@@ -662,7 +662,7 @@ flowchart LR
 
 ### C. 调研信息
 
-- 调研人：Claude Agent
+- 调研人：henryhu
 - 调研时间：2026-05-19
 - 调研版本：0.1.0
 

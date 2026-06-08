@@ -645,7 +645,7 @@ GEPA（Genetic-Pareto Prompt Evolution）是集成于 DSPy 的优化器，核心
 
 ### C. 调研信息
 
-- **调研人**：henry hu
+- **调研人**：henryhu
 - **调研时间**：2026-05-19
 - **调研版本**：v2（基于原始报告重新调研）
 - **调研深度**：标准
