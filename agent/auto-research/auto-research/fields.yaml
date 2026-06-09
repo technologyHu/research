@@ -1,0 +1,72 @@
+fields:
+  # 概述与背景
+  - name: project_overview
+    description: 项目定位、核心价值、背景起源
+    detail_level: 详细
+  - name: design_motivation
+    description: 设计动机、竞品差异化、核心目标
+    detail_level: 详细
+
+  # 架构设计
+  - name: architecture_overview
+    description: 整体架构风格、系统边界、设计原则
+    detail_level: 详细
+  - name: system_decomposition
+    description: 系统分解、核心流程、技术栈
+    detail_level: 详细
+
+  # 模块与组件设计
+  - name: module_design
+    description: 核心模块划分、依赖关系、目录结构、接口设计
+    detail_level: 详细
+
+  # 核心流程与用例（重点）
+  - name: agent_experiment_loop
+    description: Agent自主实验循环：setup→tune→commit→run→evaluate→keep/discard
+    detail_level: 详细
+    focus: Agent自主研究机制
+  - name: program_md_design
+    description: program.md 指令设计：Agent行为约束、simplicity准则、输出格式
+    detail_level: 详细
+    focus: Agent自主研究机制
+  - name: result_logging
+    description: results.tsv 结果记录机制、git分支策略
+    detail_level: 简要
+
+  # 核心技术实现（重点）
+  - name: gpt_model_architecture
+    description: GPT模型架构：RMSNorm、RoPE、Flash Attention 3、Value Embedding、残差缩放
+    detail_level: 详细
+    focus: 训练技术实现
+  - name: muon_adamw_optimizer
+    description: MuonAdamW混合优化器：Muon正交化+Polar Express+NorMuon方差缩减+AdamW
+    detail_level: 详细
+    focus: 训练技术实现
+  - name: training_loop
+    description: 训练循环：时间预算、LR调度、Muon动量调度、梯度累积、GC管理
+    detail_level: 详细
+    focus: 训练技术实现
+  - name: data_pipeline
+    description: 数据管线：ClimbMix数据集、BPE分词器、Best-fit打包、BPB评估
+    detail_level: 详细
+    focus: 训练技术实现
+
+  # API与扩展
+  - name: extension_mechanism
+    description: 扩展机制：program.md自定义、多Agent编排、平台适配
+    detail_level: 标准
+
+  # 代码质量
+  - name: code_quality
+    description: 代码规模、代码风格、测试体系
+    detail_level: 标准
+
+  # 生态
+  - name: ecosystem
+    description: 社区活跃度、Notable Forks、第三方集成
+    detail_level: 标准
+
+  # 技术评估
+  - name: tech_evaluation
+    description: 技术优势、劣势、适用场景、竞品对比
+    detail_level: 详细

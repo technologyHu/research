@@ -1,0 +1,15 @@
+topic: karpathy/autoresearch 开源项目技术调研
+project_type: 框架
+depth: 详细
+focus_areas:
+  - Agent自主研究机制
+  - 训练技术实现
+output_dir: agent/auto-research
+items:
+  - name: autoresearch
+    url: https://github.com/karpathy/autoresearch
+    description: AI Agent 自主 LLM 预训练研究框架
+execution:
+  batch_size: 1
+  items_per_agent: 1
+  output_dir: results
