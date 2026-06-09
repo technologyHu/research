@@ -6,6 +6,130 @@
 
 ---
 
+## 零、核心概念解释（必读）
+
+> 本章节解答最核心的问题：pi-autoresearch 到底在优化什么？Extension 和 Skill 分别扮演什么角色？
+
+### 0.1 pi 是什么？
+
+**pi** 是一个运行在终端的 AI 编码代理（类似于 Cursor、Copilot，但运行在命令行）。它可以：
+- 读取和编辑代码文件
+- 执行 Shell 命令
+- 调用 LLM 进行推理
+- 通过工具（Tool）与外部系统交互
+
+### 0.2 pi-autoresearch 优化的是什么？
+
+**关键澄清**：pi-autoresearch **不是优化 extension 本身**，而是让 pi 能够**自主优化用户的代码项目**。
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                        用户视角                                      │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│   用户的目标：优化我的项目（测试速度、打包体积、训练损失等）           │
+│                                                                      │
+│   ┌──────────────────┐         ┌──────────────────────────────────┐ │
+│   │  用户的代码项目   │ ◄─────  │    pi + pi-autoresearch          │ │
+│   │                  │  优化    │                                  │ │
+│   │  - src/          │         │  AI 代理自主循环：                │ │
+│   │  - tests/        │         │  修改代码 → 测量 → 保留/回退      │ │
+│   │  - package.json  │         │                                  │ │
+│   └──────────────────┘         └──────────────────────────────────┘ │
+│                                                                      │
+│   Extension 和 Skill 是"工具"，不是被优化的对象                       │
+│                                                                      │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+### 0.3 Extension 和 Skill 的角色
+
+| 组件 | 角色 | 类比 | 具体作用 |
+|------|------|------|---------|
+| **Extension** | 基础设施 | 实验室的"测量仪器" | 提供 `run_experiment`、`log_experiment` 工具，负责执行命令、记录结果、显示 UI |
+| **Skill** | 领域知识 | 实验室的"研究员" | 告诉 pi：优化什么指标、怎么测量、改哪些文件 |
+| **用户的代码** | 被优化的对象 | 实验的"样品" | pi 修改这些代码，尝试改进度量指标 |
+
+**类比理解**：
+- Extension = 天平、计时器、记录本（通用工具，不关心称什么）
+- Skill = 化学实验指导书（告诉你：要测量 pH 值，用这个试剂，记录这个数据）
+- 用户的代码 = 待测试的化学反应（被测量的对象）
+
+### 0.4 完整工作流程示例
+
+假设用户想要**优化测试速度**：
+
+```
+第 0 步：用户发起请求
+─────────────────────────────────────────────
+用户在 pi 中输入：
+> /autoresearch 优化单元测试运行时间
+
+第 1 步：Skill 收集信息
+─────────────────────────────────────────────
+autoresearch-create Skill 询问：
+- 目标：优化测试速度
+- 度量命令：pnpm test
+- 优化方向：时间越短越好（lower is better）
+- 可修改文件：vitest.config.ts, test/setup.ts
+
+Skill 生成：
+- .auto/prompt.md  ← 会话目标文档
+- .auto/measure.sh ← 度量脚本
+
+第 2 步：建立基线
+─────────────────────────────────────────────
+pi 调用 Extension 的工具：
+> run_experiment(command=".auto/measure.sh")
+
+输出：
+> METRIC total_ms=42000
+> METRIC test_count=150
+
+pi 调用：
+> log_experiment(metric=42000, status="keep", description="基线")
+
+第 3 步：开始自主循环
+─────────────────────────────────────────────
+循环迭代 #1：
+  pi 思考："也许并行运行测试可以加速"
+  pi 编辑 vitest.config.ts，添加 pool: 'forks'
+  pi 提交代码
+  pi 调用 run_experiment()
+  结果：METRIC total_ms=38000 ✓ 改进 9.5%
+  pi 调用 log_experiment(status="keep")
+  → 保留更改
+
+循环迭代 #2：
+  pi 思考："也许减少 worker 数量更好"
+  pi 编辑 vitest.config.ts，修改 workers: 4
+  pi 提交代码
+  pi 调用 run_experiment()
+  结果：METRIC total_ms=45000 ✗ 变慢 7.1%
+  pi 调用 log_experiment(status="discard")
+  → git revert，回退更改
+
+循环迭代 #3：
+  pi 思考："试试调整超时时间"
+  ...
+
+第 N 步：用户中断，整理结果
+─────────────────────────────────────────────
+用户按 Escape 中断
+用户调用：/autoresearch-finalize
+pi 读取 .auto/log.jsonl，将保留的改进分组
+创建独立分支供代码审查
+```
+
+### 0.5 关键要点总结
+
+1. **优化的是用户的代码**，不是 extension
+2. **Extension 提供"循环能力"**：执行命令、记录结果、显示 UI
+3. **Skill 提供"领域知识"**：告诉 pi 测什么、怎么测、改什么
+4. **pi 是执行者**：自主思考、修改代码、做出 keep/discard 决策
+
+---
+
 ## 一、概述与背景
 
 ### 1. 项目概述
@@ -104,38 +228,98 @@ pi-autoresearch 采用 **Extension + Skill 双层架构**：
 
 ```mermaid
 flowchart TB
-    subgraph "pi 编码代理"
-        subgraph "Extension 层 - 领域无关基础设施"
-            TOOLS[核心工具]
-            WIDGET[UI 组件]
-            STATE[状态管理]
-        end
-        
-        subgraph "Skill 层 - 领域知识注入"
-            CREATE[autoresearch-create]
-            FINALIZE[autoresearch-finalize]
-            HOOKS[autoresearch-hooks]
-        end
-        
-        subgraph "持久化层"
-            AUTO[.auto 目录]
-        end
+    subgraph USER["用户"]
+        U_CMD[命令输入]
+        U_VIEW[查看结果]
     end
     
-    TOOLS --> AUTO
-    WIDGET --> STATE
-    STATE --> AUTO
-    CREATE --> TOOLS
-    FINALIZE --> AUTO
-    HOOKS --> AUTO
+    subgraph PI["pi 编码代理（AI）"]
+        subgraph EXT["Extension 层 - 通用基础设施"]
+            TOOLS["核心工具<br/>• run_experiment<br/>• log_experiment<br/>• init_experiment"]
+            WIDGET["UI 组件<br/>• Dashboard<br/>• Widget"]
+            STATE["状态管理<br/>• 内存状态<br/>• 文件读写"]
+        end
+        
+        subgraph SKILL["Skill 层 - 领域知识"]
+            CREATE["autoresearch-create<br/>收集优化目标<br/>生成 measure.sh"]
+            FINALIZE["autoresearch-finalize<br/>整理实验结果<br/>创建独立分支"]
+        end
+        
+        AI["pi AI 核心<br/>• 思考下一步<br/>• 修改代码<br/>• 决策 keep/discard"]
+    end
+    
+    subgraph PROJECT["用户代码项目（被优化对象）"]
+        CODE["源代码<br/>vitest.config.ts<br/>test/setup.ts 等"]
+        MEASURE[".auto/measure.sh<br/>度量脚本"]
+        LOG[".auto/log.jsonl<br/>实验日志"]
+    end
+    
+    USER -->|"1. /autoresearch 优化测试速度"| PI
+    AI -->|"2. 调用 Skill"| CREATE
+    CREATE -->|"3. 生成"| MEASURE
+    CREATE -->|"4. 读取"| CODE
+    
+    AI -->|"5. 修改代码"| CODE
+    AI -->|"6. 调用工具"| TOOLS
+    TOOLS -->|"7. 执行"| MEASURE
+    MEASURE -->|"8. 输出 METRIC"| TOOLS
+    TOOLS -->|"9. 记录结果"| LOG
+    TOOLS -->|"10. 更新显示"| WIDGET
+    
+    AI -->|"11. 决策"| STATE
+    STATE -->|"12. keep: 保留<br/>discard: git revert"| CODE
+    
+    WIDGET -->|"13. 显示进度"| U_VIEW
+    
+    LOG -->|"持久化"| LOG
+    STATE -->|"读写"| LOG
 ```
+
+**关键数据流说明**：
+
+| 步骤 | 动作 | 执行者 | 说明 |
+|------|------|--------|------|
+| 1 | 用户发起请求 | 用户 | `/autoresearch 优化测试速度` |
+| 2 | 调用 Skill | pi AI | 选择 `autoresearch-create` 技能 |
+| 3 | 生成度量脚本 | Skill | 创建 `.auto/measure.sh` |
+| 4 | 读取代码 | Skill | 理解项目结构 |
+| 5 | 修改代码 | pi AI | 自主决定修改哪些文件 |
+| 6 | 调用工具 | pi AI | `run_experiment` |
+| 7 | 执行度量 | Extension | 运行 `.auto/measure.sh` |
+| 8 | 输出指标 | 脚本 | `METRIC total_ms=38000` |
+| 9 | 记录结果 | Extension | 写入 `.auto/log.jsonl` |
+| 10 | 更新显示 | Extension | Dashboard 刷新 |
+| 11 | 决策 | pi AI | 判断 keep 还是 discard |
+| 12 | 执行决策 | pi AI | 保留更改或 git revert |
 
 **架构设计原则**:
 1. **关注点分离** — Extension 处理通用循环逻辑，Skill 处理领域特定配置
 2. **状态外置** — 所有运行时状态写入 `.auto/` 目录，而非内存
 3. **工具门控** — 工具仅在 autoresearch 模式激活时对代理可见
+4. **AI 主导决策** — Extension 只提供工具，keep/discard 决策由 pi AI 做出
 
 #### 3.2 项目类型分层视角
+
+**职责分工表**（关键！）：
+
+| 职责 | 执行者 | 具体动作 |
+|------|--------|---------|
+| **思考下一步** | pi AI | 分析历史实验，生成新假设 |
+| **修改代码** | pi AI | 编辑 vitest.config.ts、test/setup.ts 等 |
+| **决策 keep/discard** | pi AI | 比较指标，决定保留或回退 |
+| **收集优化目标** | Skill | 询问用户：优化什么、怎么测、改什么 |
+| **生成度量脚本** | Skill | 创建 `.auto/measure.sh` |
+| **生成会话文档** | Skill | 创建 `.auto/prompt.md` |
+| **整理实验结果** | Skill | 分析日志，分组创建分支 |
+| **执行度量脚本** | Extension | `run_experiment` 工具 |
+| **记录实验结果** | Extension | `log_experiment` 工具，写入 JSONL |
+| **显示 UI** | Extension | Dashboard、Widget |
+| **状态持久化** | Extension | 读写 `.auto/` 目录 |
+
+**关键洞察**：
+- **pi AI 是大脑**：负责思考、决策、修改代码
+- **Extension 是手脚**：负责执行命令、记录数据、显示界面
+- **Skill 是教练**：负责设定目标、提供指导、整理结果
 
 **框架层（Extension）**:
 - 核心循环机制：`run_experiment` → `log_experiment` → keep/discard
@@ -149,7 +333,8 @@ flowchart TB
 
 **两层交互方式**:
 - Extension 注册工具到 pi，工具在 autoresearch 模式下可见
-- Skill 调用工具执行具体实验循环
+- **pi AI 调用 Skill** 来获取领域指导
+- **pi AI 调用 Extension 工具** 来执行度量和记录
 - Hook 脚本在迭代边界处触发，输出作为 steer 消息传递给代理
 
 #### 3.3 项目目录结构
@@ -198,12 +383,374 @@ pi-autoresearch/
 
 ### 4. 核心流程
 
+#### 4.0 为什么需要 Skill？（设计理念）
+
+**问题**：为什么不把所有逻辑都放在 Extension 里？
+
+**回答**：因为优化目标千差万别，Extension 无法预知所有领域。
+
+| 优化目标 | 度量命令 | 可修改文件 | 约束条件 |
+|---------|---------|-----------|---------|
+| 测试速度 | `pnpm test` | vitest.config.ts | 测试必须通过 |
+| 打包体积 | `pnpm build && du -sb dist` | webpack.config.js | 功能不变 |
+| ML 训练损失 | `uv run train.py` | model.py, hyperparams.yaml | 训练稳定 |
+| Lighthouse 评分 | `lighthouse ...` | next.config.js | 无运行时错误 |
+
+Extension 提供的是**通用的循环能力**：
+- 执行任意命令
+- 解析 METRIC 输出
+- 记录结果到 JSONL
+- 显示 Dashboard
+
+Skill 提供的是**领域特定的知识**：
+- 要优化什么指标？
+- 用什么命令测量？
+- 哪些文件可以修改？
+- 有什么约束条件？
+
+**类比**：
+- Extension = 科学实验仪器（天平、温度计、记录仪）—— 通用，不关心测什么
+- Skill = 实验指导书（化学反应步骤、生物学实验方案）—— 特定领域，告诉你怎么做
+
 #### 4.1 核心用例
 
 1. **创建优化会话** — 使用 `/autoresearch-create` 设置目标、度量脚本
 2. **运行实验循环** — 代理自主迭代：编辑 → 提交 → 测量 → 记录 → 保留/回退
 3. **整理实验结果** — 使用 `/autoresearch-finalize` 将保留的改进分组到独立分支
 4. **监控进度** — 通过 Widget、Dashboard、Export 查看实时状态
+
+#### 4.2 端到端示例：优化 Vitest 测试速度
+
+以下是一个完整的实际使用场景，展示从开始到结束的每一步：
+
+**场景背景**：
+- 项目：一个前端项目，使用 Vitest 运行 150 个测试
+- 问题：测试运行需要 42 秒，太慢
+- 目标：将测试时间缩短到 30 秒以下
+
+---
+
+**第 1 步：用户发起请求**
+
+```
+用户在 pi 终端输入：
+─────────────────────────────────────────────────────────────────
+> /autoresearch 优化 vitest 单元测试运行时间，目标 30 秒以下
+
+pi 响应：
+─────────────────────────────────────────────────────────────────
+激活 autoresearch 模式...
+调用 autoresearch-create 技能...
+```
+
+---
+
+**第 2 步：Skill 收集信息**
+
+```
+autoresearch-create Skill 与用户对话：
+─────────────────────────────────────────────────────────────────
+Skill: 我来帮你设置测试速度优化会话。几个问题：
+
+1. 度量命令是什么？
+   用户: pnpm test
+
+2. 优化方向？
+   用户: 时间越短越好（lower is better）
+
+3. 哪些文件可以修改？
+   用户: vitest.config.ts, test/setup.ts, package.json
+
+4. 有什么约束？
+   用户: 所有测试必须通过，不能跳过测试
+
+Skill: 好的，我将创建优化会话...
+```
+
+---
+
+**第 3 步：Skill 生成会话文件**
+
+```bash
+# Skill 执行的操作
+git checkout -b autoresearch/optimize-test-speed-2026-06-09
+mkdir -p .auto
+```
+
+**生成的 `.auto/prompt.md`**：
+
+```markdown
+# Autoresearch: 优化 Vitest 测试速度
+
+## Objective
+将 Vitest 测试运行时间从当前的 ~42 秒缩短到 30 秒以下。
+
+## Metrics
+- **Primary**: total_ms (ms, lower is better) — 测试总耗时
+- **Secondary**: test_count — 测试数量（监控是否有测试被跳过）
+
+## How to Run
+`./.auto/measure.sh` — 输出 METRIC 行
+
+## Files in Scope
+- `vitest.config.ts` — Vitest 配置文件
+- `test/setup.ts` — 测试 setup 文件
+- `package.json` — 依赖和脚本配置
+
+## Off Limits
+- 不要修改任何测试文件
+- 不要跳过任何测试
+- 不要更改测试断言
+
+## Constraints
+- 所有 150 个测试必须通过
+- 不能引入新的依赖
+
+## What's Been Tried
+（将在迭代过程中更新）
+```
+
+**生成的 `.auto/measure.sh`**：
+
+```bash
+#!/bin/bash
+set -euo pipefail
+
+# 运行测试并计时
+output=$(pnpm test 2>&1)
+exit_code=$?
+
+# 提取测试数量
+test_count=$(echo "$output" | grep -oP '\d+(?= tests?)' | tail -1 || echo "150")
+
+# 计算总耗时（毫秒）
+duration_ms=$(echo "$output" | grep -oP '\d+\.?\d*(?=ms)' | tail -1 || echo "0")
+
+# 输出 METRIC 行（供 run_experiment 解析）
+echo "METRIC total_ms=$duration_ms"
+echo "METRIC test_count=$test_count"
+
+exit $exit_code
+```
+
+---
+
+**第 4 步：建立基线**
+
+```
+pi 自主执行：
+─────────────────────────────────────────────────────────────────
+调用工具：init_experiment
+参数：{
+  name: "优化 Vitest 测试速度",
+  metric_name: "total_ms",
+  metric_unit: "ms",
+  direction: "lower"
+}
+
+调用工具：run_experiment
+参数：{ command: ".auto/measure.sh" }
+
+输出：
+─────────────────────────────────────────────────────────────────
+METRIC total_ms=42150
+METRIC test_count=150
+Exit code: 0
+Duration: 42.15s
+
+调用工具：log_experiment
+参数：{
+  commit: "a1b2c3d",
+  metric: 42150,
+  status: "keep",
+  description: "基线运行"
+}
+```
+
+**Dashboard 显示**：
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ Runs: 1  1 kept  (conf: —)                                      │
+│ Baseline: ★ total_ms: 42,150ms #1                               │
+│                                                                  │
+│ #   commit  ★ total_ms  status    description                  │
+│ ─────────────────────────────────────────────────────────────── │
+│ 1   a1b2c3d 42,150ms   keep      基线运行                       │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+**第 5 步：自主循环迭代**
+
+```
+═══════════════════════════════════════════════════════════════════
+迭代 #2：尝试并行池
+═══════════════════════════════════════════════════════════════════
+
+pi 思考：
+─────────────────────────────────────────────────────────────────
+"基线是 42 秒。Vitest 默认使用 threads 池，但 forks 池在某些情况下更快。
+让我试试切换到 forks 池。"
+
+pi 编辑 vitest.config.ts：
+─────────────────────────────────────────────────────────────────
+// 之前
+export default defineConfig({
+  test: {
+    // 无池配置
+  }
+})
+
+// 之后
+export default defineConfig({
+  test: {
+    pool: 'forks',
+    poolOptions: {
+      forks: {
+        singleFork: false
+      }
+    }
+  }
+})
+
+pi 提交代码：
+─────────────────────────────────────────────────────────────────
+git commit -m "尝试使用 forks 池"
+
+pi 调用工具：run_experiment
+输出：METRIC total_ms=38200, METRIC test_count=150
+
+pi 决策：
+─────────────────────────────────────────────────────────────────
+"38.2 秒比基线 42.15 秒快了 9.3%！这是一个有效的改进。
+置信度分数还需要更多数据。保留这个更改。"
+
+pi 调用工具：log_experiment
+参数：{ status: "keep", metric: 38200, description: "切换到 forks 池" }
+```
+
+**Dashboard 更新**：
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ Runs: 2  2 kept  (conf: —)                                      │
+│ Baseline: ★ total_ms: 42,150ms #1                               │
+│ Progress: ★ total_ms: 38,200ms #2 (-9.3%)                       │
+│                                                                  │
+│ #   commit  ★ total_ms  status    description                  │
+│ ─────────────────────────────────────────────────────────────── │
+│ 1   a1b2c3d 42,150ms   keep      基线运行                       │
+│ 2   b2c3d4e 38,200ms   keep      切换到 forks 池                │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+```
+═══════════════════════════════════════════════════════════════════
+迭代 #3：尝试增加 worker 数量
+═══════════════════════════════════════════════════════════════════
+
+pi 思考：
+─────────────────────────────────────────────────────────────────
+"38 秒还是比目标 30 秒慢。让我试试增加 worker 数量。"
+
+pi 编辑 vitest.config.ts：
+─────────────────────────────────────────────────────────────────
+poolOptions: {
+  forks: {
+    singleFork: false,
+    minForks: 4,
+    maxForks: 8  // 增加到 8
+  }
+}
+
+pi 提交并运行测试...
+输出：METRIC total_ms=45800, METRIC test_count=150
+
+pi 决策：
+─────────────────────────────────────────────────────────────────
+"45.8 秒比之前的 38.2 秒慢了 20%！这个更改是倒退。
+放弃这个更改，回退代码。"
+
+pi 调用工具：log_experiment
+参数：{ status: "discard", metric: 45800, description: "增加 worker 数量反而变慢" }
+
+pi 执行：git revert
+```
+
+---
+
+```
+═══════════════════════════════════════════════════════════════════
+迭代 #4-N：继续尝试其他优化...
+═══════════════════════════════════════════════════════════════════
+
+pi 可能尝试的其他想法：
+• 调整 test.setup.ts 中的全局 setup
+• 启用 Vitest 的 isolate: false
+• 使用 --shard 分片运行
+• 优化 mock 和 stub 的使用方式
+
+每次尝试都会：
+1. 编辑代码 → commit
+2. run_experiment → 获取指标
+3. log_experiment → 记录结果
+4. keep 或 discard → 保留或回退
+```
+
+---
+
+**第 6 步：用户中断，整理结果**
+
+```
+用户按 Escape 中断循环：
+
+用户输入：/autoresearch-finalize
+─────────────────────────────────────────────────────────────────
+
+pi 分析 .auto/log.jsonl：
+─────────────────────────────────────────────────────────────────
+读取到 15 次运行：
+- 10 次 keep（有效改进）
+- 5 次 discard（无效尝试）
+
+最佳结果：28,500ms（比基线快 32.4%）
+
+pi 提出分组方案：
+─────────────────────────────────────────────────────────────────
+提议创建 3 个独立分支：
+
+1. **切换到 forks 池** (commits: b2c3d4e, c3d4e5f)
+   Files: vitest.config.ts
+   Metric: 42,150ms → 38,200ms (-9.3%)
+
+2. **禁用 isolate 模式** (commits: d4e5f6a, e5f6a7b)
+   Files: vitest.config.ts
+   Metric: 38,200ms → 33,100ms (-13.4%)
+
+3. **优化 setup 文件** (commits: f6a7b8c, a7b8c9d, b8c9d0e)
+   Files: test/setup.ts
+   Metric: 33,100ms → 28,500ms (-13.9%)
+
+用户确认后，pi 创建 3 个独立分支供代码审查。
+```
+
+---
+
+**最终结果**：
+
+| 指标 | 基线 | 最佳 | 改进 |
+|------|------|------|------|
+| total_ms | 42,150ms | 28,500ms | -32.4% |
+| test_count | 150 | 150 | 不变 |
+
+**用户获得**：
+- 3 个独立的 PR，每个都可以单独审查和合并
+- 完整的实验日志 `.auto/log.jsonl`
+- 达成目标：测试时间从 42 秒降到 28.5 秒
 
 #### 4.2 核心流程图
 
@@ -684,13 +1231,17 @@ pi install npm:pi-autoresearch
 
 | 术语 | 解释 |
 |------|------|
-| pi | 一个运行在终端的 AI 编码代理 |
-| Extension | pi 的扩展机制，提供工具和 UI |
-| Skill | pi 的技能机制，注入领域知识 |
-| ASI | Actionable Side Information，可操作附加信息 |
-| MAD | Median Absolute Deviation，中位绝对偏差 |
-| JSONL | JSON Lines 格式，每行一个 JSON 对象 |
-| Steer 消息 | 注入到代理上下文的引导信息 |
+| **pi** | 一个运行在终端的 AI 编码代理（类似 Cursor、Copilot）。可以读取/编辑代码、执行命令、调用 LLM 推理。 |
+| **Extension** | pi 的扩展机制，提供工具（Tool）和 UI。pi-autoresearch 的 Extension 提供 `run_experiment`、`log_experiment` 等工具。 |
+| **Skill** | pi 的技能机制，注入领域知识。pi-autoresearch 的 Skill 告诉 pi 如何设置优化目标、生成度量脚本。 |
+| **优化目标** | 用户想要改进的指标（如测试时间、打包体积）。这是 pi-autoresearch 优化的对象，不是 extension 本身。 |
+| **度量脚本** | `.auto/measure.sh`，运行后输出 `METRIC name=value` 行。由 Skill 生成，由 Extension 执行。 |
+| **实验循环** | pi AI 自主执行的迭代：修改代码 → 运行度量 → 记录结果 → keep/discard → 重复。 |
+| **ASI** | Actionable Side Information，可操作附加信息。pi AI 在每次实验中记录的结构化诊断数据。 |
+| **MAD** | Median Absolute Deviation，中位绝对偏差。用于计算置信度分数，判断改进是否真实。 |
+| **JSONL** | JSON Lines 格式，每行一个 JSON 对象。`.auto/log.jsonl` 使用此格式存储实验记录。 |
+| **Steer 消息** | 注入到代理上下文的引导信息。Hook 脚本的输出会作为 steer 消息传递给 pi AI。 |
+| **Hook** | 在迭代边界执行的脚本（`.auto/hooks/before.sh`、`.auto/hooks/after.sh`），用于注入自定义逻辑。 |
 
 ### C. 调研信息
 
