@@ -1,0 +1,186 @@
+# pi-autoresearch 调研字段定义
+
+# 第一章节：概述与背景
+overview:
+  project_name:
+    name: 项目名称
+    description: 项目的正式名称
+    value: pi-autoresearch
+
+  github_url:
+    name: GitHub 地址
+    description: 项目的 GitHub 仓库地址
+    value: https://github.com/davebcn87/pi-autoresearch
+
+  description:
+    name: 项目描述
+    description: 一句话描述项目目标
+    value: 为 pi AI 编码代理提供自主实验循环优化的扩展框架
+
+  stars:
+    name: Star 数
+    description: GitHub Star 数量
+    value: 6967
+
+  forks:
+    name: Fork 数
+    description: GitHub Fork 数量
+    value: 411
+
+  language:
+    name: 主要语言
+    description: 项目的主要编程语言
+    value: TypeScript
+
+  license:
+    name: 许可证
+    description: 开源许可证类型
+    value: MIT
+
+  created_at:
+    name: 创建时间
+    description: 项目创建日期
+    value: 2026-03-11
+
+  last_updated:
+    name: 最后更新
+    description: 项目最后更新日期
+    value: 2026-06-09
+
+  current_version:
+    name: 当前版本
+    description: 项目当前版本号
+    value: v1.6.0
+
+# 第二章节：核心架构
+architecture:
+  arch_type:
+    name: 架构类型
+    description: 项目的架构模式
+    value: Extension + Skill 双层架构
+
+  framework_layer:
+    name: 框架层职责
+    description: Extension 层提供的功能
+    value: 核心工具、UI 组件、状态管理、持久化
+
+  implementation_layer:
+    name: 实现层职责
+    description: Skill 层提供的功能
+    value: 领域知识注入、会话配置、结果整理
+
+  core_tools:
+    name: 核心工具
+    description: 扩展提供的主要工具
+    value:
+      - init_experiment
+      - run_experiment
+      - log_experiment
+
+  session_files:
+    name: 会话文件
+    description: 持久化存储的文件结构
+    value:
+      - .auto/prompt.md
+      - .auto/measure.sh
+      - .auto/log.jsonl
+      - .auto/checks.sh
+      - .auto/hooks/
+
+# 第三章节：核心技术实现
+implementation:
+  key_algorithm:
+    name: 关键算法
+    description: 核心算法实现
+    value:
+      - JSONL 状态重建
+      - MAD 置信度计算
+      - 命令安全检查
+
+  key_modules:
+    name: 关键模块
+    description: 核心代码模块
+    value:
+      - index.ts (主扩展)
+      - compaction.ts (上下文压缩)
+      - hooks.ts (Hook 执行器)
+      - jsonl.ts (日志解析)
+
+  innovation_points:
+    name: 创新点
+    description: 技术创新和亮点
+    value:
+      - 确定性上下文压缩
+      - 工具门控机制
+      - 命令安全检查
+      - MAD 置信度评估
+      - Hook 透明注入
+
+# 第四章节：扩展与生态
+extension:
+  extension_points:
+    name: 扩展点
+    description: 支持的扩展机制
+    value:
+      - Skill (领域知识)
+      - Hook (生命周期钩子)
+      - Checks (正确性验证)
+      - Config (会话配置)
+
+  commands:
+    name: 命令接口
+    description: 提供的命令行接口
+    value:
+      - /autoresearch <text>
+      - /autoresearch off
+      - /autoresearch clear
+      - /autoresearch export
+
+  shortcuts:
+    name: 快捷键
+    description: 提供的键盘快捷键
+    value:
+      - Ctrl+Shift+F (全屏 Dashboard)
+
+# 第五章节：质量与评估
+evaluation:
+  code_size:
+    name: 代码规模
+    description: 项目代码量
+    value: ~130KB TypeScript
+
+  advantages:
+    name: 技术优势
+    description: 主要技术优势
+    value:
+      - Extension+Skill 分离设计
+      - 完整的持久化机制
+      - 命令安全检查
+      - 实时可观测性
+      - Hook 扩展机制
+
+  disadvantages:
+    name: 技术劣势
+    description: 主要技术劣势
+    value:
+      - 单文件过大 (110KB)
+      - 单一开发者
+      - Hook 脚本安全风险
+      - 大量文件 I/O
+      - 强依赖 pi 生态
+
+  recommended_scenarios:
+    name: 推荐场景
+    description: 推荐使用的场景
+    value:
+      - 有明确可度量优化目标
+      - 需要长时间自主运行
+      - 已有 pi 基础设施
+
+  not_recommended_scenarios:
+    name: 不推荐场景
+    description: 不推荐使用的场景
+    value:
+      - 无法自动验证的优化目标
+      - 没有清晰度量指标
+      - 不使用 pi 生态

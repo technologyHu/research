@@ -1,0 +1,46 @@
+# pi-autoresearch 调研大纲
+topic: pi-autoresearch 开源项目技术调研
+project_url: https://github.com/davebcn87/pi-autoresearch
+version: v1.6.0
+research_date: 2026-06-09
+
+# 项目类型: 综合类项目（扩展+技能双层架构）
+# 调研深度: 标准
+# 重点关注: 架构设计、核心实现
+
+sections:
+  - id: overview
+    name: 概述与背景
+    description: 项目定位、背景、核心问题、设计目标
+    status: completed
+
+  - id: architecture
+    name: 核心架构
+    description: 整体架构、分层视角、目录结构、核心流程
+    status: completed
+
+  - id: implementation
+    name: 核心技术实现
+    description: 算法模型、关键模块、数据结构、代码路径
+    status: completed
+
+  - id: extension
+    name: 扩展与生态
+    description: 扩展机制、社区生态、部署运维
+    status: completed
+
+  - id: evaluation
+    name: 质量与评估
+    description: 代码质量、技术评估、选型建议
+    status: completed
+
+# 核心发现
+key_findings:
+  - Extension + Skill 双层架构设计，领域无关
+  - 所有状态持久化到 .auto/ 目录
+  - 使用 MAD 算法计算置信度评分
+  - 确定性上下文压缩，绕过 LLM 摘要
+  - 命令安全检查，只允许预定义脚本
+
+# 输出目录
+output_dir: agent/auto-research/pi-auto-research
