@@ -28,7 +28,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 #### 1. Autogenesis
 
-**文件**: [agent/auto-harness/autogenesis_research/report.md](agent/auto-harness/autogenesis_research/report.md)
+**文件**: [agent/auto-harness/autogenesis_research/report.md](agent/auto-harness/autogenesis/report.md)
 
 **简介**: 调研 Autogenesis 自进化协议，提出了一套面向 LLM 智能体自进化的协议标准。核心创新是定义了自进化单元（AEU）作为最小可进化组件，支持生命周期管理和版本追溯。
 
@@ -58,7 +58,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 #### 4. LangChain Better Harness
 
-**文件**: [agent/auto-harness/langchain_better_harness_research/report.md](agent/auto-harness/langchain_better_harness_research/report.md)
+**文件**: [agent/auto-harness/langchain_better_harness_research/report.md](agent/auto-harness/langchain_better_harness/report.md)
 
 **简介**: 调研 LangChain 发布的 Better Harness 工作，这是一套 eval 驱动的 agent harness 自动优化系统。核心思想是让一个"外部 Deep Agent"通过阅读评估反馈来自动改进另一个"目标Agent"的 harness 配置。
 
@@ -68,7 +68,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 #### 5. RewardHarness
 
-**文件**: [agent/auto-harness/RewardHarness_research/report.md](agent/auto-harness/RewardHarness_research/report.md)
+**文件**: [agent/auto-harness/RewardHarness_research/report.md](agent/auto-harness/reward_harness/report.md)
 
 **简介**: 调研 RewardHarness 论文，提出自演进的奖励建模框架。仅用 0.05% 数据即可超越 GPT-5，实现了高效、可解释的奖励模型构建。
 
