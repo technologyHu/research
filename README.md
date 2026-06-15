@@ -11,7 +11,8 @@ agent/
 │   ├── continual_harness/           # Continual Harness 在线适应调研
 │   ├── hermes-agent-self-evolution/ # Hermes Agent 自进化调研
 │   ├── langchain_better_harness_research/  # LangChain Better Harness 调研
-│   └── RewardHarness_research/      # RewardHarness 奖励建模调研
+│   ├── RewardHarness_research/      # RewardHarness 奖励建模调研
+│   └── self-harness/                # Self-Harness 自优化 Harness 调研
 └── auto-research/                   # Agent 自动研究相关
     ├── arbor/                       # Arbor 论文+代码综合调研
     ├── auto-research/               # Karpathy autoresearch 项目调研
@@ -77,9 +78,19 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
+#### 6. Self-Harness
+
+**文件**: [agent/auto-harness/self-harness/report.md](agent/auto-harness/self-harness/report.md)
+
+**简介**: 调研上海AI Lab提出的Self-Harness论文，首次提出让LLM Agent自己改进运行框架的闭环范式。三阶段循环（Weakness Mining → Harness Proposal → Proposal Validation）实现无需人类专家或更强外部模型的自优化。在Terminal-Bench-2.0上，三个模型均获得显著提升，最高相对提升138%。
+
+**关键词**: 自优化Harness、弱点挖掘、回归测试、模型特异性、NeurIPS 2026
+
+---
+
 ### Agent 自动研究
 
-#### 6. Arbor
+#### 7. Arbor
 
 **文件**: [agent/auto-research/arbor/report.md](agent/auto-research/arbor/report.md)
 
@@ -89,7 +100,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 7. autoresearch (Karpathy)
+#### 8. autoresearch (Karpathy)
 
 **文件**: [agent/auto-research/auto-research/report.md](agent/auto-research/auto-research/report.md)
 
@@ -99,7 +110,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 7. pi-autoresearch
+#### 9. pi-autoresearch
 
 **文件**: [agent/auto-research/pi-auto-research/report.md](agent/auto-research/pi-auto-research/report.md)
 
@@ -111,7 +122,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ### Spec-Driven Development (vibe-coding)
 
-#### 8. OpenSpec
+#### 10. OpenSpec
 
 **文件**: [vibe-coding/openspec/report.md](vibe-coding/openspec/report.md)
 
@@ -121,7 +132,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 9. spec-kit (GitHub)
+#### 11. spec-kit (GitHub)
 
 **文件**: [vibe-coding/spec-kit/report.md](vibe-coding/spec-kit/report.md)
 
@@ -131,7 +142,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 10. Superpowers
+#### 12. Superpowers
 
 **文件**: [vibe-coding/superpowers_research/report.md](vibe-coding/superpowers_research/report.md)
 
