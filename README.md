@@ -13,6 +13,7 @@ agent/
 │   ├── langchain_better_harness_research/  # LangChain Better Harness 调研
 │   └── RewardHarness_research/      # RewardHarness 奖励建模调研
 └── auto-research/                   # Agent 自动研究相关
+    ├── arbor/                       # Arbor 论文+代码综合调研
     ├── auto-research/               # Karpathy autoresearch 项目调研
     └── pi-auto-research/            # pi-autoresearch 项目调研
 
@@ -78,7 +79,17 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ### Agent 自动研究
 
-#### 6. autoresearch (Karpathy)
+#### 6. Arbor
+
+**文件**: [agent/auto-research/arbor/report.md](agent/auto-research/arbor/report.md)
+
+**简介**: 调研中国人民大学和微软研究院联合提出的 Arbor 框架。通过假设树细化（HTR）将自主研究转变为累积的证据驱动过程。核心创新是持久协调器+短期执行器的双Agent架构，以及假设树作为研究状态的组织方式。在六项真实研究任务上超过 Codex 和 Claude Code 平均增益的 2.5 倍，MLE-Bench Lite 达到 86.36% Any Medal。
+
+**关键词**: 假设树、自主优化、协调器-执行器、证据驱动、arXiv 2606.11926
+
+---
+
+#### 7. autoresearch (Karpathy)
 
 **文件**: [agent/auto-research/auto-research/report.md](agent/auto-research/auto-research/report.md)
 
