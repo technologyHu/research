@@ -7,30 +7,44 @@
 ```
 agent/
 ├── auto-harness/                    # Agent Harness 自动优化相关研究
-│   ├── autogenesis_research/        # Autogenesis 自进化协议调研
-│   ├── continual_harness/           # Continual Harness 在线适应调研
+│   ├── agentic-harness-engineering/ # Agentic Harness Engineering 综述调研
+│   ├── auto-harness-deepmind/       # AutoHarness 代码约束框架自动合成调研
+│   ├── autogenesis/                 # Autogenesis 自进化协议调研
+│   ├── continual-harness/           # Continual Harness 在线适应调研
 │   ├── hermes-agent-self-evolution/ # Hermes Agent 自进化调研
-│   ├── langchain_better_harness_research/  # LangChain Better Harness 调研
-│   ├── RewardHarness_research/      # RewardHarness 奖励建模调研
+│   ├── langchain-better-harness/    # LangChain Better Harness 调研
+│   ├── life-harness/                # Life-Harness 运行时适配调研
+│   ├── reward-harness/              # RewardHarness 奖励建模调研
 │   └── self-harness/                # Self-Harness 自优化 Harness 调研
 └── auto-research/                   # Agent 自动研究相关
     ├── arbor/                       # Arbor 论文+代码综合调研
     ├── auto-research/               # Karpathy autoresearch 项目调研
+    ├── ml-evolve/                   # ML-Evolve 机器学习进化调研
     └── pi-auto-research/            # pi-autoresearch 项目调研
 
 vibe-coding/                         # Spec-Driven Development 相关研究
 ├── openspec/                        # OpenSpec 调研
 ├── spec-kit/                        # GitHub spec-kit 调研
-└── superpowers_research/            # Superpowers 调研
+└── superpowers/                     # Superpowers 调研
 ```
 
 ## 调研报告
 
 ### Agent Harness 自动优化
 
-#### 1. Autogenesis
+#### 1. Agentic Harness Engineering
 
-**文件**: [agent/auto-harness/autogenesis_research/report.md](agent/auto-harness/autogenesis/report.md)
+**文件**: [agent/auto-harness/agentic-harness-engineering/report.md](agent/auto-harness/agentic-harness-engineering/report.md)
+
+**简介**: 调研复旦大学、北京大学、上海奇绩智峰联合提出的 AHE（Agentic Harness Engineering）框架。通过三层可观测性支柱（组件可观测性、经验可观测性、决策可观测性）将 Harness 演化转变为闭环自动化过程。核心创新是分层轨迹蒸馏流水线，将千万级 token 压缩为 10K 级可消费证据。在 Terminal-Bench 2 上将 pass@1 从 69.7% 提升至 77.0%，超越人工设计和自动化基线。
+
+**关键词**: 可观测性驱动、轨迹蒸馏、闭环演化、组件解耦、arXiv 2604.25850
+
+---
+
+#### 2. Autogenesis
+
+**文件**: [agent/auto-harness/autogenesis/report.md](agent/auto-harness/autogenesis/report.md)
 
 **简介**: 调研 Autogenesis 自进化协议，提出了一套面向 LLM 智能体自进化的协议标准。核心创新是定义了自进化单元（AEU）作为最小可进化组件，支持生命周期管理和版本追溯。
 
@@ -38,9 +52,9 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 2. Continual Harness
+#### 3. Continual Harness
 
-**文件**: [agent/auto-harness/continual_harness/report.md](agent/auto-harness/continual_harness/report.md)
+**文件**: [agent/auto-harness/continual-harness/report.md](agent/auto-harness/continual-harness/report.md)
 
 **简介**: 调研 Princeton + DeepMind 的 Continual Harness 论文，解决具身智能体在长时序环境中脚手架自动构建和持续改进的问题。提出了在线适应的 Harness 优化方法。
 
@@ -48,7 +62,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 3. Hermes Agent Self-Evolution
+#### 4. Hermes Agent Self-Evolution
 
 **文件**: [agent/auto-harness/hermes-agent-self-evolution/report.md](agent/auto-harness/hermes-agent-self-evolution/report.md)
 
@@ -58,9 +72,9 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 4. LangChain Better Harness
+#### 5. LangChain Better Harness
 
-**文件**: [agent/auto-harness/langchain_better_harness_research/report.md](agent/auto-harness/langchain_better_harness/report.md)
+**文件**: [agent/auto-harness/langchain-better-harness/report.md](agent/auto-harness/langchain-better-harness/report.md)
 
 **简介**: 调研 LangChain 发布的 Better Harness 工作，这是一套 eval 驱动的 agent harness 自动优化系统。核心思想是让一个"外部 Deep Agent"通过阅读评估反馈来自动改进另一个"目标Agent"的 harness 配置。
 
@@ -68,9 +82,9 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 5. RewardHarness
+#### 6. RewardHarness
 
-**文件**: [agent/auto-harness/RewardHarness_research/report.md](agent/auto-harness/reward_harness/report.md)
+**文件**: [agent/auto-harness/reward-harness/report.md](agent/auto-harness/reward-harness/report.md)
 
 **简介**: 调研 RewardHarness 论文，提出自演进的奖励建模框架。仅用 0.05% 数据即可超越 GPT-5，实现了高效、可解释的奖励模型构建。
 
@@ -78,7 +92,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 6. Self-Harness
+#### 7. Self-Harness
 
 **文件**: [agent/auto-harness/self-harness/report.md](agent/auto-harness/self-harness/report.md)
 
@@ -88,9 +102,29 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
+#### 8. AutoHarness (DeepMind)
+
+**文件**: [agent/auto-harness/auto-harness-deepmind/report.md](agent/auto-harness/auto-harness-deepmind/report.md)
+
+**简介**: 调研 Google DeepMind 提出的 AutoHarness 方法，让 LLM 自动合成代码约束框架（Harness）。核心思想是将规则判断从 LLM 的概率性推理转移到确定性执行的代码，通过树搜索和 Thompson 采样管理多个代码假设。在 145 个 TextArena 游戏上实现 100% 合法动作率，使较小的 Gemini-2.5-Flash 能够战胜更大的 Gemini-2.5-Pro（56.3% 胜率）。代码即策略模式下，推理成本几乎为零，在 16 个单人游戏上平均奖励 0.870，超越 GPT-5.2-High。
+
+**关键词**: 代码约束框架、自动合成、树搜索、Thompson采样、代码即策略、ICLR 2026、arXiv 2603.03329
+
+---
+
+#### 9. LIFE-HARNESS
+
+**文件**: [agent/auto-harness/life-harness/report.md](agent/auto-harness/life-harness/report.md)
+
+**简介**: 调研北京大学提出的 LIFE-HARNESS，一个面向确定性 LLM Agent 的生命周期感知运行时外壳。核心思想是"适配接口而非模型"，通过四层架构（环境契约层、技能层、动作层、轨迹层）实现不改模型权重的 Agent 能力提升。在 126 个 model-environment 设置中平均相对改进 88.5%，且用小模型生成的 Harness 可直接迁移到大模型。
+
+**关键词**: 运行时适配、四层架构、跨模型迁移、确定性Agent、arXiv 2605.22166
+
+---
+
 ### Agent 自动研究
 
-#### 7. Arbor
+#### 10. Arbor
 
 **文件**: [agent/auto-research/arbor/report.md](agent/auto-research/arbor/report.md)
 
@@ -100,7 +134,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 8. autoresearch (Karpathy)
+#### 11. autoresearch (Karpathy)
 
 **文件**: [agent/auto-research/auto-research/report.md](agent/auto-research/auto-research/report.md)
 
@@ -110,7 +144,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 9. pi-autoresearch
+#### 12. pi-autoresearch
 
 **文件**: [agent/auto-research/pi-auto-research/report.md](agent/auto-research/pi-auto-research/report.md)
 
@@ -122,7 +156,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ### Spec-Driven Development (vibe-coding)
 
-#### 10. OpenSpec
+#### 13. OpenSpec
 
 **文件**: [vibe-coding/openspec/report.md](vibe-coding/openspec/report.md)
 
@@ -132,7 +166,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 11. spec-kit (GitHub)
+#### 14. spec-kit (GitHub)
 
 **文件**: [vibe-coding/spec-kit/report.md](vibe-coding/spec-kit/report.md)
 
@@ -142,9 +176,9 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 12. Superpowers
+#### 15. Superpowers
 
-**文件**: [vibe-coding/superpowers_research/report.md](vibe-coding/superpowers_research/report.md)
+**文件**: [vibe-coding/superpowers/report.md](vibe-coding/superpowers/report.md)
 
 **简介**: 调研 Superpowers 项目，一个面向 coding agent 的 agentic skills 框架和软件开发方法论。让 AI 编程助手具备"先设计、再规划、后实现"的结构化开发能力。
 
