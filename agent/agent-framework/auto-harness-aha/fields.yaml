@@ -1,0 +1,66 @@
+# AutoHarness (Aha) 开源项目调研字段定义
+
+# 项目基本信息
+basic_info:
+  - name: 项目名称
+    value: AutoHarness (代号 Aha)
+  - name: GitHub地址
+    value: https://github.com/aiming-lab/AutoHarness
+  - name: Star数
+    value: 325
+  - name: Fork数
+    value: 25
+  - name: License
+    value: MIT
+  - name: 主要语言
+    value: Python (3.10+)
+  - name: 当前版本
+    value: v0.1.1
+  - name: 开源时间
+    value: 2026-04-02
+
+# 架构设计字段
+architecture:
+  - name: 架构模式
+    value: 分层治理架构
+  - name: 核心组件
+    value: 治理流水线 (Pipeline)
+  - name: 三种模式
+    value: Core (6-step), Standard (8-step), Enhanced (14-step)
+  - name: 设计原则
+    value: 分层解耦、配置驱动、钩子扩展、最小侵入
+
+# 核心实现字段
+implementation:
+  - name: 风险分级
+    value: 正则模式匹配 + 4级分类 (low/medium/high/critical)
+  - name: 内置风险模式
+    value: 9大类 (危险命令、敏感信息、路径遍历等)
+  - name: 上下文管理
+    value: 6层压缩策略
+  - name: 多Agent支持
+    value: Profiles, Fork, Background, Swarm, Coordinator
+  - name: 测试用例
+    value: 958个
+
+# 扩展生态字段
+ecosystem:
+  - name: 支持后端
+    value: OpenAI, Anthropic, LangChain
+  - name: IDE集成
+    value: Claude Code, Cursor
+  - name: 策略引擎
+    value: OPA, Cedar
+  - name: 文档语言
+    value: 中/英/日/韩/西/法/德/葡/俄
+
+# 技术评估字段
+evaluation:
+  - name: 技术优势
+    value: 零侵入集成、三层模式、生产级质量
+  - name: 技术劣势
+    value: 仅支持推理时治理、不支持图编排
+  - name: 适用场景
+    value: AI Agent安全护栏、上下文管理、审计合规
+  - name: 推荐组合
+    value: AutoHarness + LangGraph

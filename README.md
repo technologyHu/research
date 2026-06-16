@@ -6,6 +6,8 @@
 
 ```
 agent/
+├── agent-framework/                 # Agent 框架相关研究
+│   └── auto-harness-aha/            # AutoHarness (Aha) 开源框架调研
 ├── auto-harness/                    # Agent Harness 自动优化相关研究
 │   ├── agentic-harness-engineering/ # Agentic Harness Engineering 综述调研
 │   ├── auto-harness-deepmind/       # AutoHarness 代码约束框架自动合成调研
@@ -30,9 +32,21 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ## 调研报告
 
+### Agent 框架
+
+#### 1. AutoHarness (Aha)
+
+**文件**: [agent/agent-framework/auto-harness-aha/report.md](agent/agent-framework/auto-harness-aha/report.md)
+
+**简介**: 调研 aiming-lab 开源的 AutoHarness (代号 Aha) 框架。轻量级 AI Agent 行为治理框架，核心理念是 "Agent = Model + Harness"。提供三层治理模式 (Core/Standard/Enhanced)，6-14步治理流水线，风险模式匹配，多层上下文管理，多 Agent 协作支持。2行代码零侵入集成，958 测试用例生产级质量。
+
+**关键词**: Harness Engineering、治理流水线、风险分级、上下文管理、多Agent协作、零侵入集成
+
+---
+
 ### Agent Harness 自动优化
 
-#### 1. Agentic Harness Engineering
+#### 2. Agentic Harness Engineering
 
 **文件**: [agent/auto-harness/agentic-harness-engineering/report.md](agent/auto-harness/agentic-harness-engineering/report.md)
 
@@ -42,7 +56,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 2. Autogenesis
+#### 3. Autogenesis
 
 **文件**: [agent/auto-harness/autogenesis/report.md](agent/auto-harness/autogenesis/report.md)
 
@@ -52,7 +66,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 3. Continual Harness
+#### 4. Continual Harness
 
 **文件**: [agent/auto-harness/continual-harness/report.md](agent/auto-harness/continual-harness/report.md)
 
@@ -62,7 +76,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 4. Hermes Agent Self-Evolution
+#### 5. Hermes Agent Self-Evolution
 
 **文件**: [agent/auto-harness/hermes-agent-self-evolution/report.md](agent/auto-harness/hermes-agent-self-evolution/report.md)
 
@@ -72,7 +86,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 5. LangChain Better Harness
+#### 6. LangChain Better Harness
 
 **文件**: [agent/auto-harness/langchain-better-harness/report.md](agent/auto-harness/langchain-better-harness/report.md)
 
@@ -82,7 +96,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 6. RewardHarness
+#### 7. RewardHarness
 
 **文件**: [agent/auto-harness/reward-harness/report.md](agent/auto-harness/reward-harness/report.md)
 
@@ -92,7 +106,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 7. Self-Harness
+#### 8. Self-Harness
 
 **文件**: [agent/auto-harness/self-harness/report.md](agent/auto-harness/self-harness/report.md)
 
@@ -102,7 +116,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 8. AutoHarness (DeepMind)
+#### 9. AutoHarness (DeepMind)
 
 **文件**: [agent/auto-harness/auto-harness-deepmind/report.md](agent/auto-harness/auto-harness-deepmind/report.md)
 
@@ -112,7 +126,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 9. LIFE-HARNESS
+#### 10. LIFE-HARNESS
 
 **文件**: [agent/auto-harness/life-harness/report.md](agent/auto-harness/life-harness/report.md)
 
@@ -124,7 +138,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ### Agent 自动研究
 
-#### 10. Arbor
+#### 11. Arbor
 
 **文件**: [agent/auto-research/arbor/report.md](agent/auto-research/arbor/report.md)
 
@@ -134,7 +148,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 11. autoresearch (Karpathy)
+#### 12. autoresearch (Karpathy)
 
 **文件**: [agent/auto-research/auto-research/report.md](agent/auto-research/auto-research/report.md)
 
@@ -144,7 +158,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 12. pi-autoresearch
+#### 13. pi-autoresearch
 
 **文件**: [agent/auto-research/pi-auto-research/report.md](agent/auto-research/pi-auto-research/report.md)
 
@@ -156,7 +170,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ### Spec-Driven Development (vibe-coding)
 
-#### 13. OpenSpec
+#### 14. OpenSpec
 
 **文件**: [vibe-coding/openspec/report.md](vibe-coding/openspec/report.md)
 
@@ -166,7 +180,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 14. spec-kit (GitHub)
+#### 15. spec-kit (GitHub)
 
 **文件**: [vibe-coding/spec-kit/report.md](vibe-coding/spec-kit/report.md)
 
@@ -176,7 +190,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 15. Superpowers
+#### 16. Superpowers
 
 **文件**: [vibe-coding/superpowers/report.md](vibe-coding/superpowers/report.md)
 

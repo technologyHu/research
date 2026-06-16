@@ -1,0 +1,66 @@
+# AutoHarness (Aha) 开源项目调研大纲
+
+topic: AutoHarness 开源项目技术调研
+project_name: auto-harness-aha
+output_dir: agent/auto-harness/auto-harness-aha
+created_at: 2026-06-16
+
+# 调研范围
+scope:
+  project_type: 框架
+  depth: 详细
+  focus:
+    - 架构设计
+    - 核心实现
+    - 使用方式
+
+# 调研章节
+chapters:
+  - id: 1
+    title: 概述与背景
+    sections:
+      - 项目概述
+      - 设计动机与目标
+    status: completed
+
+  - id: 2
+    title: 核心架构
+    sections:
+      - 整体架构
+      - 核心流程
+    status: completed
+
+  - id: 3
+    title: 核心技术实现
+    sections:
+      - 核心算法与模型
+      - 关键模块实现
+    status: completed
+
+  - id: 4
+    title: 扩展与生态
+    sections:
+      - 扩展机制
+      - 社区与生态
+      - 部署与运维
+    status: completed
+
+  - id: 5
+    title: 质量与评估
+    sections:
+      - 代码质量
+      - 技术评估
+    status: completed
+
+# 核心发现
+key_findings:
+  - 核心理念 "Agent = Model + Harness"
+  - 三层治理模式 Core/Standard/Enhanced
+  - 2行代码零侵入集成
+  - 958测试用例生产级质量
+  - 14步Enhanced模式治理流水线
+
+# 输出文件
+outputs:
+  - report.md
+  - templates/constitution.yaml
