@@ -16,6 +16,7 @@ agent/
 │   ├── hermes-agent-self-evolution/ # Hermes Agent 自进化调研
 │   ├── langchain-better-harness/    # LangChain Better Harness 调研
 │   ├── life-harness/                # Life-Harness 运行时适配调研
+│   ├── meta-evolution-harness/      # Meta-Evolution Harness 元演化调研
 │   ├── reward-harness/              # RewardHarness 奖励建模调研
 │   └── self-harness/                # Self-Harness 自优化 Harness 调研
 └── auto-research/                   # Agent 自动研究相关
@@ -136,9 +137,19 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
+#### 11. Meta-Evolution Harness
+
+**文件**: [agent/auto-harness/meta-evolution-harness/report.md](agent/auto-harness/meta-evolution-harness/report.md)
+
+**简介**: 调研 Sylph.AI 提出的两层 Harness 演化框架。核心创新是 Meta-Evolution Loop：内层 Harness Evolution Loop 优化单个任务的 Worker Harness，外层 Meta-Evolution Loop 跨多样化任务优化演化蓝图本身。建立了与元学习的精确对应关系，实现"自动化设计自动化本身"。理论框架论文，暂无开源代码和实验验证。
+
+**关键词**: 元演化、两层优化、Harness Evolution Loop、元学习、ICLR 2026、arXiv 2604.21003
+
+---
+
 ### Agent 自动研究
 
-#### 11. Arbor
+#### 12. Arbor
 
 **文件**: [agent/auto-research/arbor/report.md](agent/auto-research/arbor/report.md)
 
@@ -148,7 +159,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 12. autoresearch (Karpathy)
+#### 13. autoresearch (Karpathy)
 
 **文件**: [agent/auto-research/auto-research/report.md](agent/auto-research/auto-research/report.md)
 
@@ -158,7 +169,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 13. pi-autoresearch
+#### 14. pi-autoresearch
 
 **文件**: [agent/auto-research/pi-auto-research/report.md](agent/auto-research/pi-auto-research/report.md)
 
@@ -170,7 +181,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ### Spec-Driven Development (vibe-coding)
 
-#### 14. OpenSpec
+#### 15. OpenSpec
 
 **文件**: [vibe-coding/openspec/report.md](vibe-coding/openspec/report.md)
 
@@ -180,7 +191,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 15. spec-kit (GitHub)
+#### 16. spec-kit (GitHub)
 
 **文件**: [vibe-coding/spec-kit/report.md](vibe-coding/spec-kit/report.md)
 
@@ -190,7 +201,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 16. Superpowers
+#### 17. Superpowers
 
 **文件**: [vibe-coding/superpowers/report.md](vibe-coding/superpowers/report.md)
 
