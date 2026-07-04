@@ -1,0 +1,39 @@
+topic: Pi agent-core 开源项目技术调研
+project:
+  name: pi
+  repository: https://github.com/earendil-works/pi
+  core_package: "@earendil-works/pi-agent-core"
+  core_path: packages/agent
+  product_package: "@earendil-works/pi-coding-agent"
+  product_path: packages/coding-agent
+scope:
+  focus:
+    - agent-core 代码结构
+    - Agent/AgentLoop/AgentHarness 的职责边界
+    - Pi coding-agent 如何集成 agent-core
+    - agent 的运行流程、工具调用流程、队列、会话、压缩与重试
+outputs:
+  report: report.md
+  fields: fields.yaml
+sources:
+  local_clone: agent/agent-framework/pi/_src
+  commit: ec6311beb5b24fc918e5031173608447582d7262
+  web:
+    - https://pi.dev/
+    - https://github.com/earendil-works/pi/tree/main/packages/agent
+    - https://github.com/earendil-works/pi/tree/main/packages/coding-agent
+sections:
+  - id: overview
+    title: 项目概览
+  - id: package-boundary
+    title: agent-core 与 coding-agent 的包边界
+  - id: runtime-flow
+    title: Agent 核心运行流程
+  - id: tool-flow
+    title: 工具调用与 Hook 流程
+  - id: product-integration
+    title: Pi 产品层集成
+  - id: session-compaction
+    title: 会话树、压缩与重试
+  - id: evaluation
+    title: 技术评价与风险

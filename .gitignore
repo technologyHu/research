@@ -1,3 +1,7 @@
 .idea/
 venv/
 *.pdf
+tools/
+
+# 第三方代码引用（克隆的官方仓库，不纳入本调研仓库）
+agent/evolution-of-mas/skill-mas/code-reference/

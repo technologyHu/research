@@ -1,13 +1,15 @@
 # Research
 
-个人研究调研仓库，用于记录和整理各类技术调研报告。
+个人研究调研仓库，用于记录和整理各类技术调研报告。每篇调研以 `report.md` 形式存放在独立子目录中，本文件为全仓索引。
 
 ## 目录结构
 
 ```
 agent/
 ├── agent-framework/                 # Agent 框架相关研究
-│   └── auto-harness-aha/            # AutoHarness (Aha) 开源框架调研
+│   ├── auto-harness-aha/            # AutoHarness (Aha) 开源框架调研
+│   └── pi/                          # Pi 终端 AI 编码代理调研
+│       └── pi-agent-core/           # pi-agent-core 通用内核调研
 ├── auto-harness/                    # Agent Harness 自动优化相关研究
 │   ├── agentic-harness-engineering/ # Agentic Harness Engineering 综述调研
 │   ├── auto-harness-deepmind/       # AutoHarness 代码约束框架自动合成调研
@@ -18,13 +20,21 @@ agent/
 │   ├── life-harness/                # Life-Harness 运行时适配调研
 │   ├── meta-evolution-harness/      # Meta-Evolution Harness 元演化调研
 │   ├── meta-harness/                # Meta-Harness Harness端到端优化调研
+│   ├── retro-harness/               # RHO 回顾式 Harness 优化调研
 │   ├── reward-harness/              # RewardHarness 奖励建模调研
 │   └── self-harness/                # Self-Harness 自优化 Harness 调研
-└── auto-research/                   # Agent 自动研究相关
-    ├── arbor/                       # Arbor 论文+代码综合调研
-    ├── auto-research/               # Karpathy autoresearch 项目调研
-    ├── ml-evolve/                   # ML-Evolve 机器学习进化调研
-    └── pi-auto-research/            # pi-autoresearch 项目调研
+├── auto-research/                   # Agent 自动研究相关
+│   ├── arbor/                       # Arbor 论文+代码综合调研
+│   ├── auto-research/               # Karpathy autoresearch 项目调研
+│   ├── ml-evolve/                   # MLEvolve ML算法发现自演化调研
+│   └── pi-auto-research/            # pi-autoresearch 项目调研
+├── context_engineering/             # Agent 上下文工程相关研究
+│   └── token-pilot/                 # TokenPilot 缓存感知上下文管理调研
+├── evolution-of-mas/                # 多智能体系统演化生成相关研究
+│   ├── evo-mas/                     # EvoMAS 配置空间演化生成调研
+│   └── skill-mas/                   # Skill-MAS Meta-Skill 演化调研
+└── agent_rl/                        # Agent 强化学习相关研究
+    └── teamtr/                      # TeamTR 多智能体协调信任域微调调研
 
 vibe-coding/                         # Spec-Driven Development 相关研究
 ├── openspec/                        # OpenSpec 调研
@@ -46,9 +56,19 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
+#### 2. Pi agent-core
+
+**文件**: [agent/agent-framework/pi/pi-agent-core/report.md](agent/agent-framework/pi/pi-agent-core/report.md)
+
+**简介**: 调研 earendil-works/pi monorepo 中的 `@earendil-works/pi-agent-core` 通用 agent 内核包。拆解 Pi 的三层架构（内核层 / 产品会话层 / CLI·TUI·RPC 接入层），内核层提供状态机、事件流、LLM turn loop、工具调用、队列与通用 harness/session 抽象；上层 `pi-coding-agent`（Pi CLI/TUI/SDK 产品层）通过 npm 依赖与 import 实例化内核 `Agent`，叠加 session JSONL 持久化、extension hooks、内置工具注册、自动压缩与重试。源码快照 `ec6311b`，覆盖 `packages/agent` 与 `packages/coding-agent` 的集成关系。
+
+**关键词**: Pi、pi-agent-core、agent 内核、turn loop、工具调用、session 持久化、monorepo 集成
+
+---
+
 ### Agent Harness 自动优化
 
-#### 2. Agentic Harness Engineering
+#### 3. Agentic Harness Engineering
 
 **文件**: [agent/auto-harness/agentic-harness-engineering/report.md](agent/auto-harness/agentic-harness-engineering/report.md)
 
@@ -58,7 +78,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 3. Autogenesis
+#### 4. Autogenesis
 
 **文件**: [agent/auto-harness/autogenesis/report.md](agent/auto-harness/autogenesis/report.md)
 
@@ -68,7 +88,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 4. Continual Harness
+#### 5. Continual Harness
 
 **文件**: [agent/auto-harness/continual-harness/report.md](agent/auto-harness/continual-harness/report.md)
 
@@ -78,7 +98,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 5. Hermes Agent Self-Evolution
+#### 6. Hermes Agent Self-Evolution
 
 **文件**: [agent/auto-harness/hermes-agent-self-evolution/report.md](agent/auto-harness/hermes-agent-self-evolution/report.md)
 
@@ -88,7 +108,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 6. LangChain Better Harness
+#### 7. LangChain Better Harness
 
 **文件**: [agent/auto-harness/langchain-better-harness/report.md](agent/auto-harness/langchain-better-harness/report.md)
 
@@ -98,7 +118,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 7. RewardHarness
+#### 8. RewardHarness
 
 **文件**: [agent/auto-harness/reward-harness/report.md](agent/auto-harness/reward-harness/report.md)
 
@@ -108,7 +128,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 8. Self-Harness
+#### 9. Self-Harness
 
 **文件**: [agent/auto-harness/self-harness/report.md](agent/auto-harness/self-harness/report.md)
 
@@ -118,7 +138,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 9. AutoHarness (DeepMind)
+#### 10. AutoHarness (DeepMind)
 
 **文件**: [agent/auto-harness/auto-harness-deepmind/report.md](agent/auto-harness/auto-harness-deepmind/report.md)
 
@@ -128,7 +148,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 10. LIFE-HARNESS
+#### 11. LIFE-HARNESS
 
 **文件**: [agent/auto-harness/life-harness/report.md](agent/auto-harness/life-harness/report.md)
 
@@ -138,7 +158,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 11. Meta-Evolution Harness
+#### 12. Meta-Evolution Harness
 
 **文件**: [agent/auto-harness/meta-evolution-harness/report.md](agent/auto-harness/meta-evolution-harness/report.md)
 
@@ -148,7 +168,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 12. Meta-Harness
+#### 13. Meta-Harness
 
 **文件**: [agent/auto-harness/meta-harness/report.md](agent/auto-harness/meta-harness/report.md)
 
@@ -158,9 +178,19 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
+#### 14. Retrospective Harness Optimization (RHO)
+
+**文件**: [agent/auto-harness/retro-harness/report.md](agent/auto-harness/retro-harness/report.md)
+
+**简介**: 调研香港城市大学与微软亚洲研究院联合提出的 RHO（Retrospective Harness Optimization）框架（arXiv:2606.05922，目标 EMNLP 2026）。将 harness 形式化为"工具、prompts 与技能的持久集合"，把 Agent 执行多任务积累的轨迹数据集（含失败案例与有用洞察）作为离线优化信号，寻找最大化未来任务期望效用的最优 harness $h^\star$。核心创新是"自偏好（Self-Preference）"机制——Agent 自身作为评判者对历史轨迹做 pairwise ranking，提取改进信号，无需外部更强模型或人工标注。提供可替换的 Protocol 接口、Web UI 结果浏览与 Claude Code 动态工作流集成。
+
+**关键词**: 回顾式优化、自偏好、轨迹数据集、pairwise ranking、Harness 形式化、EMNLP 2026、arXiv 2606.05922
+
+---
+
 ### Agent 自动研究
 
-#### 13. Arbor
+#### 15. Arbor
 
 **文件**: [agent/auto-research/arbor/report.md](agent/auto-research/arbor/report.md)
 
@@ -170,7 +200,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 14. autoresearch (Karpathy)
+#### 16. autoresearch (Karpathy)
 
 **文件**: [agent/auto-research/auto-research/report.md](agent/auto-research/auto-research/report.md)
 
@@ -180,7 +210,17 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 15. pi-autoresearch
+#### 17. MLEvolve
+
+**文件**: [agent/auto-research/ml-evolve/report.md](agent/auto-research/ml-evolve/report.md)
+
+**简介**: 调研上海AI Lab与华东师大联合提出的 MLEvolve 自演化框架（arXiv:2606.06473）。针对机器学习工程（MLE）长周期自主任务中"分支信息孤立、无记忆搜索、缺乏层次化生成控制"三大瓶颈，提出三大创新：Progressive MCGS（渐进式蒙特卡洛图搜索）实现跨分支灵感共享、Retrospective Memory（回顾式记忆）主动总结复用历史成败、Hierarchical Planning（层次化规划）分离算法规划与代码实现。在 MLE-Bench 上以 12 小时预算达到 65.3% 奖牌率，并在数学算法发现任务上超越 AlphaEvolve。
+
+**关键词**: 自演化、MLE、图搜索、回顾式记忆、层次化代码生成、AlphaEvolve、arXiv 2606.06473
+
+---
+
+#### 18. pi-autoresearch
 
 **文件**: [agent/auto-research/pi-auto-research/report.md](agent/auto-research/pi-auto-research/report.md)
 
@@ -190,9 +230,55 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
+### 上下文工程 (Context Engineering)
+
+#### 19. TokenPilot
+
+**文件**: [agent/context_engineering/token-pilot/report.md](agent/context_engineering/token-pilot/report.md)
+
+**简介**: 调研浙江大学（zjunlp / Ningyu Zhang）等机构提出的 TokenPilot 框架（arXiv:2606.17016，疑似投稿 EMNLP 2026）。面向 Claude Code、Codex 等有状态执行控制器的长程会话上下文膨胀问题，首个显式协调"文本稀疏性"与"prompt cache 连续性"的双粒度上下文管理框架。全局层 Ingestion-Aware Compaction 通过 Prefix Stabilization（静态占位符替换易失字段 + 工具定义下沉）从首轮起锁定 byte-identical prefix 把冷启动转暖启动，并净化摄入消息；局部层 Lifecycle-Aware Eviction 提出"残余效用（residual utility）"概念——段完成后不立即驱逐而转入保守的 `completed` 中间态，三态状态机 active → completed → evictable 仅在任务级效用彻底失效时清除。在 PinchBench 与 Claw-Eval 上相对 9 个基线实现 isolated 61%/56%、continuous 61%/87% 成本下降，continuous 模式 Claw-Eval 成本从 \$81.52 砍至 \$10.58，保持竞争性精度。代码集成于 `zjunlp/LightMem2`。
+
+**关键词**: 上下文管理、KV prompt cache、Prefix Stabilization、残余效用、双粒度、三态状态机、arXiv 2606.17016
+
+---
+
+### 多智能体系统演化 (MAS Evolution)
+
+#### 20. EvoMAS
+
+**文件**: [agent/evolution-of-mas/evo-mas/report.md](agent/evolution-of-mas/evo-mas/report.md)
+
+**简介**: 调研 Amazon AWS 提出的 EvoMAS 框架（ICML 2026，arXiv:2602.06511）。针对自动生成多智能体系统（Automatic-MAS）中"代码生成路线表达力强但可执行性灾难、模板约束路线可靠但僵化"的根本张力，提出配置空间演化范式：用一个可进化的 meta-model 编码 MAS 配置，配置经 workflow 执行图解释为可运行的多智能体工作流，演化操作作用于配置而非代码，从源头规避语法/运行时错误。兼具代码生成的表达力与模板方法的执行可靠性。
+
+**关键词**: MAS演化、配置空间演化、meta-model、workflow执行图、Automatic-MAS、ICML 2026、arXiv 2602.06511
+
+---
+
+#### 21. Skill-MAS
+
+**文件**: [agent/evolution-of-mas/skill-mas/report.md](agent/evolution-of-mas/skill-mas/report.md)
+
+**简介**: 调研香港科技大学（广州）与蚂蚁集团联合提出的 Skill-MAS（arXiv:2606.18837）。定位为 Automatic-MAS 的"第三条路"——把 Meta-agent 的编排能力建模为可进化的 Meta-Skill，冻结前沿 LLM、不做参数更新，既摆脱推理时编排的经验无关性（同类任务反复踩坑、per-query 搜索账单高昂），又回避训练时编排的能力上限受限（绑定小模型、难扩展到 100B+ 闭源模型）。报告含同名辨析：与 arXiv:2605.09341（上海交大/中南大学/OPPO）的 SkillMAS 层次不同，切勿混淆。
+
+**关键词**: Meta-Skill、编排能力进化、冻结LLM、Automatic-MAS第三条路、同名辨析、arXiv 2606.18837
+
+---
+
+### Agent 强化学习 (Agent RL)
+
+#### 22. TeamTR
+
+**文件**: [agent/agent_rl/teamtr/report.md](agent/agent_rl/teamtr/report.md)
+
+**简介**: 调研 University of Arizona 等机构提出的 TeamTR（Trust-Region Fine-Tuning for Multi-Agent LLM Coordination，ICML 2026，arXiv:2605.15207）。针对"多智能体 LLM 系统往往不如单强模型 + best-of-N 采样"的协调失败问题，深入指出训练过程本身才是偏差根源——共享上下文团队的朴素序列微调中存在被忽视的复合占据度偏移（compounding occupancy shift）：每次更新改变团队状态分布，后续更新在缓存 rollout 上评估时分布不匹配会复合累积。借鉴 TRPO 信任域思想，在每次更新后重新采样以稳定多智能体微调。基于 VERL 框架实现。
+
+**关键词**: 多智能体协调、信任域微调、复合占据度偏移、共享上下文团队、VERL、ICML 2026、arXiv 2605.15207
+
+---
+
 ### Spec-Driven Development (vibe-coding)
 
-#### 16. OpenSpec
+#### 23. OpenSpec
 
 **文件**: [vibe-coding/openspec/report.md](vibe-coding/openspec/report.md)
 
@@ -202,7 +288,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 17. spec-kit (GitHub)
+#### 24. spec-kit (GitHub)
 
 **文件**: [vibe-coding/spec-kit/report.md](vibe-coding/spec-kit/report.md)
 
@@ -212,7 +298,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 18. Superpowers
+#### 25. Superpowers
 
 **文件**: [vibe-coding/superpowers/report.md](vibe-coding/superpowers/report.md)
 

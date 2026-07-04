@@ -1,0 +1,57 @@
+project:
+  name: pi
+  homepage: https://pi.dev/
+  repository: https://github.com/earendil-works/pi
+  license: MIT
+  organization: earendil-works
+  package_version_in_source: 0.80.2
+  source_commit: ec6311beb5b24fc918e5031173608447582d7262
+packages:
+  agent_core:
+    name: "@earendil-works/pi-agent-core"
+    path: packages/agent
+    description: General-purpose agent with transport abstraction, state management, and attachment support
+    source_files: 25
+    test_files: 20
+  coding_agent:
+    name: "@earendil-works/pi-coding-agent"
+    path: packages/coding-agent
+    description: Coding agent CLI with read, bash, edit, write tools and session management
+    source_files: 167
+runtime_flow:
+  low_level_loop:
+    entry: packages/agent/src/agent-loop.ts
+    main_functions:
+      - runAgentLoop
+      - runLoop
+      - streamAssistantResponse
+      - executeToolCalls
+  stateful_wrapper:
+    entry: packages/agent/src/agent.ts
+    class: Agent
+    responsibilities:
+      - transcript state
+      - streaming state
+      - pending tool calls
+      - steering and follow-up queues
+      - lifecycle event subscription
+  product_session:
+    entry: packages/coding-agent/src/core/agent-session.ts
+    class: AgentSession
+    responsibilities:
+      - session persistence
+      - extension events
+      - built-in and extension tool registry
+      - auto-compaction
+      - retry
+      - model and thinking-level management
+key_design_points:
+  - AgentMessage is the internal extensible message type; convertToLlm bridges to provider-compatible messages.
+  - runLoop uses nested loops: inner loop for assistant responses, tool calls, steering; outer loop for follow-up messages.
+  - Tool calls default to parallel execution, with sequential fallback when global or per-tool settings require it.
+  - beforeToolCall and afterToolCall provide policy/interception points.
+  - Pi sessions are JSONL trees with id/parentId, enabling in-place branching and compaction summaries.
+  - coding-agent uses low-level Agent directly, while packages/agent also ships AgentHarness as a reusable higher-level harness abstraction.
+uncertain_or_followup:
+  - npm registry metadata was not used as a primary source; package version is from package.json in the cloned source.
+  - The report focuses on current main branch snapshot, not historical evolution across releases.
