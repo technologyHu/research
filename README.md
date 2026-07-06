@@ -29,6 +29,7 @@ agent/
 │   ├── ml-evolve/                   # MLEvolve ML算法发现自演化调研
 │   └── pi-auto-research/            # pi-autoresearch 项目调研
 ├── context_engineering/             # Agent 上下文工程相关研究
+│   ├── self-gc/                     # Self-GC 自治理对象级上下文管理调研
 │   └── token-pilot/                 # TokenPilot 缓存感知上下文管理调研
 ├── evolution-of-mas/                # 多智能体系统演化生成相关研究
 │   ├── evo-mas/                     # EvoMAS 配置空间演化生成调研
@@ -242,9 +243,19 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
+#### 20. Self-GC
+
+**文件**: [agent/context_engineering/self-gc/report.md](agent/context_engineering/self-gc/report.md)
+
+**简介**: 调研小红书（Xiaohongshu）提出的 Self-GC 自治理上下文框架（arXiv:2607.00692，源文件用 `aaai2027.sty`，疑似投稿 AAAI 2027）。针对长程 LLM agent（浏览/工具/文件编辑/多步工作流）活动上下文膨胀问题，核心论点是上下文不应被理解为被动 token buffer，而应被理解为带不同生命周期需求的运行时对象集合——把上下文管理重定义为「对可索引、可恢复对象的生命周期控制」而非「事后文本清理」。Self-GC 把 user turn、tool span、skill state 映射为带稳定标识符的可索引对象，由 side-channel planner 在 fork prefix 上产出 fold/mask/prune 动作计划，harness 本地排练通过 object-valid 校验后存为 pending，仅在安全 turn 边界且 cache-aware commit 公式净收益为正时才提交新活动视图；fold 把精确 payload 移入 sidecar 并留恢复指针，实现压缩活动视图同时保留对象身份与逐字节可恢复性。Hard Set 上 43.95% 剪枝下达到 84.85% 无影响率（最强启发式基线仅 69.70%），332-session Production Suite 上三个 planner backbone 达到 91.27%–94.58% 无影响率，在线账户级分流下白天平均 input token 降低 10%–15%、峰值近 20%。报告含论文全部 7 张原图、planner/judge prompt 契约、输出 schema、规划-排练-提交伪代码与失败分类法。无开源代码（作者承诺发表后发布 sanitized artifact）。
+
+**关键词**: 自治理上下文、对象级生命周期、fold/mask/prune、side-channel planner、cache-aware commit、sidecar 恢复指针、无影响率、arXiv 2607.00692
+
+---
+
 ### 多智能体系统演化 (MAS Evolution)
 
-#### 20. EvoMAS
+#### 21. EvoMAS
 
 **文件**: [agent/evolution-of-mas/evo-mas/report.md](agent/evolution-of-mas/evo-mas/report.md)
 
@@ -254,7 +265,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 21. Skill-MAS
+#### 22. Skill-MAS
 
 **文件**: [agent/evolution-of-mas/skill-mas/report.md](agent/evolution-of-mas/skill-mas/report.md)
 
@@ -266,7 +277,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ### Agent 强化学习 (Agent RL)
 
-#### 22. TeamTR
+#### 23. TeamTR
 
 **文件**: [agent/agent_rl/teamtr/report.md](agent/agent_rl/teamtr/report.md)
 
@@ -278,7 +289,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ### Spec-Driven Development (vibe-coding)
 
-#### 23. OpenSpec
+#### 24. OpenSpec
 
 **文件**: [vibe-coding/openspec/report.md](vibe-coding/openspec/report.md)
 
@@ -288,7 +299,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 24. spec-kit (GitHub)
+#### 25. spec-kit (GitHub)
 
 **文件**: [vibe-coding/spec-kit/report.md](vibe-coding/spec-kit/report.md)
 
@@ -298,7 +309,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 25. Superpowers
+#### 26. Superpowers
 
 **文件**: [vibe-coding/superpowers/report.md](vibe-coding/superpowers/report.md)
 
