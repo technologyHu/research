@@ -1,0 +1,48 @@
+fields:
+  basic_info:
+    name: deepagents
+    org: langchain-ai
+    repo: langchain-ai/deepagents
+    stars: 26300
+    language: Python
+    created: 2025-07-27
+    homepage: https://docs.langchain.com/deepagents
+    blog: https://www.langchain.com/blog/the-art-of-loop-engineering
+    detail_level: 详细
+
+  loop_stack:
+    loop1_agent:
+      concept: model在循环中调用tool直到任务完成
+      primitive: create_agent (langchain)
+      code_location: langchain-ai/langchain libs/langchain/langchain/agents; deepagents/graph.py create_deep_agent
+      open_source: true
+    loop2_verification:
+      concept: grader按rubric打分，失败则反馈回loop
+      primitive: RubricMiddleware
+      code_location: deepagents/middleware/rubric.py
+      open_source: true
+      key_mechanism: after_agent hook + jump_to='model'
+    loop3_event_driven:
+      concept: cron/webhook/event触发agent在后台持续运行
+      primitive: LangSmith Deployment (cron/webhooks) + Fleet channels
+      code_location: deepagents CLI deploy/commands.py (对接点)
+      open_source: false (平台能力)
+    loop4_hill_climbing:
+      concept: 分析trace→重写harness config→使inner loop更有效
+      primitive: LangSmith Engine
+      code_location: 无开源代码（LangSmith平台）
+      open_source: false (平台能力)
+
+  two_layer_architecture:
+    framework_layer:
+      - create_agent middleware生命周期(before_agent/after_agent/wrap_model_call/hook_config/can_jump_to)
+      - AgentMiddleware类型契约
+      - LangGraph运行时(CompiledStateGraph, 持久化, checkpointing, 流式)
+    implementation_layer:
+      - deepagents自带middleware: TodoList/Skills/Filesystem/SubAgent/Summarization/Rubric/Memory/HumanInTheLoop
+      - 中间件组合顺序(base stack -> user middleware -> tail stack)
+
+  middleware_assembly:
+    base_stack: [TodoListMiddleware, SkillsMiddleware?, FilesystemMiddleware, SubAgentMiddleware?, SummarizationMiddleware, PatchToolCallsMiddleware, AsyncSubAgentMiddleware?]
+    tail_stack: [HarnessProfile extra_middleware?, _ToolExclusionMiddleware?, AnthropicPromptCachingMiddleware, MemoryMiddleware?, HumanInTheLoopMiddleware?]
+    protected_scaffolding: [FilesystemMiddleware, SubAgentMiddleware]

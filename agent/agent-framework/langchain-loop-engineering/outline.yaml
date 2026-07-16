@@ -1,0 +1,17 @@
+topic: LangChain Loop Engineering (deepagents harness)
+blog: https://www.langchain.com/blog/the-art-of-loop-engineering
+repo: https://github.com/langchain-ai/deepagents
+report_file: report.md
+project_type: framework
+depth: 详细
+focus:
+  - 4层loop架构（agent / verification / event-driven / hill-climbing）
+  - 两层架构：框架自身（create_agent middleware机制）+ 框架承载的实现（deepagents各middleware）
+  - Loop1/2开源代码实现（create_agent、RubricMiddleware）
+  - Loop3/4为LangSmith平台能力（CLI deploy对接点），如实标注
+chapters:
+  - 一、概述与背景
+  - 二、核心架构（两层架构 + 4层loop栈）
+  - 三、核心技术实现（Loop1 agent循环 / Loop2 verification / Loop3 event-driven / Loop4 hill-climbing）
+  - 四、扩展与生态（middleware扩展 / skills / 子agent / deploy / LangSmith）
+  - 五、质量与评估
