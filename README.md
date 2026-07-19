@@ -35,6 +35,8 @@ agent/
 │   └── evolution-of-mas/           # 多智能体系统演化生成相关研究
 │       ├── evo-mas/                 # EvoMAS 配置空间演化生成调研
 │       └── skill-mas/               # Skill-MAS Meta-Skill 演化调研
+├── multi-agent/                     # 多智能体协作平台相关研究
+│   └── agentspace/                  # AgentSpace 人机协作工作空间调研
 ├── context_engineering/             # Agent 上下文工程相关研究
 │   ├── self-gc/                     # Self-GC 自治理对象级上下文管理调研
 │   └── token-pilot/                 # TokenPilot 缓存感知上下文管理调研
@@ -309,9 +311,21 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
+### 多智能体协作 (Multi-Agent Collaboration)
+
+#### 26. AgentSpace
+
+**文件**: [agent/multi-agent/agentspace/report.md](agent/multi-agent/agentspace/report.md)
+
+**简介**: 调研港大 HKUDS 开源的 AgentSpace（Apache-2.0，697★/95 fork，v1.0@2026-06-21）。把 AI Agent 从「个人终端里的工具」升级为「可调度、可共享、可审计、可转移的数字员工」，定位为「人类 + Agent」的 agent-native 协作工作空间（"飞书为人类协作而生，AgentSpace 为人类和 Agent 共同协作而生"）。针对现有 Agent 框架围绕个人使用设计导致的五大痛点——Agent 私有化、上下文散落、runtime 割裂、治理缺失、工作不持久——提供四大核心能力：① 调度（AgentRouter 把 Claude Code/Codex/OpenClaw/OpenCode/Antigravity/Hermes 多 runtime 归一化为统一执行契约，身份/指令/技能稳定、只换 harness）；② 能力共享（数字员工展板把私有 Agent 变成组织级资产，可借用/转移）；③ 协作（多 Agent war room 围绕任务分工，人类在关键节点审批）；④ 治理（权限控制面 + runtime_tool 审批桥 + 三级预算熔断 + 全量审计）。两层架构视角（平台/治理层 vs 承载的治理实现），monorepo 全栈 TypeScript（12.26 万行，apps/web + apps/cli + packages/domain/db/services/daemon/sandbox）。亮点实现：`HarnessAdapter` 四方法契约（detect/buildLaunch/run/normalizeError）归一化事件/诊断/会话、`employeeToPersona()` 把数字员工映射成可 ed25519 签名的 OpenAgent persona-card（默认脱敏 + did:key）、`BudgetCheckResult` 三 scope 短路检查、远程 daemon 物化技能/知识上下文。报告含 5 幅 Mermaid 设计图（整体架构/AgentRouter 流程/daemon 时序/数据结构 classDiagram/实体 ER 图）、4 张官方 showcase 截图、5 张表格，并配 7 人研发团队 RBAC 重构实例闭环。如实标注局限：项目极早期、部署门槛高（Node 24 + PG16 + daemon）、沙箱隔离/存储隔离在路线图、非 CrewAI/LangGraph 替代（偏治理层非推理编排层）。6 篇微信解读交叉验证。
+
+**关键词**: 数字员工、AgentRouter、harness 归一化、身份与运行时解耦、权限控制面、runtime_tool 审批、OpenAgent persona-card、三级预算熔断、远程 daemon、HKUDS、Apache-2.0
+
+---
+
 ### Agent 强化学习 (Agent RL)
 
-#### 26. TeamTR
+#### 27. TeamTR
 
 **文件**: [agent/agent_rl/teamtr/report.md](agent/agent_rl/teamtr/report.md)
 
@@ -323,7 +337,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ### Spec-Driven Development (vibe-coding)
 
-#### 27. OpenSpec
+#### 28. OpenSpec
 
 **文件**: [vibe-coding/openspec/report.md](vibe-coding/openspec/report.md)
 
@@ -333,7 +347,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 28. spec-kit (GitHub)
+#### 29. spec-kit (GitHub)
 
 **文件**: [vibe-coding/spec-kit/report.md](vibe-coding/spec-kit/report.md)
 
@@ -343,7 +357,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 29. Superpowers
+#### 30. Superpowers
 
 **文件**: [vibe-coding/superpowers/report.md](vibe-coding/superpowers/report.md)
 
