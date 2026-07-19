@@ -21,6 +21,7 @@ agent/
 │   │   ├── harness_x/               # HarnessX 可组合可进化 Harness 铸造厂调研
 │   │   ├── langchain-better-harness/ # LangChain Better Harness 调研
 │   │   ├── life-harness/            # Life-Harness 运行时适配调研
+│   │   ├── memo-harness/            # MemoHarness 经验学习 Harness 适配调研
 │   │   ├── meta-evolution-harness/  # Meta-Evolution Harness 元演化调研
 │   │   ├── meta-harness/            # Meta-Harness Harness端到端优化调研
 │   │   ├── retro-harness/           # RHO 回顾式 Harness 优化调研
@@ -212,9 +213,19 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
+#### 17. MemoHarness
+
+**文件**: [agent/recursive-self-improvement/auto-harness/memo-harness/report.md](agent/recursive-self-improvement/auto-harness/memo-harness/report.md)
+
+**简介**: 调研 Notre Dame/USC 等机构提出的 MemoHarness（arXiv:2607.14159，2026-07 预印本）。把 agent harness（模型外围控制层：上下文/工具/编排/memory/解码/输出）作为优化对象，提出"训练时搜索 + 测试时案例适配"两阶段框架。三大设计：(1) 六维 harness 空间 D1–D6（Context/Tool/Generation/Orchestration/Memory/Output）按推理时间流分解，使搜索可做诊断式编辑；(2) 双层经验库 $B_t=(E_t,G_t)$ 用 typed pair 存 per-case 执行条目 + 蒸馏全局模式，诊断算子把弱分数监督升级为维度级失败归因 $z=(s,d_{prim},D_{sec},a)$；(3) 测试时逐案例适配 $W(x)=\Pi_{test}(W^*,x,S_{test}(x))$，无需标签/反馈/额外搜索轮次，从冻结经验库检索相似成功/失败案例与全局模式生成案例专属 harness。正确性优先字典序选择 $W^*=\arg\max_{lex}(\bar{r},-\bar{c})$ 防漂向"便宜但错"配置。Terminal-Bench 18 题评估分片上 0.806 vs 最强 baseline Codex 0.722（+0.084），跨 6 个未见模型平均 +0.098，成本 \$6.89 < Codex \$10.28（94% 输入 token 可缓存）。报告含论文全部 4 张原图、5 幅 Mermaid 设计图、11 个合规 LaTeX 公式块、20 个连续编号表格，并对照开源仓库 HowieHwong/MemoHarness 建立 17 行论文概念→代码实现映射（distill_every=5/min_consecutive_failures=3/train_split=0.8/seed=42 等超参与论文 Appendix C 严格对应）。诚实标注局限：18 题点估计无显著性检验、组件未分别 ablate、成本竞争力依赖缓存假设。
+
+**关键词**: 经验学习 Harness、六维分解、双层经验库、测试时案例适配、正确性优先字典序、operation-level 诊断、跨模型迁移、arXiv 2607.14159
+
+---
+
 ### Agent 自动研究
 
-#### 17. Arbor
+#### 18. Arbor
 
 **文件**: [agent/recursive-self-improvement/auto-research/arbor/report.md](agent/recursive-self-improvement/auto-research/arbor/report.md)
 
@@ -224,7 +235,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 18. autoresearch (Karpathy)
+#### 19. autoresearch (Karpathy)
 
 **文件**: [agent/recursive-self-improvement/auto-research/auto-research/report.md](agent/recursive-self-improvement/auto-research/auto-research/report.md)
 
@@ -234,7 +245,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 19. MLEvolve
+#### 20. MLEvolve
 
 **文件**: [agent/recursive-self-improvement/auto-research/ml-evolve/report.md](agent/recursive-self-improvement/auto-research/ml-evolve/report.md)
 
@@ -244,7 +255,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 20. pi-autoresearch
+#### 21. pi-autoresearch
 
 **文件**: [agent/recursive-self-improvement/auto-research/pi-auto-research/report.md](agent/recursive-self-improvement/auto-research/pi-auto-research/report.md)
 
@@ -256,7 +267,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ### 上下文工程 (Context Engineering)
 
-#### 21. TokenPilot
+#### 22. TokenPilot
 
 **文件**: [agent/context_engineering/token-pilot/report.md](agent/context_engineering/token-pilot/report.md)
 
@@ -266,7 +277,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 22. Self-GC
+#### 23. Self-GC
 
 **文件**: [agent/context_engineering/self-gc/report.md](agent/context_engineering/self-gc/report.md)
 
@@ -278,7 +289,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ### 多智能体系统演化 (MAS Evolution)
 
-#### 23. EvoMAS
+#### 24. EvoMAS
 
 **文件**: [agent/recursive-self-improvement/evolution-of-mas/evo-mas/report.md](agent/recursive-self-improvement/evolution-of-mas/evo-mas/report.md)
 
@@ -288,7 +299,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 24. Skill-MAS
+#### 25. Skill-MAS
 
 **文件**: [agent/recursive-self-improvement/evolution-of-mas/skill-mas/report.md](agent/recursive-self-improvement/evolution-of-mas/skill-mas/report.md)
 
@@ -300,7 +311,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ### Agent 强化学习 (Agent RL)
 
-#### 25. TeamTR
+#### 26. TeamTR
 
 **文件**: [agent/agent_rl/teamtr/report.md](agent/agent_rl/teamtr/report.md)
 
@@ -312,7 +323,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ### Spec-Driven Development (vibe-coding)
 
-#### 26. OpenSpec
+#### 27. OpenSpec
 
 **文件**: [vibe-coding/openspec/report.md](vibe-coding/openspec/report.md)
 
@@ -322,7 +333,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 27. spec-kit (GitHub)
+#### 28. spec-kit (GitHub)
 
 **文件**: [vibe-coding/spec-kit/report.md](vibe-coding/spec-kit/report.md)
 
@@ -332,7 +343,7 @@ vibe-coding/                         # Spec-Driven Development 相关研究
 
 ---
 
-#### 28. Superpowers
+#### 29. Superpowers
 
 **文件**: [vibe-coding/superpowers/report.md](vibe-coding/superpowers/report.md)
 
