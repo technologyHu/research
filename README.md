@@ -46,6 +46,8 @@ framework/                                # 框架 / 内核 / 方法论框架调
     └── agentspace/                       # AgentSpace 人机协作工作空间调研
 
 product/                                  # 产品级系统调研
+├── anthropic/                            # Anthropic 产品级系统调研
+│   └── claude-tag/                       # Claude Tag (@Claude in Slack) 调研
 └── hermes/                               # Nous Research Hermes 自进化系统调研
     └── agent-self-evolution/             # Hermes Agent 自进化调研
 
@@ -376,3 +378,13 @@ open-source-project/                      # 开源工具 / 项目调研
 **简介**: 调研 Superpowers 项目，一个面向 coding agent 的 agentic skills 框架和软件开发方法论。让 AI 编程助手具备"先设计、再规划、后实现"的结构化开发能力。
 
 **关键词**: agentic skills、结构化开发、TDD、软件工程方法论
+
+---
+
+#### 31. Claude Tag (@Claude in Slack)
+
+**文件**: [product/anthropic/claude-tag/report.md](product/anthropic/claude-tag/report.md)
+
+**简介**: 调研 Anthropic 2026-06-23 发布的 Claude Tag 产品——把 Claude 以团队成员身份常驻进 Slack 频道（`@Claude`），管理员授权频道/工具/数据/代码库访问，频道内任何人 tag 即可委派任务。核心是从「你访问的工具」翻转成「坐在团队中间的同事」。覆盖：四大支柱能力、五层架构 + 51CTO 六层分层逻辑、Session 属于话题而非用户的沙箱模型（五步生命周期 + Checklist 机制 + 中途转向 + 50 条消息窗口 + 托管页面）、Agent Identity 访问模型（Claude 用自身服务账号、Agent Proxy 三层出口控制 default-deny、凭证 write-only 存储与边界注入、Web Search vs URL fetch 区别、凭证隔离 ≠ 知识隔离）、记忆系统（三方式积累 + 公开/私有读写矩阵 + 私转公不迁移）、Routines 五类 standing work、9 大落地场景、可终结任务设计、计费与治理（含 75%/95% 告警与启动额度）、`anthropics/claude-tag-plugins` 18 个 SaaS 连接器插件代码分析（5 幅 Mermaid 设计图）、竞品三位一体护城河、国内飞书/钉钉启示、阿里禁令地缘风险、未解决问题（持久化 prompt injection、供应商锁定、组合惩罚、特洛伊木马论）。基于官方首发+工程 Blog、官方文档（how-it-works/agent-identity/security-and-data/proactivity/memory 等）、9 篇微信公众号深度解读与源码分析。含 14 张官方/三方图 + 1 张 Hero + 5 幅 Mermaid 设计图。
+
+**关键词**: Claude Tag、@Claude、Slack、Agent Identity、Agent Proxy、Ambient、组织身份、delegated authority、Karpathy 第三次 UI 改革、凭证隔离
