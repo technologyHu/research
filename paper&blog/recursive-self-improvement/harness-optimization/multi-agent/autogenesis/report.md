@@ -102,9 +102,13 @@ Autogenesis的核心思想是**协议化的自进化**：通过双层协议架�
 - **进化循环**：Reflect → Select → Improve → Evaluate → Commit
 
 **第三层：应用层（AGS系统）**
-- Planning Agent：任务分解与协调
-- 子智能体：Deep Researcher, Browser-Use, Deep Analyzer, Vibe Coding
-- Agent Bus：标准化消息通信
+
+> 术语映射说明：以下为论文用语与 GitHub 代码实证的对照（详见 §7）。论文图示中的 "Planning Agent" 与 "Agent Bus" 在代码中并无同名实体，分别为 `MetaAgent` 与 `runtime/`+`protocol/` 两层的归纳性称呼。
+
+- **协调者 MetaAgent**（论文称 Planning Agent）：任务分解与协调。代码中 MetaAgent 本质是普通 tool-calling agent，跑与 leaf agent 完全相同的事件循环（`on_start → _advance → _think → _dispatch_round → _run_one → _conclude`），只是把注册的子 agent 当作 capability/tool 投影进自己的 roster 来调用。
+- **子智能体 actor**：论文称 Deep Researcher / Browser-Use / Deep Analyzer / Vibe Coding；代码中为 `code_agent`、`general_agent`、`browser_agent`、`monitor_agent`、`reviewer_agent`。
+- **通信层 runtime + protocol**（论文称 Agent Bus）：`runtime/` 管"消息怎么移动"（verbs：`spawn / send / ask / invoke / suspend+resume / publish+subscribe`），`protocol/` 管"对话的形状"（typed channels：`escalation / delegation / query / progress / control / pubsub`）。子 agent 通过 `EscalationMessage` 向 MetaAgent 上报并挂起、由 reply 恢复——是 suspend/resume 通道，并非一条具名总线。
+- **进化操作 agent**：generator / evaluator / optimizer 三类 agent，每个资源类型各一个，构成自进化闭环的执行体（即"用 agent 去优化 agent/工具/技能"）。
 
 ### 3.3 核心算法/模型
 
@@ -363,48 +367,85 @@ Vevo = ⋃_{τ∈T} Eτ ∪ {y}
 
 ### 7.2 代码架构
 
-基于论文描述，代码仓库结构如下：
+> 核对说明：本节结构经直接抓取 GitHub 仓库（`github.com/DVampire/Autogenesis`，main 分支）的完整文件树、`README.md`、`PROJECT.md` 及关键源码（`autogenesis/agent/actor/meta_agent.py`、`autogenesis/agent/optimizer/README.md`）实证后重写。早期版本中"`src/agents/planning_agent.py`、`src/optimizers/reflection.py`"等树系基于论文描述的推断，**与实际仓库不符**，已废弃。真实仓库无 `src/` 顶层目录，核心包即 `autogenesis/`，且每个模块统一遵循 `default/`(内置) + `types.py`(基类与 context) + `server.py`(对应 `*_manager` 单例) 的协议化形状。
+
+仓库顶层与核心包结构（据 `PROJECT.md`，精简呈现）：
 
 ```
-autogenesis/
-├── src/
-│   ├── agents/          # 智能体实现
-│   │   ├── planning_agent.py
-│   │   ├── deep_researcher.py
-│   │   ├── browser_use_agent.py
-│   │   ├── deep_analyzer.py
-│   │   └── vibe_coding_agent.py
-│   ├── tools/           # 工具/MCP/Skill实现
-│   ├── environments/    # 环境模块
-│   ├── memory/          # 记忆系统
-│   ├── optimizers/      # 优化器
-│   │   ├── reflection.py
-│   │   ├── textgrad.py
-│   │   ├── reinforce.py
-│   │   └── grpo.py
-│   ├── tracing/         # 追踪与版本管理
-│   └── config/          # 配置系统
-├── benchmark/           # 基准测试
-└── prompts/             # 提示词模板
+Autogenesis/
+├── autogenesis/           # 核心框架；各组件模块共享同一形状：
+│   │                     #   default/(内置) + types.py + server.py(*_manager 单例)
+│   ├── agent/            # 智能体（内置；进化产物 → extension/）
+│   │   ├── actor/        #   任务执行：Meta, Code, General, Browser, Monitor, Reviewer
+│   │   ├── generator/    #   创建新组件（每个类型一个 *_generate_agent）
+│   │   ├── evaluator/    #   评分组件质量（每个类型一个 *_evaluate_agent）
+│   │   └── optimizer/    #   进化现有组件源码（每个类型一个 *_optimize_agent）
+│   ├── tool/             # 工具：default/(bash, file r/w/edit, git, done...) + workflow/(todo)
+│   ├── prompt/           # 提示词模板（每个 agent 一个 HTML）
+│   ├── skill/            # 技能（多步 SOP 工作流），按类别扫描 SKILL.md
+│   ├── connector/        # 连接器——外部 MCP server 作为工具（CONNECTOR.md 驱动）
+│   ├── environment/      # 执行环境（browser, sandbox...）
+│   ├── sandbox/          # 隔离执行容器（opensandbox 后端，基础设施，不参与进化）
+│   ├── benchmark/        # 基准测试（在包内；非热插拔）aime/gpqa/gsm8k/hle/leetcode...
+│   ├── extension/        # ExtensionManager——加载/进化外部 extension/ 树
+│   ├── memory/           # 记忆系统（按会话分层）
+│   ├── hook/             # Hook 流水线（compact, memory, trace...）
+│   ├── trace/            # 可观测性——原始事件日志
+│   ├── trajectory/       # 一次 run 的可训练投影（SFT/RL 记录）
+│   ├── runtime/          # Agent 运行时：mailbox + pump + lifecycle（"消息怎么移动"）
+│   ├── protocol/         # Agent 间对话（"对话的形状"：escalation/delegation/query/pubsub...）
+│   ├── constraint/       # 运行预算（step/token/wall-time）
+│   ├── model/            # LLM 客户端（model_manager，含 anthropic/openai/google/openrouter）
+│   ├── data/             # 数据集加载器（DATASET 注册表）
+│   └── registry.py       # mmengine Registry 实例（见 §7.5 注册表）
+├── configs/              # mmengine 配置（base.py, meta_agent.py, agents/, tools/, memory/）
+├── datasets/             # 内置基准数据集
+├── extension/            # 热插拔进化内容，在包外（由 ExtensionManager 加载）：
+│                         #   扁平活动文件 + .versions/ 归档 + manifest.json
+├── examples/run_meta_agent.py   # 主入口——MetaAgent 编排一切
+└── tests/ · scripts/ · frontend/ · docker/   # 测试 · 安装 · 前端 UI · 容器
 ```
+
+关键结构要点（与论文方法对应）：
+
+1. **进化对象即"能力生态"**：`agent / tool / skill / connector / environment` 五类资源是可进化对象；它们既存在于各模块 `default/`（手写内置），也存在于包外 `extension/` 树（运行时生成/进化），由 `ExtensionManager` 加载。
+2. **进化操作由专门 agent 执行**：`optimizer/`、`evaluator/`、`generator/` 下每个资源类型各有一个 agent（如 `agent_optimize_agent.py`、`tool_evaluate_agent.py`）。注意 optimizer **不是按算法分文件**（`reflection.py`/`grpo.py` 那种是错误推断），而是**按资源类型分**，每个都是 agent。
+3. **版本与回滚**：`extension_manager.add_component(...)` 写扁平活动文件、归档版本到 `.versions/`、在 `manifest.json` 记录活动版本；`rollback(module, name, version)` 可恢复任意历史版本——SEPL"Commit/回滚"的代码落地。
+4. **`enable_evolving` 门控**：冻结组件（如进化 agent 自身，`enable_evolving=False`）永不被优化——SEPL"安全/可审计"属性的代码落地。
 
 ### 7.3 论文-代码对应关系
 
-| 论文部分 | 代码位置 | 对应程度 |
+| 论文部分 | 代码位置（实证） | 对应程度 |
 |---------|---------|---------|
-| RSPL资源定义 | `src/agents/`, `src/tools/`, `src/memory/` | ✅ 完整对应 |
-| SEPL操作符 | `src/optimizers/` | ✅ 完整对应 |
-| AGS多智能体系统 | `src/agents/` | ✅ 完整对应 |
-| 基准测试 | `benchmark/` | ✅ 完整对应 |
+| RSPL资源定义 | `autogenesis/agent/`、`autogenesis/tool/`、`autogenesis/memory/`、`autogenesis/environment/`、`autogenesis/connector/`、`autogenesis/skill/` | ✅ 完整对应 |
+| SEPL操作符（进化闭环） | `autogenesis/agent/{optimizer,evaluator,generator}/` + `autogenesis/extension/`（版本/回滚）+ `enable_evolving` 门控 | ✅ 完整对应 |
+| AGS多智能体系统 | `autogenesis/agent/actor/`（MetaAgent+子agent）+ `runtime/`+`protocol/`（通信） | ✅ 完整对应 |
+| 基准测试 | `autogenesis/benchmark/` + `datasets/`（先读本地，缺则从 HF 拉取） | ✅ 完整对应 |
 
 ### 7.4 核心模块实现
 
-**Reflection Optimizer核心流程**：
-1. 执行智能体并收集轨迹
-2. 反思失败原因生成假设
-3. 选择优化目标并生成修改提案
-4. 通过RSPL接口应用修改
-5. 评估并决定提交或回滚
+**自进化闭环核心流程**（据 `PROJECT.md` "The self-evolution loop"，与论文 Algorithm 1 算子对照）：
+
+| 论文 SEPL 算子 | 代码实现 | 说明 |
+|-----|-----|-----|
+| Reflect（隐含于 decide） | actor/optimizer/evaluator agent 分析执行轨迹 | `decide`：判定某能力缺失/弱 |
+| Select + Improve | `*_generate_agent`（生成新组件）或 `*_optimize_agent`（改现有组件源码并重新注册） | 操作对象按资源类型分 agent |
+| Evaluate | `*_evaluate_agent` 打分 | 判定改动是否有效 |
+| Commit / Rollback | `extension_manager`：写活动文件 + 归档版本 + manifest；`rollback(module,name,version)` | 安全门控 `enable_evolving=False` 者不被优化 |
+
+### 7.5 注册表机制（实测）
+
+组件通过 mmengine `Registry` 自注册（`autogenesis/registry.py`），内置组件在 import 时注册、进化产物由 `ExtensionManager` 在运行时注册：
+
+| Registry | 所属模块 | 装饰器 |
+|-----|-----|-----|
+| TOOL | autogenesis.tool | `@TOOL.register_module()` |
+| AGENT | autogenesis.agent | `@AGENT.register_module()` |
+| PROMPT | autogenesis.prompt | `@PROMPT.register_module()` |
+| SKILL | autogenesis.skill | `@SKILL.register_module()` |
+| ENVIRONMENT | autogenesis.environment | `@ENVIRONMENT.register_module()` |
+| MEMORY_SYSTEM | autogenesis.memory | `@MEMORY_SYSTEM.register_module()` |
+| DATASET / BENCHMARK / HOOK / CONSTRAINT / SANDBOX | 对应模块 | 同上模式 |
 
 ---
 
@@ -501,13 +542,13 @@ autogenesis/
 ### B. 调研信息
 
 - 调研人：henryhu
-- 调研时间：2026-06-02
+- 调研时间：2026-06-02（初稿）；2026-08-04（§3.2/§7 代码实证核对修订）
 - 论文版本：arXiv:2604.15034v4
 - 参考来源：
   - 论文原文 PDF
   - 微信公众号文章：机器之心
-  - GitHub代码仓库
+  - GitHub代码仓库（实证核对 main 分支：`README.md`、`PROJECT.md`、`autogenesis/agent/actor/meta_agent.py`、`autogenesis/agent/optimizer/README.md` 及完整文件树）
 
 ---
 
-*报告生成时间: 2026-06-02*
+*报告生成时间: 2026-06-02；最近修订: 2026-08-04*
