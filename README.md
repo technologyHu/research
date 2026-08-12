@@ -36,8 +36,11 @@ paper&blog/                              # 学术论文 / 博客 / 综述调研�
 ├── context_engineering/                  # Agent 上下文工程相关研究
 │   ├── self-gc/                          # Self-GC 自治理对象级上下文管理调研
 │   └── token-pilot/                      # TokenPilot 缓存感知上下文管理调研
-└── agent_rl/                             # Agent 强化学习相关研究
-    └── teamtr/                           # TeamTR 多智能体协调信任域微调调研
+├── agent-rl/                             # Agent 强化学习相关研究
+│   └── teamtr/                           # TeamTR 多智能体协调信任域微调调研
+└── llm-ensemble/                         # LLM Ensemble 多模型组合相关研究
+    ├── llm-ensemble-survey/              # LLM Ensemble 系统综述调研（taxonomy 坐标系）
+    └── moa/                              # Mixture-of-Agents 原始论文调研
 
 framework/                                # 框架 / 内核 / 方法论框架调研
 ├── agent-framework/                      # Agent 框架相关研究
@@ -297,7 +300,7 @@ open-source-project/                      # 开源工具 / 项目调研
 
 ### 优化模型 (Model Optimization)（paper&blog/recursive-self-improvement/model-optimization/）
 
-按分类法，更新模型权重的 L3 工作。本目录当前为空占位（`model-optimization/.gitkeep`）：纯 L3 工作 TeamTR 位于 `paper&blog/agent_rl/teamtr/`，按现有分类不迁入本目录。将来若有纯模型权重优化工作可补入。
+按分类法，更新模型权重的 L3 工作。本目录当前为空占位（`model-optimization/.gitkeep`）：纯 L3 工作 TeamTR 位于 `paper&blog/agent-rl/teamtr/`，按现有分类不迁入本目录。将来若有纯模型权重优化工作可补入。
 
 ---
 
@@ -375,7 +378,7 @@ open-source-project/                      # 开源工具 / 项目调研
 
 #### 28. TeamTR
 
-**文件**: [paper&blog/agent_rl/teamtr/report.md](paper&blog/agent_rl/teamtr/report.md)
+**文件**: [paper&blog/agent-rl/teamtr/report.md](paper&blog/agent-rl/teamtr/report.md)
 
 **简介**: 调研 University of Arizona 等机构提出的 TeamTR（Trust-Region Fine-Tuning for Multi-Agent LLM Coordination，ICML 2026，arXiv:2605.15207）。针对"多智能体 LLM 系统往往不如单强模型 + best-of-N 采样"的协调失败问题，深入指出训练过程本身才是偏差根源——共享上下文团队的朴素序列微调中存在被忽视的复合占据度偏移（compounding occupancy shift）：每次更新改变团队状态分布，后续更新在缓存 rollout 上评估时分布不匹配会复合累积。借鉴 TRPO 信任域思想，在每次更新后重新采样以稳定多智能体微调。基于 VERL 框架实现。
 
@@ -383,9 +386,31 @@ open-source-project/                      # 开源工具 / 项目调研
 
 ---
 
+### LLM Ensemble（paper&blog/）
+
+#### 29. LLM Ensemble 综述
+
+**文件**: [paper&blog/llm-ensemble/llm-ensemble-survey/report.md](paper&blog/llm-ensemble/llm-ensemble-survey/report.md)
+
+**简介**: 调研 LLM Ensemble 领域首篇系统性综述《Harnessing Multiple Large Language Models: A Survey on LLM Ensemble》（IJCAI Survey Track 2026，arXiv:2502.18036，北航/中关村实验室等）。定义"系统层面多 LLM 推理时组合"的范围边界（不含模型内部 MoE 专家路由），以 before / during / after inference 三段 taxonomy 建立坐标系，并覆盖 cascade 级联与 benchmark 评测体系。作为 LLM Ensemble 调研计划阶段 0 的奠基产出，附与调研计划的对照表，为后续按主线（MoA、路由、级联、评测）深挖提供导航底图。
+
+**关键词**: LLM Ensemble、taxonomy 坐标系、before/during/after inference、cascade、评测体系、IJCAI 2026、arXiv 2502.18036
+
+---
+
+#### 30. Mixture-of-Agents (MoA)
+
+**文件**: [paper&blog/llm-ensemble/moa/report.md](paper&blog/llm-ensemble/moa/report.md)
+
+**简介**: 调研 MoA 原始论文《Mixture-of-Agents Enhances Large Language Model Capabilities》（arXiv 2406.04692，ICLR 2025，Together AI + Duke）。提出 layered 的 Mixture-of-Agents 架构：让多个 proposer 模型并行生成候选响应，再由 aggregator 模型综合汇总，通过分层迭代让模型"看到其它模型的输出后生成更好响应"，实证揭示 LLM 的 collaborativeness（可协作性）。作为 LLM Ensemble 调研计划阶段 1 MoA 主线的奠基工作，是后续所有 MoA 变体（Self-MoA、SMoA、RMoA、Together MoA 部署等）的 baseline，挂在综述 taxonomy 的 (c1) 非级联 / selection-then-regeneration 格。
+
+**关键词**: MoA、Mixture-of-Agents、分层迭代、collaborativeness、proposer/aggregator、LLM Ensemble、ICLR 2025、arXiv 2406.04692
+
+---
+
 ### Spec-Driven Development (vibe-coding)（open-source-project/）
 
-#### 29. OpenSpec
+#### 31. OpenSpec
 
 **文件**: [open-source-project/vibe-coding/openspec/report.md](open-source-project/vibe-coding/openspec/report.md)
 
@@ -395,7 +420,7 @@ open-source-project/                      # 开源工具 / 项目调研
 
 ---
 
-#### 30. spec-kit (GitHub)
+#### 32. spec-kit (GitHub)
 
 **文件**: [open-source-project/vibe-coding/spec-kit/report.md](open-source-project/vibe-coding/spec-kit/report.md)
 
@@ -405,7 +430,7 @@ open-source-project/                      # 开源工具 / 项目调研
 
 ---
 
-#### 31. Superpowers
+#### 33. Superpowers
 
 **文件**: [open-source-project/vibe-coding/superpowers/report.md](open-source-project/vibe-coding/superpowers/report.md)
 
@@ -415,7 +440,7 @@ open-source-project/                      # 开源工具 / 项目调研
 
 ---
 
-#### 32. Claude Tag (@Claude in Slack)
+#### 34. Claude Tag (@Claude in Slack)
 
 **文件**: [product/anthropic/claude-tag/report.md](product/anthropic/claude-tag/report.md)
 
