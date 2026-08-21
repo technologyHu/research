@@ -39,10 +39,11 @@ context-engineering/                      # Agent 上下文工程技术方向
 
 llm-ensemble/                             # LLM Ensemble 技术方向
 ├── llm-ensemble-research-plan.md         # 方向调研计划（roadmap / 进度跟踪）
-├── survey/                               # 坐标系（综述直接放报告）
-│   └── report.md                         # LLM Ensemble 系统综述调研（taxonomy 坐标系）
+├── survey/                               # 坐标系（综述）
+│   └── llm-ensemble-survey/              # LLM Ensemble 系统综述调研（taxonomy 坐标系）
 ├── moa/                                  # MoA 主线
 │   ├── paper/                            # 原始论文
+│   │   └── mixture-of-agents/            # 原始 MoA 论文（proposer/aggregator 框架）
 │   ├── open-source-project/              # 开源实现（当前为空占位）
 │   └── product/                          # 产品实现（当前为空占位）
 ├── routing/                              # 路由主线（Before-Inference）
@@ -431,7 +432,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 #### 29. LLM Ensemble 综述
 
-**文件**: [llm-ensemble/survey/report.md](llm-ensemble/survey/report.md)
+**文件**: [llm-ensemble/survey/llm-ensemble-survey/report.md](llm-ensemble/survey/llm-ensemble-survey/report.md)
 
 **简介**: 调研 LLM Ensemble 领域首篇系统性综述《Harnessing Multiple Large Language Models: A Survey on LLM Ensemble》（IJCAI Survey Track 2026，arXiv:2502.18036，北航/中关村实验室等）。定义"系统层面多 LLM 推理时组合"的范围边界（不含模型内部 MoE 专家路由），以 before / during / after inference 三段 taxonomy 建立坐标系，并覆盖 cascade 级联与 benchmark 评测体系。作为 LLM Ensemble 调研计划阶段 0 的奠基产出，附与调研计划的对照表，为后续按主线（MoA、路由、级联、评测）深挖提供导航底图。
 
@@ -441,7 +442,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 #### 30. Mixture-of-Agents (MoA)
 
-**文件**: [llm-ensemble/moa/paper/report.md](llm-ensemble/moa/paper/report.md)
+**文件**: [llm-ensemble/moa/paper/mixture-of-agents/report.md](llm-ensemble/moa/paper/mixture-of-agents/report.md)
 
 **简介**: 调研 MoA 原始论文《Mixture-of-Agents Enhances Large Language Model Capabilities》（arXiv 2406.04692，ICLR 2025，Together AI + Duke）。提出 layered 的 Mixture-of-Agents 架构：让多个 proposer 模型并行生成候选响应，再由 aggregator 模型综合汇总，通过分层迭代让模型"看到其它模型的输出后生成更好响应"，实证揭示 LLM 的 collaborativeness（可协作性）。作为 LLM Ensemble 调研计划阶段 1 MoA 主线的奠基工作，是后续所有 MoA 变体（Self-MoA、SMoA、RMoA、Together MoA 部署等）的 baseline，挂在综述 taxonomy 的 (c1) 非级联 / selection-then-regeneration 格。
 
