@@ -39,11 +39,24 @@ context-engineering/                      # Agent 上下文工程技术方向
 
 llm-ensemble/                             # LLM Ensemble 技术方向
 ├── llm-ensemble-research-plan.md         # 方向调研计划（roadmap / 进度跟踪）
-├── paper/                                # 学术论文 / 博客 / 综述
-│   ├── moa/                              # Mixture-of-Agents 原始论文调研
-│   └── survey/                           # LLM Ensemble 系统综述调研（taxonomy 坐标系）
-├── open-source-project/                  # 开源工具 / 项目（当前为空占位）
-└── product/                              # 产品级系统（当前为空占位）
+├── survey/                               # 坐标系（综述直接放报告）
+│   └── report.md                         # LLM Ensemble 系统综述调研（taxonomy 坐标系）
+├── moa/                                  # MoA 主线
+│   ├── paper/                            # 原始论文
+│   ├── open-source-project/              # 开源实现（当前为空占位）
+│   └── product/                          # 产品实现（当前为空占位）
+├── routing/                              # 路由主线（Before-Inference）
+│   ├── paper/                            # 当前为空占位
+│   ├── open-source-project/              # 当前为空占位
+│   └── product/                          # 当前为空占位
+├── cascade/                              # 级联主线
+│   ├── paper/                            # 当前为空占位
+│   ├── open-source-project/              # 当前为空占位
+│   └── product/                          # 当前为空占位
+└── benchmark/                            # 评测体系
+    ├── paper/                            # 当前为空占位
+    ├── open-source-project/              # 当前为空占位
+    └── product/                          # 当前为空占位
 
 multi-agent-framework/                    # 多智能体协作框架技术方向
 ├── paper/                                # 学术论文 / 博客 / 综述（当前为空占位）
@@ -91,11 +104,8 @@ recursive-self-improvement/               # 递归自我改进技术方向（按
 │   ├── paper/                           # 学术论文 / 博客 / 综述（当前为 .gitkeep 占位）
 │   ├── open-source-project/             # 开源工具 / 项目（当前为 .gitkeep 占位）
 │   └── product/                         # 产品级系统（当前为空占位）
-└── survey/                              # 综述 / 观点（全部为论文）
-    ├── paper/                           # 学术论文 / 博客 / 综述
-    │   └── a-taxonomy-of-self-evolving-agents/  # Self-Evolving Agents 分类法调研
-    ├── open-source-project/             # 开源工具 / 项目（当前为空占位）
-    └── product/                         # 产品级系统（当前为空占位）
+└── survey/                              # 综述 / 观点（与 paper 平级的独立类型）
+    └── a-taxonomy-of-self-evolving-agents/  # Self-Evolving Agents 分类法调研
 
 vibe-coding/                              # Spec-Driven Development 技术方向
 ├── paper/                                # 学术论文 / 博客 / 综述（当前为空占位）
@@ -363,7 +373,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 #### 24. A Taxonomy of Self-Evolving Agents
 
-**文件**: [recursive-self-improvement/survey/paper/a-taxonomy-of-self-evolving-agents/report.md](recursive-self-improvement/survey/paper/a-taxonomy-of-self-evolving-agents/report.md)
+**文件**: [recursive-self-improvement/survey/a-taxonomy-of-self-evolving-agents/report.md](recursive-self-improvement/survey/a-taxonomy-of-self-evolving-agents/report.md)
 
 **简介**: 调研 Shilong Liu（刘世隆）2026-07-08 博客《A Taxonomy of Self-Evolving Agents》。把 self-evolving / self-improving / continual learning / RSI / TTT 等一锅术语，收敛到一个统一坐标系：**Model · Harness · Artifact 三个"进化可以发生的地点"**，并据此把现有系统分为三层——L1 Artifact Iterative Optimization（产物迭代优化，不动权重，代表 AlphaEvolve/FARS/Recursive/LabOS/Qumus/NVIDIA）、L2 Agent Harness Self-improvement（Harness 自改进，含 2a Prompt Learning & Memory [GEPA/ACE/Mem0]、2b Tool & Skill Creation [Alita/Mem-UI]、2c Multi-agent Self-evolving [Eevee/Alita-G]、不动权重）、L3 Model Learning without Gold Answers（无金答案模型学习，动权重，含 3a 伪标签/内部信号 [Self-training/TTRL/DeepSeek-R1]、3b 自博弈/环境弱信号 [SPIN/Absolute Zero/Early Experience]、3c TTT 架构 [DeltaNet]、3d Continual Learning）。核心主张是不争论名字、改问三问：**What evolves? What feedback drives it? Where does the loop close?** 闭环闭在 benchmark/code/science/物理世界分别长成 solver/软件/发现/真实系统改进。报告含博客全部 5 张原图（Models-Harness-Artifacts 关系图、Artifact 循环图、AlphaEvolve 流水线、Harness 自改进图、Model Learning 图，从 lsl.zone 下载校验为真 PNG）、3 幅 Mermaid 设计图（未来三层闭环 + 综合分类树）、19 张表格，并把分类法当坐标系对本仓库既有调研逐一落点。本仓库已按该分类法把 `recursive-self-improvement/` 重组为 artifact / harness（单/多 agent）/ model / joint 四级目录。含关键金句索引（"Agent=Model+Harness"、"A human is a router"、"Context matters"×3、"人与术语都会随时间变化"、结语"世界仍是最难的环境、也是自进化 agent 最有意义的地方"）。诚实标注参考资料微信公众号文章访问触发环境异常验证门、正文未能抓取。
 
@@ -421,7 +431,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 #### 29. LLM Ensemble 综述
 
-**文件**: [llm-ensemble/paper/survey/report.md](llm-ensemble/paper/survey/report.md)
+**文件**: [llm-ensemble/survey/report.md](llm-ensemble/survey/report.md)
 
 **简介**: 调研 LLM Ensemble 领域首篇系统性综述《Harnessing Multiple Large Language Models: A Survey on LLM Ensemble》（IJCAI Survey Track 2026，arXiv:2502.18036，北航/中关村实验室等）。定义"系统层面多 LLM 推理时组合"的范围边界（不含模型内部 MoE 专家路由），以 before / during / after inference 三段 taxonomy 建立坐标系，并覆盖 cascade 级联与 benchmark 评测体系。作为 LLM Ensemble 调研计划阶段 0 的奠基产出，附与调研计划的对照表，为后续按主线（MoA、路由、级联、评测）深挖提供导航底图。
 
@@ -431,7 +441,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 #### 30. Mixture-of-Agents (MoA)
 
-**文件**: [llm-ensemble/paper/moa/report.md](llm-ensemble/paper/moa/report.md)
+**文件**: [llm-ensemble/moa/paper/report.md](llm-ensemble/moa/paper/report.md)
 
 **简介**: 调研 MoA 原始论文《Mixture-of-Agents Enhances Large Language Model Capabilities》（arXiv 2406.04692，ICLR 2025，Together AI + Duke）。提出 layered 的 Mixture-of-Agents 架构：让多个 proposer 模型并行生成候选响应，再由 aggregator 模型综合汇总，通过分层迭代让模型"看到其它模型的输出后生成更好响应"，实证揭示 LLM 的 collaborativeness（可协作性）。作为 LLM Ensemble 调研计划阶段 1 MoA 主线的奠基工作，是后续所有 MoA 变体（Self-MoA、SMoA、RMoA、Together MoA 部署等）的 baseline，挂在综述 taxonomy 的 (c1) 非级联 / selection-then-regeneration 格。
 
