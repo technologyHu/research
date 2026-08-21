@@ -487,7 +487,7 @@ graph TD
 | `auto-harness/meta-evolution-harness` | Meta-Evolution | **L2** | 两层演化蓝图优化 harness |
 | `auto-harness/reward-harness` | RewardHarness | **L2↔L3** | 自演进奖励建模，介于 harness 与权重之间 |
 | `auto-harness/autogenesis` | Autogenesis | **L2** | 自进化协议，AEU 最小可进化组件 |
-| `product/hermes/agent-self-evolution` | Hermes | **L2** | API 调用优化 prompt/instruction/few-shot，无 GPU 训练 |
+| `recursive-self-improvement/harness-optimization/product/agent-self-evolution` | Hermes | **L2** | API 调用优化 prompt/instruction/few-shot，无 GPU 训练 |
 | `auto-research/arbor` | Arbor | **L1** | 假设树自主研究，产物是研究结论 |
 | `auto-research/ml-evolve` | MLEvolve | **L1** | 自演化发现 ML 算法，超越 AlphaEvolve |
 | `evolution-of-mas/evo-mas` | EvoMAS | **L2** | 配置空间演化生成 MAS（harness 侧） |

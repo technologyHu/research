@@ -290,7 +290,7 @@
 
 | 序号 | 工作 | 优先级 | 状态 | 笔记/产出 | 备注 |
 |---|---|---|---|---|---|
-| 0.1 | Harnessing Multiple LLMs 综述（2502.18036） | ⭐⭐⭐ | ✅ | [report.md](./llm-ensemble-survey/report.md) | taxonomy 速查表来源，IJCAI Survey 2026，已建坐标系 |
+| 0.1 | Harnessing Multiple LLMs 综述（2502.18036） | ⭐⭐⭐ | ✅ | [report.md](./survey/report.md) | taxonomy 速查表来源，IJCAI Survey 2026，已建坐标系 |
 | 0.2 | Ensemble LLMs: A Survey（MDPI） | ⭐ | ⬜ |  | 对照视角 |
 | 0.3 | Awesome-LLM-Ensemble | ⭐ | ✅ | [Awesome-LLM-Ensemble](https://github.com/junchenzhi/Awesome-LLM-Ensemble) | 当索引用，综述配套清单，254 star，已作引用源 |
 
