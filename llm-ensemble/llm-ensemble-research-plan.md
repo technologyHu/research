@@ -290,7 +290,7 @@
 
 | 序号 | 工作 | 优先级 | 状态 | 笔记/产出 | 备注 |
 |---|---|---|---|---|---|
-| 0.1 | Harnessing Multiple LLMs 综述（2502.18036） | ⭐⭐⭐ | ✅ | [report.md](./llm-ensemble-survey/report.md) | taxonomy 速查表来源，IJCAI Survey 2026，已建坐标系 |
+| 0.1 | Harnessing Multiple LLMs 综述（2502.18036） | ⭐⭐⭐ | ✅ | [report.md](./survey/llm-ensemble-survey/report.md) | taxonomy 速查表来源，IJCAI Survey 2026，已建坐标系 |
 | 0.2 | Ensemble LLMs: A Survey（MDPI） | ⭐ | ⬜ |  | 对照视角 |
 | 0.3 | Awesome-LLM-Ensemble | ⭐ | ✅ | [Awesome-LLM-Ensemble](https://github.com/junchenzhi/Awesome-LLM-Ensemble) | 当索引用，综述配套清单，254 star，已作引用源 |
 
@@ -298,8 +298,8 @@
 
 | 序号 | 工作 | 优先级 | 状态 | 笔记/产出 | 备注 |
 |---|---|---|---|---|---|
-| 1.1 | Mixture-of-Agents 原始（2406.04692） | ⭐⭐⭐ | ✅ | [report.md](./moa/report.md) | 所有变体 baseline，已建 proposer/aggregator 框架 |
-| 1.2 | Together MoA 工程实现 | ⭐⭐⭐ | ✅ | [report.md](./moa/report.md) §4 | 部署形态，代码分析章节已覆盖 moa.py/advanced-moa.py |
+| 1.1 | Mixture-of-Agents 原始（2406.04692） | ⭐⭐⭐ | ✅ | [report.md](./moa/paper/mixture-of-agents/report.md) | 所有变体 baseline，已建 proposer/aggregator 框架 |
+| 1.2 | Together MoA 工程实现 | ⭐⭐⭐ | ✅ | [report.md](./moa/paper/mixture-of-agents/report.md) §4 | 部署形态，代码分析章节已覆盖 moa.py/advanced-moa.py |
 | 1.3 | Rethinking MoA / Self-MoA（2502.00674） | ⭐⭐⭐ | ⬜ |  | 关键质疑，决定对照组 |
 | 1.4 | SMoA：Sparse Mixture-of-Agents | ⭐⭐ | ⬜ |  | selection + early stopping |
 | 1.5 | RMoA：Residual Mixture-of-Agents | ⭐⭐ | ⬜ |  | residual extraction |
