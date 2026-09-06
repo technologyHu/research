@@ -20,7 +20,9 @@ agent-framework/                          # Agent 框架技术方向
 
 agent-in-organization/                    # AI 进入组织 / 数字员工技术方向
 ├── paper/                                # 学术论文 / 博客 / 综述（当前为空占位）
-├── open-source-project/                  # 开源工具 / 项目（当前为空占位）
+├── open-source-project/                  # 开源工具 / 项目
+│   ├── buzz/                             # Buzz (Block) 人+Agent 同室协作工作区调研
+│   └── multica/                          # Multica AI-native 任务管理平台调研
 └── product/                              # 产品级系统
     └── claude-tag/                       # Claude Tag (@Claude in Slack) 调研
 
@@ -489,3 +491,23 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 **简介**: 调研 Anthropic 2026-06-23 发布的 Claude Tag 产品——把 Claude 以团队成员身份常驻进 Slack 频道（`@Claude`），管理员授权频道/工具/数据/代码库访问，频道内任何人 tag 即可委派任务。核心是从「你访问的工具」翻转成「坐在团队中间的同事」。覆盖：四大支柱能力、五层架构 + 51CTO 六层分层逻辑、Session 属于话题而非用户的沙箱模型（五步生命周期 + Checklist 机制 + 中途转向 + 50 条消息窗口 + 托管页面）、Agent Identity 访问模型（Claude 用自身服务账号、Agent Proxy 三层出口控制 default-deny、凭证 write-only 存储与边界注入、Web Search vs URL fetch 区别、凭证隔离 ≠ 知识隔离）、记忆系统（三方式积累 + 公开/私有读写矩阵 + 私转公不迁移）、Routines 五类 standing work、9 大落地场景、可终结任务设计、计费与治理（含 75%/95% 告警与启动额度）、`anthropics/claude-tag-plugins` 18 个 SaaS 连接器插件代码分析（5 幅 Mermaid 设计图）、竞品三位一体护城河、国内飞书/钉钉启示、阿里禁令地缘风险、未解决问题（持久化 prompt injection、供应商锁定、组合惩罚、特洛伊木马论）。基于官方首发+工程 Blog、官方文档（how-it-works/agent-identity/security-and-data/proactivity/memory 等）、9 篇微信公众号深度解读与源码分析。含 14 张官方/三方图 + 1 张 Hero + 5 幅 Mermaid 设计图。
 
 **关键词**: Claude Tag、@Claude、Slack、Agent Identity、Agent Proxy、Ambient、组织身份、delegated authority、Karpathy 第三次 UI 改革、凭证隔离
+
+---
+
+#### 35. Buzz (Block)
+
+**文件**: [agent-in-organization/open-source-project/buzz/report.md](agent-in-organization/open-source-project/buzz/report.md)
+
+**简介**: 调研 Block（Jack Dorsey 旗下）开源的 Buzz 自托管团队工作区（Apache-2.0 / Rust monorepo，2026-03 创建，5 个月 ~3 万★）。核心命题：为「人类 + Agent」的混合团队从零设计协作基础设施——人类和 Agent 在同一个频道/房间里协作，底层是 Nostr relay（NIP-01），每一条消息/反应/工作流步骤/评审/Git 事件都是同一本日志里的带 Schnorr 签名的 Nostr 事件；每个 Agent 持自有 secp256k1 密钥对（不借团队成员工牌）、以频道成员身份获得权限（非全局 flags）、操作全量进 tamper-evident 哈希链审计。报告含源码级分析：buzz-core 零 I/O 内核 + 129 种 kind 注册表、buzz-relay 订阅分发（DashMap fan-out / Redis 跨节点）、NIP-42/98 + 完整 Scope 权限模型、buzz-acp AgentPool（ACP 桥 → AI 子进程）+ buzz-agent（零 unsafe coding agent）+ MCP 工具面与 MCP 生命周期钩子（_Stop/_PostCompact）、远程 Agent 管理（Kubernetes provider / presence-is-status）、buzz-workflow YAML-as-code（4 种 trigger + evalexpr 条件 + 审批门）、buzz-audit 哈希链、Postgres/Redis/S3 三件套数据模型。**协议层深度**：Buzz 自定义 NIP 套件 18 篇——NIP-OA 所有者证明 / NIP-AA 代理认证（虚拟成员，owner 吊销即 Agent 群自动失效）/ NIP-AE Agent Engrams 可审计记忆 / NIP-PMA / NIP-IA / NIP-CW / NIP-WP / NIP-DV / NIP-PL / NIP-MP。**工程严谨性**：多租户隔离用 TLA+/Tamarin 形式化验证、Git-on-object-storage 给出 CAS 原子性的安全证明。工作流 action 分派当前为诚实标注的 placeholder（WF-07/08 未落地）、移动端/mobile 在 wiring——官方明确警告勿按愿景列做合规规划。含 6 幅 Mermaid 图（整体架构/模块依赖/Agent 闭环时序/工作流执行/NIP-AA 认证时序/协议栈分层）+ 4 张官方产品截图、横向对标 AgentSpace 与 claude-tag（表2：三项目对比「Agent 以成员身份进组织」三条路线）、产品范式分析（Chat+Bot → 人+Agent 同室）、多 Agent 实操观察。基于英文源码 + 官方 docs/（自定义 NIPs + 形式化 spec）+ GitHub API + 6 篇微信公众号解读（references/ 以原文标题存档）。
+
+**关键词**: Buzz、Block、Nostr relay、agent-native workspace、自托管工作区、NIP-01/42/98、Agent 独立密钥、频道成员身份、哈希链审计、ACP/MCP、buzz-workflow、YAML-as-code、多 Agent 协作、人+Agent 同室、AgentSpace/claude-tag 对标
+
+---
+
+#### 36. Multica (multica-ai)
+
+**文件**: [agent-in-organization/open-source-project/multica/report.md](agent-in-organization/open-source-project/multica/report.md)
+
+**简介**: 调研 multica-ai 开源的 Multica AI-native 任务管理平台（Multica License = Apache 2.0 + 托管/嵌入附加条款，Go + TS monorepo，2026-01 开源，8 个月 48.9K★ / 6.3K Fork / 100+ 贡献者，工作日发版至 v0.4.40）。核心定位：**Agent 是看板上的一等公民同事**——像给同事派活一样把 Issue 指派给 AI 编码 Agent，Agent 认领后在你的机器上执行、实时回帖、交付进「待审查」列，合并权在人。**本质是控制面而非 Agent**（≈ Linear + GitHub Actions，执行方是 Agent）：不造 Agent 循环，驱动用户本机已装已登录的 26 种编码 CLI（Claude Code/Codex/Cursor/Kimi/Qwen/CodeBuddy/DeepSeek Harness 等，国产 CLI 占半壁江山）。报告源码级分析：三段式拓扑（Next.js 前端 / Go 控制面 Chi+gorilla/websocket+PostgreSQL 17 / 本机 Agent Daemon）与「代码不出本机」安全边界、核心对象模型（Workspace/Issue/Agent/Run/Runtime/Squad/Skill/Autopilot，Agent=可复用配置而非常驻进程、Run 结束 ≠ 任务完成）、`Backend` 接口 + 26 份 CLI 适配（一次性流式 vs Codex app-server/ACP 持续 stdio 协议两家族、统一七类消息、64KB stderr 环形缓冲）、Daemon 生命周期（健康端口 19514 fail-fast、WS 唤醒 + 3 秒轮询双通道、信号量并发 20、WorkspaceID 空即拒执行的安全闸门、GC TTL 24h 但保留 Codex 会话供 resume）、跨 run 上下文靠 ResumeSessionID 会话恢复而非常驻进程、execenv git worktree 隔离三保证（快照回放/用户目录零写入/无静默丢弃）、dispatch ReasonCode 派遣准入词汇表（每个错误码对应真实事故 MUL-xxxx 且与相邻码刻意区分语义）、内置 Chief of Staff Agent「Mika」+ multica-platform 元技能、136 张表数据模型（应用层显式关系、CONCURRENTLY 索引、task_usage 多级预聚合）、Skills 团队经验沉淀（skills-lock.json 锁 hash）。**质量与实测**：约 67 万行 Go + 43 万行 TS、近 1600 测试文件、注释即设计文档（每条硬约束标注触发 bug 编号）；5 款 CLI 实测引用——CodeBuddy 上下文叠加致 token 滚雪球、Codex 完成率天花板但要求 responses API、Pi 缓存命中 97% 却因 bash 无超时被 find 挂死（AGENTS.md 强制约束后失败率降近 Codex 水平）；劣势含小队全自动偏慢（10 分钟人活跑半小时）、执行机必须在线无云端兜底。含 6 幅 Mermaid（三段式架构/核心对象模型/执行链路时序/CLI 适配层/Daemon 主循环/数据结构类图）+ 3 幅官方文档原图 + 3 幅深读文章配图、适用性矩阵与选型建议（vs Linear/Devin/buzz/claude-tag）。基于 GitHub API + 浅克隆源码逐模块阅读 + 官方中文文档 + 5 篇微信公众号深度解读（references/ 以原文标题存档）。
+
+**关键词**: Multica、Managed Agents、Agent 一等公民、任务看板、控制面、26 种 CLI 适配、Agent Daemon、git worktree 隔离、会话恢复、dispatch ReasonCode、Squads、Skills、Autopilot、审查门禁、代码不出本机、Linear+GitHub Actions 类比
