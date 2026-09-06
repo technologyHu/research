@@ -24,7 +24,8 @@ agent-in-organization/                    # AI 进入组织 / 数字员工技术
 │   ├── buzz/                             # Buzz (Block) 人+Agent 同室协作工作区调研
 │   └── multica/                          # Multica AI-native 任务管理平台调研
 └── product/                              # 产品级系统
-    └── claude-tag/                       # Claude Tag (@Claude in Slack) 调研
+    ├── claude-tag/                       # Claude Tag (@Claude in Slack) 调研
+    └── grok-bot/                         # Grok Bot (xAI) 云端常驻数字员工调研
 
 agent-rl/                                 # Agent 强化学习技术方向
 ├── paper/                                # 学术论文 / 博客 / 综述
@@ -511,3 +512,13 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 **简介**: 调研 multica-ai 开源的 Multica AI-native 任务管理平台（Multica License = Apache 2.0 + 托管/嵌入附加条款，Go + TS monorepo，2026-01 开源，8 个月 48.9K★ / 6.3K Fork / 100+ 贡献者，工作日发版至 v0.4.40）。核心定位：**Agent 是看板上的一等公民同事**——像给同事派活一样把 Issue 指派给 AI 编码 Agent，Agent 认领后在你的机器上执行、实时回帖、交付进「待审查」列，合并权在人。**本质是控制面而非 Agent**（≈ Linear + GitHub Actions，执行方是 Agent）：不造 Agent 循环，驱动用户本机已装已登录的 26 种编码 CLI（Claude Code/Codex/Cursor/Kimi/Qwen/CodeBuddy/DeepSeek Harness 等，国产 CLI 占半壁江山）。报告源码级分析：三段式拓扑（Next.js 前端 / Go 控制面 Chi+gorilla/websocket+PostgreSQL 17 / 本机 Agent Daemon）与「代码不出本机」安全边界、核心对象模型（Workspace/Issue/Agent/Run/Runtime/Squad/Skill/Autopilot，Agent=可复用配置而非常驻进程、Run 结束 ≠ 任务完成）、`Backend` 接口 + 26 份 CLI 适配（一次性流式 vs Codex app-server/ACP 持续 stdio 协议两家族、统一七类消息、64KB stderr 环形缓冲）、Daemon 生命周期（健康端口 19514 fail-fast、WS 唤醒 + 3 秒轮询双通道、信号量并发 20、WorkspaceID 空即拒执行的安全闸门、GC TTL 24h 但保留 Codex 会话供 resume）、跨 run 上下文靠 ResumeSessionID 会话恢复而非常驻进程、execenv git worktree 隔离三保证（快照回放/用户目录零写入/无静默丢弃）、dispatch ReasonCode 派遣准入词汇表（每个错误码对应真实事故 MUL-xxxx 且与相邻码刻意区分语义）、内置 Chief of Staff Agent「Mika」+ multica-platform 元技能、136 张表数据模型（应用层显式关系、CONCURRENTLY 索引、task_usage 多级预聚合）、Skills 团队经验沉淀（skills-lock.json 锁 hash）。**质量与实测**：约 67 万行 Go + 43 万行 TS、近 1600 测试文件、注释即设计文档（每条硬约束标注触发 bug 编号）；5 款 CLI 实测引用——CodeBuddy 上下文叠加致 token 滚雪球、Codex 完成率天花板但要求 responses API、Pi 缓存命中 97% 却因 bash 无超时被 find 挂死（AGENTS.md 强制约束后失败率降近 Codex 水平）；劣势含小队全自动偏慢（10 分钟人活跑半小时）、执行机必须在线无云端兜底。含 6 幅 Mermaid（三段式架构/核心对象模型/执行链路时序/CLI 适配层/Daemon 主循环/数据结构类图）+ 3 幅官方文档原图 + 3 幅深读文章配图、适用性矩阵与选型建议（vs Linear/Devin/buzz/claude-tag）。基于 GitHub API + 浅克隆源码逐模块阅读 + 官方中文文档 + 5 篇微信公众号深度解读（references/ 以原文标题存档）。
 
 **关键词**: Multica、Managed Agents、Agent 一等公民、任务看板、控制面、26 种 CLI 适配、Agent Daemon、git worktree 隔离、会话恢复、dispatch ReasonCode、Squads、Skills、Autopilot、审查门禁、代码不出本机、Linear+GitHub Actions 类比
+
+---
+
+#### 37. Grok Bot (xAI)
+
+**文件**: [agent-in-organization/product/grok-bot/report.md](agent-in-organization/product/grok-bot/report.md)
+
+**简介**: 调研 xAI 2026-08-11 发布的 Grok Bot——云端常驻数字员工产品（Early Beta 至 2026-09-03 Grok Bot for Enterprise）。核心定义：每个 Bot 是一个具名的、持久化的 AI teammate，拥有自己的云端电脑（Linux VM，浏览器+文件系统+终端，约 8核16G/120GB/900Mbps，空闲休眠可唤醒），可登录用户工具跨软件完成任务（官方强调覆盖"没有干净 API 或 MCP 的平台"），7×24 运行。五大机制：云电脑、iMessage 式沟通（Bot 与一条长期 conversation 一一绑定——session 被从产品概念降级为内部实现细节，用户管理"人"而非 context）、多 Bot 协作（幕僚长+专项 Bot，Bot 间自动互发消息、`/workspace` 交接、xAI 内部数据：Bot 团队管理 200+ Cloud Agents、月 2000+ PR）、示范学习（Teach a Task → Skill 存方法 → Routine 定时执行）、审批与人机交接（交互审批 + Auto Review 独立审查模型 + Take Over 凭证环节交还用户）。安全模型为三种 Agent 身份哲学中最保守的"Bot 是人的影子"（act as signed-in member，权限 ≤ 所属成员，对照 claude-tag 的服务账号与 Buzz 的独立密钥路线）；企业版补齐 SAML SSO/SCIM 2.0/网络出口白名单/审计三管道。定价不单卖随订阅赠送（Cursor Pro $20/月起、SuperGrok $30/月起），Bot 用量独立计算，额度消耗爆炸是最大槽点（实测几分钟烧 70% 试用额度）。**代码分析**：本体闭源，但分析同产品线开源的 xai-org/grok-build（Rust，约 169 万行/97 crate，Apache-2.0）——源码五条证据表明它是 Grok Bot 本地/云端共用的 harness 代码基（同一 85% 阈值 compaction 引擎且注明与云端 Python 实现对齐、同一 `x.ai/tool` 工具词表、bot-relay 协议含 VNC 屏幕描述符、云端沙箱 fork/hibernate/restore API 共享类型 + per-turn rootfs 快照、ConversationsClient 直连 grok.com）。含 3 幅 Mermaid 设计图（系统架构/模块依赖/任务执行链路）、7 张截图、11 张表格；如实记录批评（"更像 RPA 重做版"争议、多 Bot 共享云电脑的横向污染风险、memory 出错用户无权修复、组织级锁定不可用）。基于官方公告 + docs.x.ai 安全/身份文档 + grok-build 源码快照（2026-09-01）+ 10 篇微信公众号深度解读（references/ 以原文标题存档）。
+
+**关键词**: Grok Bot、xAI、数字员工、云电脑、常驻 Agent、幕僚长、Teach a Task、Skill/Routine、Auto Review、Take Over、Bot 是人的影子、grok-build、bot-relay、session 降级、Human Gate
