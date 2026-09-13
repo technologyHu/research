@@ -180,7 +180,17 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 6. autoresearch (Karpathy)
+#### 6. AREX
+
+**文件**: [recursive-self-improvement/artifact-optimization/paper/arex/report.md](recursive-self-improvement/artifact-optimization/paper/arex/report.md)
+
+**简介**: 调研 BAAI/VectorSpaceLab 提出的 AREX（arXiv:2607.21461v3），以「发现-验证不对称性」为第一性原理的递归自我改进（RSI）深度研究 Agent。双层循环：内层研究循环采集证据、经自主上下文更新（ACU）工具把膨胀历史压缩为含「已证发现/未决约束/被否候选+死因/下一步计划」的改进状态，再经 finish 外化带置信度的结构化答案；外层自改进循环按置信度阈值做 Accept/Refine/Restart 三态状态转移，把部分验证解递归转为更聚焦的研究问题（Refine 重写研究目标 ^{(k+1)}$、Refreshed 上下文）。训练：验证合成任务+教师轨迹过滤，多阶段中期训练（浏览→推理渐进、关键步聚焦监督）+步感知 GRPO。落地 dense 4B（Turbo）与 122B-A10B MoE（Base）。结果：10B 激活全 6 项胜 Qwen3.5-397B、对骨干 BrowseComp +18.7、WideSearch 82.0 超所有报告模型；2x2 消融 ACU+外循环合计 +22.9 且近似超可加；关键步监督降幅最大（-8.4）。报告含论文全部 4 张原图、4 幅 Mermaid、17 张编号表、纯 LaTeX 公式。**代码章节诚实记录脱节**：官方仓库仅推理侧 quickstart（~720 行），ACU 与外循环未实现为框架代码（期望内化于权重），训练代码全闭源。归 L1（产物迭代优化）：**RSI 的递归对象是研究产物（答案 ^{(k)}$ 与研究状态 $ar h$），外层循环基于当前答案把目标 ^{(k+1)}$ 改写得更聚焦再产出更好的答案**——改进方法是验证→Refine 目标改写，改进对象是产物；Harness（工具集/外层控制流）由人设计固定，权重训练（Qwen3.5→AREX 后训练）是人工配方（约束合成任务+规则判分），无 AI 驱动训练闭环。权重更新只是把固定流程内化，系统内唯一跨代际变化的载体是产物（答案/研究状态），故归 L1。
+
+**关键词**: 递归自我改进、发现-验证不对称、双层循环、ACU 自主上下文更新、Refine 目标改写、关键步监督、步感知GRPO、BrowseComp、arXiv 2607.21461、BAAI
+
+---
+
+#### 7. autoresearch (Karpathy)
 
 **文件**: [recursive-self-improvement/artifact-optimization/open-source-project/auto-research/report.md](recursive-self-improvement/artifact-optimization/open-source-project/auto-research/report.md)
 
@@ -190,7 +200,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 7. pi-autoresearch
+#### 8. pi-autoresearch
 
 **文件**: [recursive-self-improvement/artifact-optimization/open-source-project/pi-auto-research/report.md](recursive-self-improvement/artifact-optimization/open-source-project/pi-auto-research/report.md)
 
@@ -204,7 +214,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 按分类法，优化 agent 自身的 prompt/memory/tool/skill、不动模型权重的 L2 工作，分单 agent 与多 agent 两组。Hermes（recursive-self-improvement/harness-optimization/product/）与 Better Harness（agent-framework/open-source-project/）属同类但位于其它一级目录，列在本节末作索引。
 
-#### 8. Agentic Harness Engineering（单 agent）
+#### 9. Agentic Harness Engineering（单 agent）
 
 **文件**: [recursive-self-improvement/harness-optimization/paper/single-agent/agentic-harness-engineering/report.md](recursive-self-improvement/harness-optimization/paper/single-agent/agentic-harness-engineering/report.md)
 
@@ -214,7 +224,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 9. AutoHarness (DeepMind)（单 agent）
+#### 10. AutoHarness (DeepMind)（单 agent）
 
 **文件**: [recursive-self-improvement/harness-optimization/paper/single-agent/auto-harness-deepmind/report.md](recursive-self-improvement/harness-optimization/paper/single-agent/auto-harness-deepmind/report.md)
 
@@ -224,7 +234,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 10. LIFE-HARNESS（单 agent）
+#### 11. LIFE-HARNESS（单 agent）
 
 **文件**: [recursive-self-improvement/harness-optimization/paper/single-agent/life-harness/report.md](recursive-self-improvement/harness-optimization/paper/single-agent/life-harness/report.md)
 
@@ -234,7 +244,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 11. MemoHarness（单 agent）
+#### 12. MemoHarness（单 agent）
 
 **文件**: [recursive-self-improvement/harness-optimization/paper/single-agent/memo-harness/report.md](recursive-self-improvement/harness-optimization/paper/single-agent/memo-harness/report.md)
 
@@ -244,7 +254,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 12. Meta-Evolution Harness（单 agent）
+#### 13. Meta-Evolution Harness（单 agent）
 
 **文件**: [recursive-self-improvement/harness-optimization/paper/single-agent/meta-evolution-harness/report.md](recursive-self-improvement/harness-optimization/paper/single-agent/meta-evolution-harness/report.md)
 
@@ -254,7 +264,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 13. Meta-Harness（单 agent）
+#### 14. Meta-Harness（单 agent）
 
 **文件**: [recursive-self-improvement/harness-optimization/paper/single-agent/meta-harness/report.md](recursive-self-improvement/harness-optimization/paper/single-agent/meta-harness/report.md)
 
@@ -264,7 +274,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 14. Retrospective Harness Optimization (RHO)（单 agent）
+#### 15. Retrospective Harness Optimization (RHO)（单 agent）
 
 **文件**: [recursive-self-improvement/harness-optimization/paper/single-agent/retro-harness/report.md](recursive-self-improvement/harness-optimization/paper/single-agent/retro-harness/report.md)
 
@@ -274,7 +284,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 15. RewardHarness（单 agent，L2↔L3 桥接）
+#### 16. RewardHarness（单 agent，L2↔L3 桥接）
 
 **文件**: [recursive-self-improvement/harness-optimization/paper/single-agent/reward-harness/report.md](recursive-self-improvement/harness-optimization/paper/single-agent/reward-harness/report.md)
 
@@ -284,7 +294,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 16. Self-Harness（单 agent）
+#### 17. Self-Harness（单 agent）
 
 **文件**: [recursive-self-improvement/harness-optimization/paper/single-agent/self-harness/report.md](recursive-self-improvement/harness-optimization/paper/single-agent/self-harness/report.md)
 
@@ -294,7 +304,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 17. WikiSkill（单 agent）
+#### 18. WikiSkill（单 agent）
 
 **文件**: [recursive-self-improvement/harness-optimization/paper/single-agent/wikiskill/report.md](recursive-self-improvement/harness-optimization/paper/single-agent/wikiskill/report.md)
 
@@ -304,7 +314,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 18. Autogenesis（多 agent）
+#### 19. Autogenesis（多 agent）
 
 **文件**: [recursive-self-improvement/harness-optimization/paper/multi-agent/autogenesis/report.md](recursive-self-improvement/harness-optimization/paper/multi-agent/autogenesis/report.md)
 
@@ -314,7 +324,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 19. EvoMAS（多 agent）
+#### 20. EvoMAS（多 agent）
 
 **文件**: [recursive-self-improvement/harness-optimization/paper/multi-agent/evo-mas/report.md](recursive-self-improvement/harness-optimization/paper/multi-agent/evo-mas/report.md)
 
@@ -324,7 +334,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 20. Skill-MAS（多 agent）
+#### 21. Skill-MAS（多 agent）
 
 **文件**: [recursive-self-improvement/harness-optimization/paper/multi-agent/skill-mas/report.md](recursive-self-improvement/harness-optimization/paper/multi-agent/skill-mas/report.md)
 
@@ -334,7 +344,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 21. Hermes Agent Self-Evolution（同类索引，位于 product/）
+#### 22. Hermes Agent Self-Evolution（同类索引，位于 product/）
 
 **文件**: [recursive-self-improvement/harness-optimization/product/agent-self-evolution/report.md](recursive-self-improvement/harness-optimization/product/agent-self-evolution/report.md)
 
@@ -344,7 +354,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 22. LangChain Better Harness（同类索引，位于 agent-framework/open-source-project/）
+#### 23. LangChain Better Harness（同类索引，位于 agent-framework/open-source-project/）
 
 **文件**: [agent-framework/open-source-project/langchain/better-harness/report.md](agent-framework/open-source-project/langchain/better-harness/report.md)
 
@@ -362,9 +372,9 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ### 联合优化 (Joint Optimization)（recursive-self-improvement/joint-optimization/paper/）
 
-按分类法"三层边界模糊、未来一起生长"，同时优化 Harness 与模型权重的工作。
+按分类法"三层边界模糊、未来一起生长"，同时优化 Harness 与模型权重的工作。（AREX 已移入 L1 产物优化：其递归对象是研究产物而非 Harness，权重更新是人工配方后训练。）
 
-#### 23. Continual Harness
+#### 24. Continual Harness
 
 **文件**: [recursive-self-improvement/joint-optimization/paper/continual-harness/report.md](recursive-self-improvement/joint-optimization/paper/continual-harness/report.md)
 
@@ -374,7 +384,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 24. HarnessX
+#### 25. HarnessX
 
 **文件**: [recursive-self-improvement/joint-optimization/paper/harness_x/report.md](recursive-self-improvement/joint-optimization/paper/harness_x/report.md)
 
@@ -386,7 +396,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ### 综述 / 观点 (Survey)（recursive-self-improvement/survey/）
 
-#### 25. A Taxonomy of Self-Evolving Agents
+#### 26. A Taxonomy of Self-Evolving Agents
 
 **文件**: [recursive-self-improvement/survey/a-taxonomy-of-self-evolving-agents/report.md](recursive-self-improvement/survey/a-taxonomy-of-self-evolving-agents/report.md)
 
@@ -398,7 +408,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ### 上下文工程 (Context Engineering)（context-engineering/paper/）
 
-#### 26. TokenPilot
+#### 27. TokenPilot
 
 **文件**: [context-engineering/paper/token-pilot/report.md](context-engineering/paper/token-pilot/report.md)
 
@@ -408,7 +418,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 27. Self-GC
+#### 28. Self-GC
 
 **文件**: [context-engineering/paper/self-gc/report.md](context-engineering/paper/self-gc/report.md)
 
@@ -420,7 +430,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ### 多智能体协作 (Multi-Agent Collaboration)（multi-agent-framework/open-source-project/）
 
-#### 28. AgentSpace
+#### 29. AgentSpace
 
 **文件**: [multi-agent-framework/open-source-project/agentspace/report.md](multi-agent-framework/open-source-project/agentspace/report.md)
 
@@ -432,7 +442,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ### Agent 强化学习 (Agent RL)（agent-rl/paper/）
 
-#### 29. TeamTR
+#### 30. TeamTR
 
 **文件**: [agent-rl/paper/teamtr/report.md](agent-rl/paper/teamtr/report.md)
 
@@ -444,7 +454,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ### LLM Ensemble（llm-ensemble/）
 
-#### 30. LLM Ensemble 综述
+#### 31. LLM Ensemble 综述
 
 **文件**: [llm-ensemble/survey/llm-ensemble-survey/report.md](llm-ensemble/survey/llm-ensemble-survey/report.md)
 
@@ -454,7 +464,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 31. Mixture-of-Agents (MoA)
+#### 32. Mixture-of-Agents (MoA)
 
 **文件**: [llm-ensemble/moa/paper/mixture-of-agents/report.md](llm-ensemble/moa/paper/mixture-of-agents/report.md)
 
@@ -466,7 +476,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ### Spec-Driven Development (vibe-coding)（vibe-coding/open-source-project/）
 
-#### 32. OpenSpec
+#### 33. OpenSpec
 
 **文件**: [vibe-coding/open-source-project/openspec/report.md](vibe-coding/open-source-project/openspec/report.md)
 
@@ -476,7 +486,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 33. spec-kit (GitHub)
+#### 34. spec-kit (GitHub)
 
 **文件**: [vibe-coding/open-source-project/spec-kit/report.md](vibe-coding/open-source-project/spec-kit/report.md)
 
@@ -486,7 +496,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 34. Superpowers
+#### 35. Superpowers
 
 **文件**: [vibe-coding/open-source-project/superpowers/report.md](vibe-coding/open-source-project/superpowers/report.md)
 
@@ -496,7 +506,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 35. Claude Tag (@Claude in Slack)
+#### 36. Claude Tag (@Claude in Slack)
 
 **文件**: [agent-in-organization/product/claude-tag/report.md](agent-in-organization/product/claude-tag/report.md)
 
@@ -506,7 +516,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 36. Buzz (Block)
+#### 37. Buzz (Block)
 
 **文件**: [agent-in-organization/open-source-project/buzz/report.md](agent-in-organization/open-source-project/buzz/report.md)
 
@@ -516,7 +526,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 37. Multica (multica-ai)
+#### 38. Multica (multica-ai)
 
 **文件**: [agent-in-organization/open-source-project/multica/report.md](agent-in-organization/open-source-project/multica/report.md)
 
@@ -526,7 +536,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 38. Grok Bot (xAI)
+#### 39. Grok Bot (xAI)
 
 **文件**: [agent-in-organization/product/grok-bot/report.md](agent-in-organization/product/grok-bot/report.md)
 
