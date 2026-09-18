@@ -89,11 +89,11 @@ recursive-self-improvement/               # 递归自我改进技术方向（按
 │   │   │   ├── retro-harness/                # RHO 回顾式 Harness 优化调研
 │   │   │   ├── reward-harness/               # RewardHarness 奖励建模调研
 │   │   │   ├── self-harness/                 # Self-Harness 自优化 Harness 调研
-│   │   │   └── wikiskill/                    # WikiSkill 持久知识 Wiki 驱动技能进化调研
+│   │   │   └── wikiskill/              # ✱ 已迁移至 agent-skill/paper/single-agent/wikiskill/
 │   │   └── multi-agent/                # 多 agent harness 优化
 │   │       ├── autogenesis/            # Autogenesis 自进化协议调研
 │   │       ├── evo-mas/                # EvoMAS 配置空间演化生成调研
-│   │       └── skill-mas/              # Skill-MAS Meta-Skill 演化调研
+│   │       └── skill-mas/              # ✱ 已迁移至 agent-skill/paper/multi-agent/skill-mas/
 │   ├── open-source-project/             # 开源工具 / 项目（当前为 .gitkeep 占位）
 │   │   ├── single-agent/
 │   │   └── multi-agent/
@@ -111,6 +111,15 @@ recursive-self-improvement/               # 递归自我改进技术方向（按
 │   └── product/                         # 产品级系统（当前为空占位）
 └── survey/                              # 综述 / 观点（与 paper 平级的独立类型）
     └── a-taxonomy-of-self-evolving-agents/  # Self-Evolving Agents 分类法调研
+
+agent-skill/                              # Agent Skill 技术方向
+├── paper/                                # 学术论文 / 博客
+│   ├── single-agent/                     # 单 agent 技能
+│   │   └── wikiskill/                    # WikiSkill 编译经验为持久知识驱动技能进化
+│   └── multi-agent/                      # 多 agent 技能
+│       └── skill-mas/                    # Skill-MAS Meta-Skill 演化编排能力
+├── open-source-project/                  # 开源工具 / 框架（当前为空占位）
+└── product/                              # 产品级系统（当前为空占位）
 
 vibe-coding/                              # Spec-Driven Development 技术方向
 ├── paper/                                # 学术论文 / 博客 / 综述（当前为空占位）
@@ -304,13 +313,11 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 18. WikiSkill（单 agent）
+#### 18. WikiSkill（已迁移）
 
-**文件**: [recursive-self-improvement/harness-optimization/paper/single-agent/wikiskill/report.md](recursive-self-improvement/harness-optimization/paper/single-agent/wikiskill/report.md)
+**文件**: [agent-skill/paper/single-agent/wikiskill/report.md](agent-skill/paper/single-agent/wikiskill/report.md)
 
-**简介**: 调研 Google Research + Virginia Tech 提出的 WikiSkill 框架（arXiv:2608.27454，2026-08-27）。针对 EvoSkill / Trace2Skill / SkillOpt 共同的结构缺陷——"指导技能开发的洞见散落在优化历史里、无法系统性复用"，在「原始执行经验（Raw 层，不可变）/ 累积知识（Wiki 层，**永不回滚**）/ 可执行技能（Skills 层，可门控回滚）」三层之间建立**非对称生命周期**：技能可以错，知识不行。四个组件循环：Inference Agent 只读技能禁读 Wiki（full-injection）→ Wiki Maintainer 分层采样轨迹（≤5 失败+≤3 成功）固化 pattern 页 → Skill Proposer ReAct 按需 read_file 查 pattern/trace、每轮一个原子提案 → Gating 严格 R_val > R_best 才接受，无论接受/拒绝 harness 都程序化把提案全文+diff+分数追加 skill-impact.md（被拒提案保持可见，下一轮不重复踩坑）。5 基准 × 5 模型：相对最强竞品平均高 3.3–12.0 分（Qwen-4B/9B/27B、Gemma-31B、Gemini-3.5-Flash）；**Qwen-3.5-9B 配进化技能 47.4% 反超 27B 无技能 39.4%**；Qwen 家族增益 +12.3/+17.5/+23.9 随规模递增（技能进化与模型缩放互补）。跨模型迁移：27B 技能把 9B 的 ALFWorld 从自进化 63.4% 推到 70.2%、4B 技能把 Gemma LiveMath 从 56.7% 推到 73.1%；负迁移真实存在（4B 技能的模型特定 workaround 把 Gemini SpreadSheet 从 50.5% 坑到 18.1%），据此区分「技能发现」与「技能执行」两种能力。消融坐实核心：给 Proposer 开 Wiki +15.0 分（48.7→63.7），给 Inference Agent 开反而 −2.8（63.7→60.9）——**Wiki 应帮助产生能力，而非替代能力**。全量批下每轮优化器调用 1+T_ReAct 次、对训练集规模 O(1)。案例：ALFWorld 上 Iter 0 被拒提案留审计 → Iter 1 据此提对 break-repetition-loop。含论文全部 3 张原图（Figure 1 SVG 经 headless Chrome 无损渲染、Figure 2/3 原始 PNG）、3 幅 Mermaid 设计图（社区实现系统架构/模块依赖/提案生命周期）、20 张编号表格。**代码章节**：官方未开源（经查证 arXiv/HF/google-research org/作者 X 均无仓库），分析 2 个社区忠实实现——Python 版 ashutoshsinghpr7/wikiskill（123★，PyPI 包，Hermes/Claude/Codex/Copilot 多后端，隔离 HERMES_HOME 保证门控只评候选技能集，git 机制锁死"技能可回滚、Wiki 永不回滚"，建立 14 行论文概念→代码映射）与 TS 版 ranjithrajv/wikiskill（npm 包，跨编码 CLI，额外移植 SkillOpt 文本学习率 bounded-update，仅 Claude Code runner 实装真实 held-out 验证）；如实标注两版截至快照均未公开坐实论文级增益。7 篇微信公众号解读交叉验证（references/ 以原文标题存档）。归 L2（单 agent）：冻结模型权重、进化面向执行的程序性技能，与 MemoHarness/Self-Harness 同目录。
-
-**关键词**: 技能进化、持久知识层、三层架构、非对称回滚、skill-impact 审计轨迹、训练期禁读 Wiki、技能发现与执行解耦、跨模型迁移、负迁移、O(1) 优化调用、arXiv 2608.27454
+**简介**: ✱ 已从本目录迁移至独立方向 `agent-skill/`。原入口保留，迁移后地址不变。详见 [Agent Skill 方向](#agent-skill-技术方向)。
 
 ---
 
@@ -334,13 +341,11 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 21. Skill-MAS（多 agent）
+#### 21. Skill-MAS（已迁移）
 
-**文件**: [recursive-self-improvement/harness-optimization/paper/multi-agent/skill-mas/report.md](recursive-self-improvement/harness-optimization/paper/multi-agent/skill-mas/report.md)
+**文件**: [agent-skill/paper/multi-agent/skill-mas/report.md](agent-skill/paper/multi-agent/skill-mas/report.md)
 
-**简介**: 调研香港科技大学（广州）与蚂蚁集团联合提出的 Skill-MAS（arXiv:2606.18837）。定位为 Automatic-MAS 的"第三条路"——把 Meta-agent 的编排能力建模为可进化的 Meta-Skill，冻结前沿 LLM、不做参数更新，既摆脱推理时编排的经验无关性（同类任务反复踩坑、per-query 搜索账单高昂），又回避训练时编排的能力上限受限（绑定小模型、难扩展到 100B+ 闭源模型）。报告含同名辨析：与 arXiv:2605.09341（上海交大/中南大学/OPPO）的 SkillMAS 层次不同，切勿混淆。归 L2（多 agent）：Automatic-MAS，"冻结前沿LLM、不做参数更新""模型权重保持冻结"，Meta-Skill 演化多 agent 编排能力。
-
-**关键词**: Meta-Skill、编排能力进化、冻结LLM、Automatic-MAS第三条路、同名辨析、arXiv 2606.18837
+**简介**: ✱ 已从本目录迁移至独立方向 `agent-skill/`。原入口保留，迁移后地址不变。详见 [Agent Skill 方向](#agent-skill-技术方向)。
 
 ---
 
@@ -406,9 +411,52 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
+### Agent Skill（agent-skill/）
+
+按技能维度组织的独立调研方向。技能（Skill）是把指令、脚本、资源打包成基于文件系统的可复用能力单元（`SKILL.md`），是 Agent Harness（L2）的核心组件之一。本方向覆盖技能从表示、学习、进化到落地的完整链路。迁入来源标注 ✱。
+
+#### 27. WikiSkill（单 agent，✱ 自 harness-optimization 迁入）
+
+**文件**: [agent-skill/paper/single-agent/wikiskill/report.md](agent-skill/paper/single-agent/wikiskill/report.md)
+
+**简介**: 调研 Google Research + Virginia Tech 提出的 WikiSkill 框架（arXiv:2608.27454，2026-08-27）。针对 EvoSkill / Trace2Skill / SkillOpt 共同的结构缺陷——"指导技能开发的洞见散落在优化历史里、无法系统性复用"，在「原始执行经验（Raw 层，不可变）/ 累积知识（Wiki 层，**永不回滚**）/ 可执行技能（Skills 层，可门控回滚）」三层之间建立**非对称生命周期**：技能可以错，知识不行。四个组件循环：Inference Agent 只读技能禁读 Wiki（full-injection）→ Wiki Maintainer 分层采样轨迹（≤5 失败+≤3 成功）固化 pattern 页 → Skill Proposer ReAct 按需 read_file 查 pattern/trace、每轮一个原子提案 → Gating 严格 R_val > R_best 才接受，无论接受/拒绝 harness 都程序化把提案全文+diff+分数追加 skill-impact.md（被拒提案保持可见，下一轮不重复踩坑）。5 基准 × 5 模型：相对最强竞品平均高 3.3–12.0 分（Qwen-4B/9B/27B、Gemma-31B、Gemini-3.5-Flash）；**Qwen-3.5-9B 配进化技能 47.4% 反超 27B 无技能 39.4%**；Qwen 家族增益 +12.3/+17.5/+23.9 随规模递增（技能进化与模型缩放互补）。跨模型迁移：27B 技能把 9B 的 ALFWorld 从自进化 63.4% 推到 70.2%、4B 技能把 Gemma LiveMath 从 56.7% 推到 73.1%；负迁移真实存在（4B 技能的模型特定 workaround 把 Gemini SpreadSheet 从 50.5% 坑到 18.1%），据此区分「技能发现」与「技能执行」两种能力。消融坐实核心：给 Proposer 开 Wiki +15.0 分（48.7→63.7），给 Inference Agent 开反而 −2.8（63.7→60.9）——**Wiki 应帮助产生能力，而非替代能力**。全量批下每轮优化器调用 1+T_ReAct 次、对训练集规模 O(1)。案例：ALFWorld 上 Iter 0 被拒提案留审计 → Iter 1 据此提对 break-repetition-loop。含论文全部 3 张原图（Figure 1 SVG 经 headless Chrome 无损渲染、Figure 2/3 原始 PNG）、3 幅 Mermaid 设计图（社区实现系统架构/模块依赖/提案生命周期）、20 张编号表格。**代码章节**：官方未开源（经查证 arXiv/HF/google-research org/作者 X 均无仓库），分析 2 个社区忠实实现——Python 版 ashutoshsinghpr7/wikiskill（123★，PyPI 包，Hermes/Claude/Codex/Copilot 多后端，隔离 HERMES_HOME 保证门控只评候选技能集，git 机制锁死"技能可回滚、Wiki 永不回滚"，建立 14 行论文概念→代码映射）与 TS 版 ranjithrajv/wikiskill（npm 包，跨编码 CLI，额外移植 SkillOpt 文本学习率 bounded-update，仅 Claude Code runner 实装真实 held-out 验证）；如实标注两版截至快照均未公开坐实论文级增益。7 篇微信公众号解读交叉验证（references/ 以原文标题存档）。归 L2（单 agent）：冻结模型权重、进化面向执行的程序性技能。
+
+**关键词**: 技能进化、持久知识层、三层架构、非对称回滚、skill-impact 审计轨迹、训练期禁读 Wiki、技能发现与执行解耦、跨模型迁移、负迁移、O(1) 优化调用、arXiv 2608.27454
+
+---
+
+#### 28. Skill-MAS（多 agent，✱ 自 harness-optimization 迁入）
+
+**文件**: [agent-skill/paper/multi-agent/skill-mas/report.md](agent-skill/paper/multi-agent/skill-mas/report.md)
+
+**简介**: 调研香港科技大学（广州）与蚂蚁集团联合提出的 Skill-MAS（arXiv:2606.18837）。定位为 Automatic-MAS 的"第三条路"——把 Meta-agent 的编排能力建模为可进化的 Meta-Skill，冻结前沿 LLM、不做参数更新，既摆脱推理时编排的经验无关性（同类任务反复踩坑、per-query 搜索账单高昂），又回避训练时编排的能力上限受限（绑定小模型、难扩展到 100B+ 闭源模型）。报告含同名辨析：与 arXiv:2605.09341（上海交大/中南大学/OPPO）的 SkillMAS 层次不同，切勿混淆。归 L2（多 agent）：Automatic-MAS，"冻结前沿LLM、不做参数更新""模型权重保持冻结"，Meta-Skill 演化多 agent 编排能力。
+
+**关键词**: Meta-Skill、编排能力进化、冻结LLM、Automatic-MAS第三条路、同名辨析、arXiv 2606.18837
+
+---
+
+#### 相关报告（其它方向涉及 skill 概念）
+
+以下报告保留在各自方向原位，但与 Agent Skill 主题直接相关，交叉索引供统一查阅：
+
+| 方向 | 报告 | 与技能的关系 |
+|------|------|-------------|
+| vibe-coding / open-source-project | [Superpowers](vibe-coding/open-source-project/superpowers/report.md) | agentic skills 框架 + SKILL.md 模板（保留原位） |
+| recursive-self-improvement / harness-optimization | [RHO (retro-harness)](recursive-self-improvement/harness-optimization/paper/single-agent/retro-harness/report.md) | Harness 形式化 = 工具 + prompts + 技能 |
+| 同上 | [LIFE-HARNESS](recursive-self-improvement/harness-optimization/paper/single-agent/life-harness/report.md) | 四层架构包含「技能层」 |
+| 同上 | [MemoHarness](recursive-self-improvement/harness-optimization/paper/single-agent/memo-harness/report.md) | Harness 六维空间中 Generation/Skill 维度 |
+| 同上 | [Agentic Harness Engineering](recursive-self-improvement/harness-optimization/paper/single-agent/agentic-harness-engineering/report.md) | 技能作为可编辑组件槽位 |
+| recursive-self-improvement / survey | [A Taxonomy of Self-Evolving Agents](recursive-self-improvement/survey/a-taxonomy-of-self-evolving-agents/report.md) | L2 2b Tool & Skill Creation 分类锚点 |
+| agent-in-organization / product | [Grok Bot](agent-in-organization/product/grok-bot/report.md) | Teach a Task → Skill → Routine 产品化链路 |
+| agent-in-organization / open-source-project | [Multica](agent-in-organization/open-source-project/multica/report.md) | Skills 团队经验沉淀 (skills-lock.json) |
+| multi-agent-framework / open-source-project | [AgentSpace](multi-agent-framework/open-source-project/agentspace/report.md) | 远程 daemon 物化技能/知识上下文 |
+| context-engineering / paper | [Self-GC](context-engineering/paper/self-gc/report.md) | skill state 作为可索引上下文对象 |
+
+---
+
 ### 上下文工程 (Context Engineering)（context-engineering/paper/）
 
-#### 27. TokenPilot
+#### 29. TokenPilot
 
 **文件**: [context-engineering/paper/token-pilot/report.md](context-engineering/paper/token-pilot/report.md)
 
@@ -418,7 +466,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 28. Self-GC
+#### 30. Self-GC
 
 **文件**: [context-engineering/paper/self-gc/report.md](context-engineering/paper/self-gc/report.md)
 
@@ -430,7 +478,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ### 多智能体协作 (Multi-Agent Collaboration)（multi-agent-framework/open-source-project/）
 
-#### 29. AgentSpace
+#### 31. AgentSpace
 
 **文件**: [multi-agent-framework/open-source-project/agentspace/report.md](multi-agent-framework/open-source-project/agentspace/report.md)
 
@@ -442,7 +490,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ### Agent 强化学习 (Agent RL)（agent-rl/paper/）
 
-#### 30. TeamTR
+#### 32. TeamTR
 
 **文件**: [agent-rl/paper/teamtr/report.md](agent-rl/paper/teamtr/report.md)
 
@@ -454,7 +502,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ### LLM Ensemble（llm-ensemble/）
 
-#### 31. LLM Ensemble 综述
+#### 33. LLM Ensemble 综述
 
 **文件**: [llm-ensemble/survey/llm-ensemble-survey/report.md](llm-ensemble/survey/llm-ensemble-survey/report.md)
 
@@ -464,7 +512,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 32. Mixture-of-Agents (MoA)
+#### 34. Mixture-of-Agents (MoA)
 
 **文件**: [llm-ensemble/moa/paper/mixture-of-agents/report.md](llm-ensemble/moa/paper/mixture-of-agents/report.md)
 
@@ -476,7 +524,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ### Spec-Driven Development (vibe-coding)（vibe-coding/open-source-project/）
 
-#### 33. OpenSpec
+#### 35. OpenSpec
 
 **文件**: [vibe-coding/open-source-project/openspec/report.md](vibe-coding/open-source-project/openspec/report.md)
 
@@ -486,7 +534,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 34. spec-kit (GitHub)
+#### 36. spec-kit (GitHub)
 
 **文件**: [vibe-coding/open-source-project/spec-kit/report.md](vibe-coding/open-source-project/spec-kit/report.md)
 
@@ -496,7 +544,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 35. Superpowers
+#### 37. Superpowers
 
 **文件**: [vibe-coding/open-source-project/superpowers/report.md](vibe-coding/open-source-project/superpowers/report.md)
 
@@ -506,7 +554,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 36. Claude Tag (@Claude in Slack)
+#### 38. Claude Tag (@Claude in Slack)
 
 **文件**: [agent-in-organization/product/claude-tag/report.md](agent-in-organization/product/claude-tag/report.md)
 
@@ -516,7 +564,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 37. Buzz (Block)
+#### 39. Buzz (Block)
 
 **文件**: [agent-in-organization/open-source-project/buzz/report.md](agent-in-organization/open-source-project/buzz/report.md)
 
@@ -526,7 +574,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 38. Multica (multica-ai)
+#### 40. Multica (multica-ai)
 
 **文件**: [agent-in-organization/open-source-project/multica/report.md](agent-in-organization/open-source-project/multica/report.md)
 
@@ -536,7 +584,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 39. Grok Bot (xAI)
+#### 41. Grok Bot (xAI)
 
 **文件**: [agent-in-organization/product/grok-bot/report.md](agent-in-organization/product/grok-bot/report.md)
 
