@@ -13,10 +13,13 @@ agent-framework/                          # Agent 框架技术方向
 │   ├── auto-harness-aha/                 # AutoHarness (Aha) 开源框架调研
 │   ├── langchain/                        # LangChain 相关框架调研
 │   │   ├── loop-engineering/             # LangChain Loop Engineering (deepagents) 调研
-│   │   └── better-harness/               # LangChain Better Harness 调研
+│   │   ├── better-harness/               # LangChain Better Harness 调研
+│   │   └── harness-jev/                  # LangChain Building a Harness with Jev 调研
 │   └── pi/                               # Pi 终端 AI 编码代理调研
 │       └── pi-agent-core/                # pi-agent-core 通用内核调研
-└── product/                              # 产品级系统（当前为空占位）
+└── product/                              # 产品级系统
+    └── claude-code/                      # Claude Code 产品调研
+        └── claude-mods/                  # Claude Code 进程内扩展机制调研
 
 agent-in-organization/                    # AI 进入组织 / 数字员工技术方向
 ├── paper/                                # 学术论文 / 博客 / 综述（当前为空占位）
@@ -121,7 +124,7 @@ agent-skill/                              # Agent Skill 技术方向
 ├── open-source-project/                  # 开源工具 / 框架（当前为空占位）
 └── product/                              # 产品级系统（当前为空占位）
 
-vibe-coding/                              # Spec-Driven Development 技术方向
+vibe-coding/                              # AI 编程与工作流扩展（含 Spec-Driven Development）
 ├── paper/                                # 学术论文 / 博客 / 综述（当前为空占位）
 ├── open-source-project/                  # 开源工具 / 项目
 │   ├── openspec/                         # OpenSpec 调研
@@ -165,11 +168,21 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
+#### 4. LangChain Building a Harness with Jev
+
+**文件**: [agent-framework/open-source-project/langchain/harness-jev/report.md](agent-framework/open-source-project/langchain/harness-jev/report.md)
+
+**简介**: 调研 LangChain 官方博客《Building a Harness with Jev》（2026-09-17，Sydney Runkle & Hunter Lovell）**并对其集成包做源码级核查**（PyPI `langchain-typesafe` v0.0.1a3，wheel 内 10 个模块逐文件分析）。介绍 TypeSafe AI 发布的 **System One 模型 Jev**——不生成文本，只对 `state + questions` 返回类型化答案与概率（RLCD 校准决策强化学习训练，支持 Choice/Score/Noul 三种问题类型，同 state 多 question 并行评估）。核心论点：agent 循环里"每个决策都要一次 LLM 调用"又慢又贵，用 Jev 这类便宜的 System One 调用替换循环内结构化决策点；Claude Code/Codex/Cursor 已内置"执行前危险动作分类"但锁在闭源 harness 里，Jev + `langchain-typesafe`（`TypeSafeClassifier`、`ModelRouterMiddleware` 模型路由、`AutoModeMiddleware` 工具风险门禁）把该护栏模式开放给所有 agent。**源码级发现**（博客未写）：`TypeSafeClassifier` 打到 `api.typesafe.ai/v1/systemone`、默认 `jev-latest`、httpx2 双客户端；`ModelRouterMiddleware` 在 `before_agent` 分类一次写 state、`wrap_model_call` 整轮路由；`AutoModeMiddleware` 对白名单内工具问 Noul `is_risky`、**概率≥0.5 硬编码拦截**、返回 `status="error"` ToolMessage、白名单外放行、fail-closed、无人工确认；错误对象刻意不泄露响应体/凭据。**诚实标注**：集成包源码已核实，但 Jev 模型本体/服务端闭源，无独立 benchmark，200x/400x 为厂商宣传。
+
+**关键词**: Jev、System One 模型、RLCD、TypeSafeClassifier、ModelRouterMiddleware、AutoModeMiddleware、模型路由、工具风险门禁、harness
+
+---
+
 ### 优化产物 (Artifact Optimization)（recursive-self-improvement/artifact-optimization/paper/）
 
 按《A Taxonomy of Self-Evolving Agents》分类法，优化外部产物、不动模型权重的 L1 工作。
 
-#### 4. Arbor
+#### 5. Arbor
 
 **文件**: [recursive-self-improvement/artifact-optimization/paper/arbor/report.md](recursive-self-improvement/artifact-optimization/paper/arbor/report.md)
 
@@ -179,7 +192,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 5. MLEvolve
+#### 6. MLEvolve
 
 **文件**: [recursive-self-improvement/artifact-optimization/paper/ml-evolve/report.md](recursive-self-improvement/artifact-optimization/paper/ml-evolve/report.md)
 
@@ -189,7 +202,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 6. AREX
+#### 7. AREX
 
 **文件**: [recursive-self-improvement/artifact-optimization/paper/arex/report.md](recursive-self-improvement/artifact-optimization/paper/arex/report.md)
 
@@ -199,7 +212,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 7. autoresearch (Karpathy)
+#### 8. autoresearch (Karpathy)
 
 **文件**: [recursive-self-improvement/artifact-optimization/open-source-project/auto-research/report.md](recursive-self-improvement/artifact-optimization/open-source-project/auto-research/report.md)
 
@@ -209,7 +222,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 8. pi-autoresearch
+#### 9. pi-autoresearch
 
 **文件**: [recursive-self-improvement/artifact-optimization/open-source-project/pi-auto-research/report.md](recursive-self-improvement/artifact-optimization/open-source-project/pi-auto-research/report.md)
 
@@ -223,7 +236,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 按分类法，优化 agent 自身的 prompt/memory/tool/skill、不动模型权重的 L2 工作，分单 agent 与多 agent 两组。Hermes（recursive-self-improvement/harness-optimization/product/）与 Better Harness（agent-framework/open-source-project/）属同类但位于其它一级目录，列在本节末作索引。
 
-#### 9. Agentic Harness Engineering（单 agent）
+#### 10. Agentic Harness Engineering（单 agent）
 
 **文件**: [recursive-self-improvement/harness-optimization/paper/single-agent/agentic-harness-engineering/report.md](recursive-self-improvement/harness-optimization/paper/single-agent/agentic-harness-engineering/report.md)
 
@@ -233,7 +246,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 10. AutoHarness (DeepMind)（单 agent）
+#### 11. AutoHarness (DeepMind)（单 agent）
 
 **文件**: [recursive-self-improvement/harness-optimization/paper/single-agent/auto-harness-deepmind/report.md](recursive-self-improvement/harness-optimization/paper/single-agent/auto-harness-deepmind/report.md)
 
@@ -243,7 +256,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 11. LIFE-HARNESS（单 agent）
+#### 12. LIFE-HARNESS（单 agent）
 
 **文件**: [recursive-self-improvement/harness-optimization/paper/single-agent/life-harness/report.md](recursive-self-improvement/harness-optimization/paper/single-agent/life-harness/report.md)
 
@@ -253,7 +266,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 12. MemoHarness（单 agent）
+#### 13. MemoHarness（单 agent）
 
 **文件**: [recursive-self-improvement/harness-optimization/paper/single-agent/memo-harness/report.md](recursive-self-improvement/harness-optimization/paper/single-agent/memo-harness/report.md)
 
@@ -263,7 +276,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 13. Meta-Evolution Harness（单 agent）
+#### 14. Meta-Evolution Harness（单 agent）
 
 **文件**: [recursive-self-improvement/harness-optimization/paper/single-agent/meta-evolution-harness/report.md](recursive-self-improvement/harness-optimization/paper/single-agent/meta-evolution-harness/report.md)
 
@@ -273,7 +286,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 14. Meta-Harness（单 agent）
+#### 15. Meta-Harness（单 agent）
 
 **文件**: [recursive-self-improvement/harness-optimization/paper/single-agent/meta-harness/report.md](recursive-self-improvement/harness-optimization/paper/single-agent/meta-harness/report.md)
 
@@ -283,7 +296,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 15. Retrospective Harness Optimization (RHO)（单 agent）
+#### 16. Retrospective Harness Optimization (RHO)（单 agent）
 
 **文件**: [recursive-self-improvement/harness-optimization/paper/single-agent/retro-harness/report.md](recursive-self-improvement/harness-optimization/paper/single-agent/retro-harness/report.md)
 
@@ -293,7 +306,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 16. RewardHarness（单 agent，L2↔L3 桥接）
+#### 17. RewardHarness（单 agent，L2↔L3 桥接）
 
 **文件**: [recursive-self-improvement/harness-optimization/paper/single-agent/reward-harness/report.md](recursive-self-improvement/harness-optimization/paper/single-agent/reward-harness/report.md)
 
@@ -303,7 +316,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 17. Self-Harness（单 agent）
+#### 18. Self-Harness（单 agent）
 
 **文件**: [recursive-self-improvement/harness-optimization/paper/single-agent/self-harness/report.md](recursive-self-improvement/harness-optimization/paper/single-agent/self-harness/report.md)
 
@@ -313,7 +326,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 18. WikiSkill（已迁移）
+#### 19. WikiSkill（已迁移）
 
 **文件**: [agent-skill/paper/single-agent/wikiskill/report.md](agent-skill/paper/single-agent/wikiskill/report.md)
 
@@ -321,7 +334,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 19. Autogenesis（多 agent）
+#### 20. Autogenesis（多 agent）
 
 **文件**: [recursive-self-improvement/harness-optimization/paper/multi-agent/autogenesis/report.md](recursive-self-improvement/harness-optimization/paper/multi-agent/autogenesis/report.md)
 
@@ -331,7 +344,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 20. EvoMAS（多 agent）
+#### 21. EvoMAS（多 agent）
 
 **文件**: [recursive-self-improvement/harness-optimization/paper/multi-agent/evo-mas/report.md](recursive-self-improvement/harness-optimization/paper/multi-agent/evo-mas/report.md)
 
@@ -341,7 +354,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 21. Skill-MAS（已迁移）
+#### 22. Skill-MAS（已迁移）
 
 **文件**: [agent-skill/paper/multi-agent/skill-mas/report.md](agent-skill/paper/multi-agent/skill-mas/report.md)
 
@@ -349,7 +362,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 22. Hermes Agent Self-Evolution（同类索引，位于 product/）
+#### 23. Hermes Agent Self-Evolution（同类索引，位于 product/）
 
 **文件**: [recursive-self-improvement/harness-optimization/product/agent-self-evolution/report.md](recursive-self-improvement/harness-optimization/product/agent-self-evolution/report.md)
 
@@ -359,7 +372,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 23. LangChain Better Harness（同类索引，位于 agent-framework/open-source-project/）
+#### 24. LangChain Better Harness（同类索引，位于 agent-framework/open-source-project/）
 
 **文件**: [agent-framework/open-source-project/langchain/better-harness/report.md](agent-framework/open-source-project/langchain/better-harness/report.md)
 
@@ -379,7 +392,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 按分类法"三层边界模糊、未来一起生长"，同时优化 Harness 与模型权重的工作。（AREX 已移入 L1 产物优化：其递归对象是研究产物而非 Harness，权重更新是人工配方后训练。）
 
-#### 24. Continual Harness
+#### 25. Continual Harness
 
 **文件**: [recursive-self-improvement/joint-optimization/paper/continual-harness/report.md](recursive-self-improvement/joint-optimization/paper/continual-harness/report.md)
 
@@ -389,7 +402,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 25. HarnessX
+#### 26. HarnessX
 
 **文件**: [recursive-self-improvement/joint-optimization/paper/harness_x/report.md](recursive-self-improvement/joint-optimization/paper/harness_x/report.md)
 
@@ -401,7 +414,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ### 综述 / 观点 (Survey)（recursive-self-improvement/survey/）
 
-#### 26. A Taxonomy of Self-Evolving Agents
+#### 27. A Taxonomy of Self-Evolving Agents
 
 **文件**: [recursive-self-improvement/survey/a-taxonomy-of-self-evolving-agents/report.md](recursive-self-improvement/survey/a-taxonomy-of-self-evolving-agents/report.md)
 
@@ -415,7 +428,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 按技能维度组织的独立调研方向。技能（Skill）是把指令、脚本、资源打包成基于文件系统的可复用能力单元（`SKILL.md`），是 Agent Harness（L2）的核心组件之一。本方向覆盖技能从表示、学习、进化到落地的完整链路。迁入来源标注 ✱。
 
-#### 27. WikiSkill（单 agent，✱ 自 harness-optimization 迁入）
+#### 28. WikiSkill（单 agent，✱ 自 harness-optimization 迁入）
 
 **文件**: [agent-skill/paper/single-agent/wikiskill/report.md](agent-skill/paper/single-agent/wikiskill/report.md)
 
@@ -425,7 +438,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 28. Skill-MAS（多 agent，✱ 自 harness-optimization 迁入）
+#### 29. Skill-MAS（多 agent，✱ 自 harness-optimization 迁入）
 
 **文件**: [agent-skill/paper/multi-agent/skill-mas/report.md](agent-skill/paper/multi-agent/skill-mas/report.md)
 
@@ -456,7 +469,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ### 上下文工程 (Context Engineering)（context-engineering/paper/）
 
-#### 29. TokenPilot
+#### 30. TokenPilot
 
 **文件**: [context-engineering/paper/token-pilot/report.md](context-engineering/paper/token-pilot/report.md)
 
@@ -466,7 +479,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 30. Self-GC
+#### 31. Self-GC
 
 **文件**: [context-engineering/paper/self-gc/report.md](context-engineering/paper/self-gc/report.md)
 
@@ -478,7 +491,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ### 多智能体协作 (Multi-Agent Collaboration)（multi-agent-framework/open-source-project/）
 
-#### 31. AgentSpace
+#### 32. AgentSpace
 
 **文件**: [multi-agent-framework/open-source-project/agentspace/report.md](multi-agent-framework/open-source-project/agentspace/report.md)
 
@@ -490,7 +503,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ### Agent 强化学习 (Agent RL)（agent-rl/paper/）
 
-#### 32. TeamTR
+#### 33. TeamTR
 
 **文件**: [agent-rl/paper/teamtr/report.md](agent-rl/paper/teamtr/report.md)
 
@@ -502,7 +515,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ### LLM Ensemble（llm-ensemble/）
 
-#### 33. LLM Ensemble 综述
+#### 34. LLM Ensemble 综述
 
 **文件**: [llm-ensemble/survey/llm-ensemble-survey/report.md](llm-ensemble/survey/llm-ensemble-survey/report.md)
 
@@ -512,7 +525,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 34. Mixture-of-Agents (MoA)
+#### 35. Mixture-of-Agents (MoA)
 
 **文件**: [llm-ensemble/moa/paper/mixture-of-agents/report.md](llm-ensemble/moa/paper/mixture-of-agents/report.md)
 
@@ -524,7 +537,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ### Spec-Driven Development (vibe-coding)（vibe-coding/open-source-project/）
 
-#### 35. OpenSpec
+#### 36. OpenSpec
 
 **文件**: [vibe-coding/open-source-project/openspec/report.md](vibe-coding/open-source-project/openspec/report.md)
 
@@ -534,7 +547,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 36. spec-kit (GitHub)
+#### 37. spec-kit (GitHub)
 
 **文件**: [vibe-coding/open-source-project/spec-kit/report.md](vibe-coding/open-source-project/spec-kit/report.md)
 
@@ -544,7 +557,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 37. Superpowers
+#### 38. Superpowers
 
 **文件**: [vibe-coding/open-source-project/superpowers/report.md](vibe-coding/open-source-project/superpowers/report.md)
 
@@ -554,7 +567,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 38. Claude Tag (@Claude in Slack)
+#### 39. Claude Tag (@Claude in Slack)
 
 **文件**: [agent-in-organization/product/claude-tag/report.md](agent-in-organization/product/claude-tag/report.md)
 
@@ -564,7 +577,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 39. Buzz (Block)
+#### 40. Buzz (Block)
 
 **文件**: [agent-in-organization/open-source-project/buzz/report.md](agent-in-organization/open-source-project/buzz/report.md)
 
@@ -574,7 +587,7 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 40. Multica (multica-ai)
+#### 41. Multica (multica-ai)
 
 **文件**: [agent-in-organization/open-source-project/multica/report.md](agent-in-organization/open-source-project/multica/report.md)
 
@@ -584,10 +597,30 @@ vibe-coding/                              # Spec-Driven Development 技术方向
 
 ---
 
-#### 41. Grok Bot (xAI)
+#### 42. Grok Bot (xAI)
 
 **文件**: [agent-in-organization/product/grok-bot/report.md](agent-in-organization/product/grok-bot/report.md)
 
 **简介**: 调研 xAI 2026-08-11 发布的 Grok Bot——云端常驻数字员工产品（Early Beta 至 2026-09-03 Grok Bot for Enterprise）。核心定义：每个 Bot 是一个具名的、持久化的 AI teammate，拥有自己的云端电脑（Linux VM，浏览器+文件系统+终端，约 8核16G/120GB/900Mbps，空闲休眠可唤醒），可登录用户工具跨软件完成任务（官方强调覆盖"没有干净 API 或 MCP 的平台"），7×24 运行。五大机制：云电脑、iMessage 式沟通（Bot 与一条长期 conversation 一一绑定——session 被从产品概念降级为内部实现细节，用户管理"人"而非 context）、多 Bot 协作（幕僚长+专项 Bot，Bot 间自动互发消息、`/workspace` 交接、xAI 内部数据：Bot 团队管理 200+ Cloud Agents、月 2000+ PR）、示范学习（Teach a Task → Skill 存方法 → Routine 定时执行）、审批与人机交接（交互审批 + Auto Review 独立审查模型 + Take Over 凭证环节交还用户）。安全模型为三种 Agent 身份哲学中最保守的"Bot 是人的影子"（act as signed-in member，权限 ≤ 所属成员，对照 claude-tag 的服务账号与 Buzz 的独立密钥路线）；企业版补齐 SAML SSO/SCIM 2.0/网络出口白名单/审计三管道。定价不单卖随订阅赠送（Cursor Pro $20/月起、SuperGrok $30/月起），Bot 用量独立计算，额度消耗爆炸是最大槽点（实测几分钟烧 70% 试用额度）。**代码分析**：本体闭源，但分析同产品线开源的 xai-org/grok-build（Rust，约 169 万行/97 crate，Apache-2.0）——源码五条证据表明它是 Grok Bot 本地/云端共用的 harness 代码基（同一 85% 阈值 compaction 引擎且注明与云端 Python 实现对齐、同一 `x.ai/tool` 工具词表、bot-relay 协议含 VNC 屏幕描述符、云端沙箱 fork/hibernate/restore API 共享类型 + per-turn rootfs 快照、ConversationsClient 直连 grok.com）。含 3 幅 Mermaid 设计图（系统架构/模块依赖/任务执行链路）、7 张截图、11 张表格；如实记录批评（"更像 RPA 重做版"争议、多 Bot 共享云电脑的横向污染风险、memory 出错用户无权修复、组织级锁定不可用）。基于官方公告 + docs.x.ai 安全/身份文档 + grok-build 源码快照（2026-09-01）+ 10 篇微信公众号深度解读（references/ 以原文标题存档）。
 
 **关键词**: Grok Bot、xAI、数字员工、云电脑、常驻 Agent、幕僚长、Teach a Task、Skill/Routine、Auto Review、Take Over、Bot 是人的影子、grok-build、bot-relay、session 降级、Human Gate
+
+---
+
+### Claude Code 产品扩展（agent-framework/product/claude-code/）
+
+#### 43. Claude Mods
+
+**文件**: [agent-framework/product/claude-code/claude-mods/report.md](agent-framework/product/claude-code/claude-mods/report.md)
+
+**简介**: 使用 research 技能深入调研 Claude Code 的进程内扩展机制，源码固定于 Claude Code `3deb873` 与 Playground `569c528`。以技术原理为主线，覆盖静态扫描、worker 与宿主边界、工具执行链、continuation / next.to / trace、API 重入、错误与预算、流式最终返回值、UI 描述与交互回传、Client、状态与热重载，以及 engine.create 能力 fold。逐函数分析 sec-default 的 500 ms Promise 缓存、政策来源与 verdict 复核，diff 的刷新合并 / generation stamp，agents-md 的执行后嵌套指令去重。按“概念—架构—执行—权限—UI—源码—开发—验证—评估”组织为 9 个主体章节和 3 个附录，含 32 个精确源码锚点、12 张自绘图、3 张官方截图，并附用户提供的中文速查表。两个上游政策辅助函数的 7 项受控断言、教学调度模型的 9 项实验和 Tool Tally 的 10 项本地检查通过；明确区分源码事实、版本契约、历史设计、教学模型与未验证宿主机制。四篇微信正文仍因环境验证不可读，本机 CLI 2.1.198，未加载官方 mods 或做真实宿主/性能测试。
+
+**关键词**: Claude Mods、Function Hooks、Claude Code、Harness Engineering、事件中间件、插件、UI 扩展、sec-default、上下文工程
+
+**开发示例**: [Tool Tally 行为与验证边界](agent-framework/product/claude-code/claude-mods/report.md#71-完整例子tool-tally-的行为与文件)；独立源码和测试文件已清理，正文保留调研时的行为分析及检查结论。
+
+**技术实验**: [教学调度模型与九项语义检查](agent-framework/product/claude-code/claude-mods/report.md#822-教学调度模型九项语义实验)；独立实验文件已清理，正文保留研究者模型的解释与证据边界。
+
+**术语速查**: [Claude Mods 概念与机制索引](agent-framework/product/claude-code/claude-mods/glossary.md)，正文已补充术语释义、执行过程与具体例子，便于对照源码理解。
+
+**系统总览**: 正文按“整体架构与模块交互 → 注册加载 → 完整回合执行 → 各机制分解”展开，新增模块协作、注册加载、执行流程三张图，并用 Tool Tally 串起事件、状态与 UI。 第二章进一步改为编号架构图配合 Read 与计数例子，按需展开高级细节。
