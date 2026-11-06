@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "exclude_paths": [
+    ".agents/**",
+    "plans/coding-agent/plan.md",
+    "product/coding-agent/compare-architecture-diagram-skills/**",
+    "open-source/coding-agent/diagram-design-fireworks-integration/**"
+  ],
+  "description": "技能选型与技能维护资料不属于本仓库调研工作总览。保留原文件，只排除索引。"
+}

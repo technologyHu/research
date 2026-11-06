@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 2,
+  "repository": "technologyHu/research",
+  "branch": "openjiuwen-harness",
+  "fingerprint": "50b76c64bfbe03a4",
+  "types": {
+    "paper": "论文",
+    "open-source": "开源项目",
+    "product": "产品",
+    "benchmark": "评测",
+    "topic": "技术专题"
+  },
+  "colors": {
+    "theme": "#b0a0ff",
+    "paper": "#ffbe75",
+    "open-source": "#57deca",
+    "product": "#75acff",
+    "benchmark": "#f78dc1",
+    "topic": "#c7a3ff",
+    "unknown": "#9aaac6"
+  },
+  "stats": {
+    "themes": 0,
+    "types": 0,
+    "objects": 0,
+    "reports": 0
+  },
+  "updatedAt": "",
+  "nodes": [],
+  "edges": [],
+  "reports": [],
+  "themeOverview": [],
+  "warnings": []
+}
