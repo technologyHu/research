@@ -73,6 +73,10 @@ README 的 `research-graph:start` 与 `research-graph:end` 之间由脚本维护
 
 发布前和发布后的截图、线上验收结果保存在工作流制品中，保留 7 天。线上 `publication.json` 属于发布制品，不参与自动回写 Git，避免提交哈希自引用。发布后的验证失败表示本轮验收未通过，不会把部署状态冒充验证成功；该检查不自动回滚 GitHub Pages。
 
+构建、部署和线上验收在同一运行环境内顺序执行，复用已经安装的 Chromium；发布前检查不通过时不会部署，发布后验收不通过时流水线不会显示成功。
+
+首次真实发布的版本、资源核对和页面检查见[首次发布验收记录](research-graph-first-publication.md)。
+
 工作流串行执行，不 force-push；如果有人在构建期间推送新提交，旧构建的普通推送失败后停止发布，后续构建再使用最新内容。回写使用 `GITHUB_TOKEN`，不会递归触发构建。GitHub Pages 已设置为 Actions 发布，`github-pages` 环境仅允许 `openjiuwen-harness` 分支部署。
 
 本地修改需要推送后才能更新远程展示；已打开页面需刷新获取新快照，不持续轮询。GitHub 图片缓存可能稍晚更新。更换分支时，需要同步调整工作流触发、checkout、生成参数、回写目标与发布环境分支规则。
