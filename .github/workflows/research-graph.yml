@@ -40,6 +40,7 @@ env:
 
 jobs:
   build:
+    name: 构建、发布与线上验收
     if: github.ref == 'refs/heads/openjiuwen-harness'
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -48,7 +49,11 @@ jobs:
       fingerprint: ${{ steps.graph.outputs.fingerprint }}
     permissions:
       contents: write
-      pages: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -112,47 +117,14 @@ jobs:
           path: .tmp/research-graph/*.png
           if-no-files-found: ignore
           retention-days: 7
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    outputs:
-      page_url: ${{ steps.deployment.outputs.page_url }}
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
       - name: 发布交互调研图谱
         id: deployment
         uses: actions/deploy-pages@v4
-  verify:
-    needs: [build, deploy]
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          ref: ${{ needs.build.outputs.source_sha }}
-          persist-credentials: false
-      - uses: actions/setup-python@v6
-        with:
-          python-version: '3.13'
-          cache: pip
-          cache-dependency-path: |
-            scripts/research-graph-requirements.txt
-            scripts/research-graph-browser-requirements.txt
-      - name: 安装线上验收依赖
-        run: |
-          python -m pip install -r scripts/research-graph-requirements.txt -r scripts/research-graph-browser-requirements.txt
-          python -m playwright install --with-deps chromium
       - name: 核对线上版本、全部静态资源及桌面移动端页面
         env:
-          PAGE_URL: ${{ needs.deploy.outputs.page_url }}
-          SOURCE_SHA: ${{ needs.build.outputs.source_sha }}
-          FINGERPRINT: ${{ needs.build.outputs.fingerprint }}
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+          SOURCE_SHA: ${{ steps.source.outputs.sha }}
+          FINGERPRINT: ${{ steps.graph.outputs.fingerprint }}
         run: python tests/research_graph_publication.py --site-url "$PAGE_URL" --expected-commit "$SOURCE_SHA" --expected-fingerprint "$FINGERPRINT" --repository "$GITHUB_REPOSITORY"
       - name: 保存真实发布验收记录
         if: always()
