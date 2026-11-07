@@ -6,21 +6,29 @@ Windows 调用 Python 可加 `-X utf8 -B`，读写文档使用 UTF-8。用 subpr
 
 ## 创建与定位
 
+长期主题计划先按 [主题计划维护](theme-planning.md) 定位；单次任务的 outline／fields 继续留在本节创建的临时目录。只维护主题计划时直接编辑长期 Markdown，不必执行 create。现有命令不会自动同步或归档主题计划，也没有主题归档命令；由当前代理按规范维护。
+
+从主题计划进入执行、回写成果及清理前同步，使用 [流程交接表](theme-planning.md#流程接入与交接)。创建／维护主题计划本身不调用本节 list/show 代替查找计划，也不以缺少旧 .tmp 为由中断纯计划编辑。
+
 ```text
-python <skills_root>/research/scripts/research_task.py create --workspace . --topic "研究主题" --type paper --depth standard --field "method=方法怎样解决问题？" --field "limitations=主要适用边界是什么？"
+python <skills_root>/research/scripts/research_task.py create --workspace . --topic "研究主题" --theme agent-memory --type paper --target memory-method --depth standard --field "method=方法怎样解决问题？" --field "limitations=主要适用边界是什么？"
 python <skills_root>/research/scripts/research_task.py list --workspace .
 python <skills_root>/research/scripts/research_task.py show --work-dir <work_dir>
 ```
 
-返回 run_id 和相对于项目根的任务、计划与报告路径。所有中间资料集中在对应报告目录的 `<type>/<theme>/<target>/.tmp/<run-id>/`，包含 owner.json 标记；同名主题产生独立 run，不覆盖旧任务。完整目录模板见 [交付规范](delivery-policy.md)。list 查找当前项目各调研目录内的任务，跳过临时目录内部的源码、下载资料及其他项目任务，可用 `--topic` 筛选。多个任务匹配时明确选择 run_id／work_dir，不自动采用第一项。
+返回 run_id 和相对于项目根的任务、计划与报告路径。所有中间资料集中在对应报告目录的 `<theme>/<type>/<target>/.tmp/<run-id>/`，包含 owner.json 标记；同名主题产生独立 run，不覆盖旧任务。完整目录模板见 [交付规范](delivery-policy.md)。list 查找当前项目各调研目录内的任务，跳过临时目录内部的源码、下载资料及其他项目任务，可用 `--topic` 筛选。多个任务匹配时明确选择 run_id／work_dir，不自动采用第一项。
 
-后续命令和编辑使用返回的 outline、fields 相对路径，例如 `paper/agent-memory/example-paper/.tmp/<run-id>/outline.json`。受管任务默认 outline.json、fields.json；已有 fields.yaml／fields.yml 由 show 返回实际路径。自动发现时若同时存在多个 fields 配置就报错，不静默选择一份；手工校验可明确传 --fields，但不要为追加对象或字段另建同名配置。受管 outline 始终为 outline.json，旧手工 YAML 计划用检查脚本明确传路径，不伪造 owner。
+后续命令和编辑使用返回的 outline、fields 相对路径，例如 `agent-memory/paper/example-paper/.tmp/<run-id>/outline.json`。受管任务默认 outline.json、fields.json；已有 fields.yaml／fields.yml 由 show 返回实际路径。自动发现时若同时存在多个 fields 配置就报错，不静默选择一份；手工校验可明确传 --fields，但不要为追加对象或字段另建同名配置。受管 outline 始终为 outline.json，旧手工 YAML 计划用检查脚本明确传路径，不伪造 owner。
 
-create 创建调研目录及其 .tmp/ 任务目录，但不创建或覆盖 report.md。默认按 [目录归类规则](delivery-policy.md#类型与主题归类) 输出到 `<type>/<theme>/<target>/`；`--theme agent-memory` 指定分类主题，省略时为 general。单对象 target 优先取明确给定的对象 id；对比使用 compare-标题slug，跨类型归入 topic。`--topic` 是调研标题，`--goal` 可明确研究目的。`--output` 可覆盖默认位置，路径相对于 `--workspace`，已有报告继续沿用原位置。
+create 创建调研目录及其 .tmp/ 任务目录，但不创建或覆盖 report.md。按 [目录归类规则](delivery-policy.md#类型与主题归类) 输出到 `<theme>/<type>/<target>/`；`--theme agent-memory` 指定英文主题，省略时为 general。单对象 target 优先取明确给定的英文对象 id；`--target` 可另行指定英文目录名，对比任务按需加 compare-，跨类型归入 topic。中文正式名称通过 `--native-target-name 扣子` 明确声明例外，内部仍可使用 `--item coze:product=扣子`。`--topic` 是中文或英文调研标题，不能因此把一般中文描述用作目录；无英文对象 id 时传 --target。`--output` 相对于 `--workspace`，新建位置必须匹配主题优先结构，已有报告可原地复用。
 
 默认只有一个对象，名称取调研标题；可重复 `--item id[:type]=名称` 明确对象，两个以上自动使用 comparison。混合比较例如 `--type topic --theme agent-memory --item paper:paper=论文 --item sdk:open-source=集成包`。create／show 返回 classification，便于核对分类，不代表证据已更新。
 
 字段可重复 `--field id=问题`，默认 overview 仅是规划起点。执行前根据所选类型模板调整 fields.json，必要时增加 applies_to、item_ids 和 core。指定版本、时间范围和来源种子也在 outline.json 中完善。详细结构见 [配置约定](research-config.md)。
+
+已关联主题计划时，选取本次授权任务，将问题落实到 goal／fields，在主题表回填实际 run_id，并按 [本次范围快照与对照](theme-planning.md#本次执行范围快照与回写前对照) 在本 run 的 scope/ 保存目标、版本／时间、相关问题及验收原文。复用主题标识传入 --theme，不用 --topic 代替整个主题计划；恢复执行、成稿和回写前与当前计划对照，清理前把结论、报告及缺口记入长期计划。scope/ 由代理填写，报告工具不会自动读取或核对主题 Markdown。
+
+范围快照同时记录本次依赖 ID、hard／soft、所需成果及接受条件，notes.md／证据记录补记实际采用的前置版本与主张；按 [依赖规则](theme-planning.md#依赖的满足失效与复核) 核对并回写。依赖判定和主题任务状态由代理维护，不等同于 progress.json 的字段状态，也不由任务 verify 自动判断。
 
 用户指定文章用重复的 `--reference URL` 登记；已有任务可用 add-article。fetch-articles、import-article、review-article 和 archive-article 负责获取、核对和归档；fetch-articles 可按 --id 筛选，download-article-images 独立补图，不重抓正文。完整命令及状态规则见 [文章获取流程](article-acquisition.md)。light／full 都会检查必获取项，不能把退出码 0 或 HTTP 成功当作正文已核对、调研已完成。
 

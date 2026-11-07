@@ -1,0 +1,19 @@
+{
+  "format": 1,
+  "graphify": {
+    "package": "graphifyy",
+    "version": "0.9.103",
+    "requirements": "references/graphify.lock"
+  },
+  "understand": {
+    "repository": "https://github.com/Egonex-AI/Understand-Anything",
+    "commit": "4e6d3299017a7432da15957874992837a315c5b4",
+    "version": "2.9.8",
+    "bundle": "vendor/understand-plugin.json.gz",
+    "archiveSha256": "2b6e6747d4b3e778e50048cf1b8884b52e29aa8151bf3f62a4ae1311487f3581",
+    "contentSha256": "2699b748b7ced77bfdcb4d3c397d02657dcb1cd61d8e2541102ce3d476bb9da3",
+    "fileCount": 374,
+    "pnpmVersion": "11.25.0",
+    "installMode": "wasm-core-no-lifecycle"
+  }
+}

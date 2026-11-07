@@ -6,7 +6,7 @@ import unittest
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from research_graph import build_graph, parse_markdown, next_steps, resolve_link, update_readme, generate_artifacts, START, END
+from research_graph import build_graph, parse_markdown, next_steps, resolve_link, update_readme, generate_artifacts, work_ids, START, END
 import research_graph_delivery as delivery
 from research_graph_preview import work_labels
 from research_graph_publication import publication_manifest, ASSETS
@@ -25,12 +25,12 @@ class ResearchGraphTests(unittest.TestCase):
         target.write_text(text, encoding="utf-8")
         return target
 
-    def report(self, path="paper/agents/one/report.md", completion="partial", run="run-1", items=None):
+    def report(self, path="agents/paper/one/report.md", completion="partial", run="run-1", items=None):
         summary = {"completion": completion, "run_id": run, "items": items or []}
         return self.write(path, "# 报告一\n\n<!-- research-summary\n" + json.dumps(summary) + "\n-->\n")
 
     def plan(self, extra="", status="active"):
-        return self.write("plans/agents/plan.md", f"""---
+        return self.write("agents/plan.md", f"""---
 theme_id: agents
 title: 智能体
 status: {status}
@@ -53,7 +53,7 @@ updated_at: 2026-11-06
 
     def test_shared_report_and_independent_completion(self):
         self.report()
-        self.plan("- T001、T002：[共同报告](../../paper/agents/one/report.md)。")
+        self.plan("- T001、T002：[共同报告](paper/one/report.md)。")
         graph = self.build()
         self.assertEqual(graph["stats"], {"themes": 1, "reports": 1, "types": 1, "objects": 2})
         self.assertEqual(graph["reports"][0]["status"], "partial")
@@ -64,10 +64,10 @@ updated_at: 2026-11-06
 
     def test_does_not_scan_archives_references_or_temp(self):
         self.report()
-        self.report("paper/agents/.tmp/report.md")
-        self.report("paper/agents/references/report.md")
-        self.write("paper/agents/one/references/copied.md", "# 原始文章")
-        self.write("plans/agents/archive/plan.md", "invalid: [")
+        self.report("agents/paper/.tmp/report.md")
+        self.report("agents/paper/references/report.md")
+        self.write("agents/paper/one/references/copied.md", "# 原始文章")
+        self.write("agents/archive/plan.md", "invalid: [")
         self.plan()
         graph = self.build()
         self.assertEqual(graph["stats"]["reports"], 1)
@@ -75,36 +75,36 @@ updated_at: 2026-11-06
 
     def test_only_explicit_report_links_and_not_code_links(self):
         self.report()
-        self.report("product/agents/two/report.md", run="different")
-        self.plan("""- T001：[一](../../paper/agents/one/report.md)。
-- T002：[二](../../product/agents/two/report.md)。
+        self.report("agents/product/two/report.md", run="different")
+        self.plan("""- T001：[一](paper/one/report.md)。
+- T002：[二](product/two/report.md)。
 
 ```markdown
-T002 [不算引用](../../paper/agents/one/report.md)
+T002 [不算引用](paper/one/report.md)
 ```
 """)
         graph = self.build()
         links = {(n["id"], r) for n in graph["nodes"] if n["kind"] == "object" for r in n["reportIds"]}
-        self.assertEqual(links, {("work:agents:T001", "report:paper/agents/one/report.md"),
-                                 ("work:agents:T002", "report:product/agents/two/report.md")})
+        self.assertEqual(links, {("work:agents:T001", "report:agents/paper/one/report.md"),
+                                 ("work:agents:T002", "report:agents/product/two/report.md")})
 
     def test_table_result_links_keep_their_own_task_row(self):
         self.report()
-        self.report("paper/agents/two/report.md", run="run-2")
+        self.report("agents/paper/two/report.md", run="run-2")
         self.plan("""| 任务 | 报告 |
 | --- | --- |
-| T001 | [一](../../paper/agents/one/report.md) |
-| T002 | [二](../../paper/agents/two/report.md) |
+| T001 | [一](paper/one/report.md) |
+| T002 | [二](paper/two/report.md) |
 """)
         graph = self.build()
         produced = {(n["id"], r) for n in graph["nodes"] if n["kind"] == "object" for r in n["reportIds"]}
         self.assertEqual(len(produced), 2)
-        self.assertNotIn(("work:agents:T002", "report:paper/agents/one/report.md"), produced)
+        self.assertNotIn(("work:agents:T002", "report:agents/paper/one/report.md"), produced)
 
     def test_candidate_names_do_not_merge_distinct_research_works(self):
         items = [{"id": "x", "name": "Shared", "type": "paper"}]
         self.report(items=items)
-        self.report("paper/second/two/report.md", items=items)
+        self.report("second/paper/two/report.md", items=items)
         graph = self.build()
         self.assertEqual(graph["stats"]["objects"], 2)
         self.assertEqual(graph["stats"]["reports"], 2)
@@ -114,27 +114,27 @@ T002 [不算引用](../../paper/agents/one/report.md)
 
     def test_work_ids_are_scoped_to_their_theme(self):
         self.report(items=[{"name": "X", "type": "product"}, {"name": "X", "type": "open-source"}])
-        self.plan("T001：[实际成果](../../paper/agents/one/report.md)")
-        self.write("plans/second/plan.md", "---\ntheme_id: second\n---\n# 另一主题\n## 对象与任务\n| ID | 状态 |\n| --- | --- |\n| T001 | planned |\n")
+        self.plan("T001：[实际成果](paper/one/report.md)")
+        self.write("second/plan.md", "---\ntheme_id: second\n---\n# 另一主题\n## 对象与任务\n| ID | 状态 |\n| --- | --- |\n| T001 | planned |\n")
         graph = self.build()
         self.assertEqual(graph["stats"]["objects"], 3)
         self.assertTrue({"work:agents:T001", "work:second:T001"}.issubset({n["id"] for n in graph["nodes"]}))
 
     def test_report_to_report_links_and_encoded_paths(self):
         self.report()
-        target = self.report("paper/agents/报告 二/report.md")
-        self.write("paper/agents/one/report.md", "# 一\n\n[引用](../%E6%8A%A5%E5%91%8A%20%E4%BA%8C/report.md#结论)\n")
+        target = self.report("agents/paper/报告 二/report.md")
+        self.write("agents/paper/one/report.md", "# 一\n\n[引用](../%E6%8A%A5%E5%91%8A%20%E4%BA%8C/report.md#结论)\n")
         graph = self.build()
         self.assertEqual(graph["stats"]["objects"], 2)
         self.assertTrue(all(n["kind"] in {"theme", "object"} for n in graph["nodes"]))
-        self.assertEqual(resolve_link(self.root, self.root / "paper/agents/one/report.md", "../%E6%8A%A5%E5%91%8A%20%E4%BA%8C/report.md"), target.relative_to(self.root).as_posix())
+        self.assertEqual(resolve_link(self.root, self.root / "agents/paper/one/report.md", "../%E6%8A%A5%E5%91%8A%20%E4%BA%8C/report.md"), target.relative_to(self.root).as_posix())
 
     def test_reference_links_resolve_but_external_or_escape_links_do_not(self):
         self.report()
-        source = self.root / "plans/agents/plan.md"
+        source = self.root / "agents/plan.md"
         self.assertIsNone(resolve_link(self.root, source, "https://example.com/report.md"))
         self.assertIsNone(resolve_link(self.root, source, "../../../../outside.md"))
-        self.plan("T001 [成果][result]\n\n[result]: ../../paper/agents/one/report.md\n")
+        self.plan("T001 [成果][result]\n\n[result]: paper/one/report.md\n")
         self.assertTrue(any(n.get("taskId") == "T001" and n["reportIds"] for n in self.build()["nodes"] if n["kind"] == "object"))
 
     def test_deterministic_data_and_current_branch_urls(self):
@@ -153,12 +153,12 @@ T002 [不算引用](../../paper/agents/one/report.md)
         self.assertNotEqual(one["fingerprint"], self.build()["fingerprint"])
 
     def test_invalid_summary_fails_instead_of_silently_losing_data(self):
-        self.write("paper/agents/one/report.md", "# 报告\n<!-- research-summary\n{invalid}\n-->")
+        self.write("agents/paper/one/report.md", "# 报告\n<!-- research-summary\n{invalid}\n-->")
         with self.assertRaisesRegex(ValueError, "research-summary"):
             self.build()
 
     def test_summary_examples_in_code_are_not_metadata(self):
-        self.write("paper/agents/one/report.md", '# 报告\n\n```markdown\n<!-- research-summary\n{"completion":"complete","items":[{"name":"fake"}]}\n-->\n```\n')
+        self.write("agents/paper/one/report.md", '# 报告\n\n```markdown\n<!-- research-summary\n{"completion":"complete","items":[{"name":"fake"}]}\n-->\n```\n')
         graph = self.build()
         self.assertEqual(graph["stats"]["objects"], 1)
         self.assertFalse(any(n["label"] == "fake" for n in graph["nodes"]))
@@ -213,11 +213,11 @@ T002 [不算引用](../../paper/agents/one/report.md)
     def test_explicit_skill_exclusions_apply_to_tracked_inputs(self):
         self.report()
         self.plan()
-        self.write(".research-graph.json", json.dumps({"schema_version": 1, "exclude_paths": ["plans/agents/plan.md", "paper/agents/one/**"]}))
+        self.write(".research-graph.json", json.dumps({"schema_version": 1, "exclude_paths": ["agents/plan.md", "agents/paper/one/**"]}))
         self.assertEqual(self.build()["nodes"], [])
 
     def test_no_forced_type_layer_and_no_report_or_task_nodes(self):
-        self.plan("T001：[实际成果](../../paper/agents/one/report.md)")
+        self.plan("T001：[实际成果](paper/one/report.md)")
         self.report(items=[{"name": "Candidate", "type": "product"}])
         graph = self.build()
         self.assertEqual({n["kind"] for n in graph["nodes"]}, {"theme", "object"})
@@ -227,7 +227,7 @@ T002 [不算引用](../../paper/agents/one/report.md)
 
     def test_multiple_reports_in_same_directory_are_one_work(self):
         self.report()
-        self.report("paper/agents/one/details.md")
+        self.report("agents/paper/one/details.md")
         graph = self.build()
         self.assertEqual(graph["stats"]["objects"], 1)
         self.assertEqual(graph["stats"]["reports"], 2)
@@ -243,7 +243,7 @@ T002 [不算引用](../../paper/agents/one/report.md)
 
     def test_readme_summarizes_theme_status_plan_reports_and_next_steps(self):
         self.report(completion="partial")
-        path = self.plan("- T001、T002：[共同报告](../../paper/agents/one/report.md)。")
+        path = self.plan("- T001、T002：[共同报告](paper/one/report.md)。")
         path.write_text(path.read_text(encoding="utf-8") + """
 ## 缺口与下一步
 | 问题／任务 | 缺口或阻碍 | 影响 | 下一步／恢复条件 |
@@ -254,14 +254,14 @@ T002 [不算引用](../../paper/agents/one/report.md)
         update_readme(self.root, graph, "https://example.com/")
         content = (self.root / "README.md").read_text(encoding="utf-8")
         self.assertIn("| 主题 | 状态 | 计划 | 报告 | 下一步 |", content)
-        self.assertIn("| 智能体 | 进行中 | [调研计划](plans/agents/plan.md)", content)
-        self.assertEqual(content.count("[报告一](paper/agents/one/report.md)（部分完成）"), 1)
+        self.assertIn("| 智能体 | 进行中 | [调研计划](agents/plan.md)", content)
+        self.assertEqual(content.count("[报告一](agents/paper/one/report.md)（部分完成）"), 1)
         self.assertIn("Q001／T001：补查独立复现", content)
         self.assertEqual(graph["themeOverview"][0]["status"], "active")
 
     def test_readme_keeps_archived_theme_and_does_not_invent_next_actions(self):
         self.plan(status="archived")
-        self.write("plans/agents/archive/plan.md", "# 不应新增主题")
+        self.write("agents/archive/plan.md", "# 不应新增主题")
         graph = self.build()
         update_readme(self.root, graph, "https://example.com/")
         content = (self.root / "README.md").read_text(encoding="utf-8")
@@ -288,8 +288,8 @@ T002 [不算引用](../../paper/agents/one/report.md)
 
     def test_reference_in_next_steps_is_not_a_delivered_result(self):
         self.report()
-        path = self.plan("T001：[实际成果](../../paper/agents/one/report.md)")
-        path.write_text(path.read_text(encoding="utf-8") + "\n## 缺口与下一步\n\nT002 后续需参考[已有报告](../../paper/agents/one/report.md)，尚未产出成果。\n", encoding="utf-8")
+        path = self.plan("T001：[实际成果](paper/one/report.md)")
+        path.write_text(path.read_text(encoding="utf-8") + "\n## 缺口与下一步\n\nT002 后续需参考[已有报告](paper/one/report.md)，尚未产出成果。\n", encoding="utf-8")
         works = {n["taskId"]: n for n in self.build()["nodes"] if n.get("taskId")}
         self.assertEqual(len(works["T001"]["reportIds"]), 1)
         self.assertEqual(works["T002"]["reportIds"], [])
@@ -308,7 +308,7 @@ T002 [不算引用](../../paper/agents/one/report.md)
 ## 执行记录
 | 工作 ID | 参考报告 | 预期报告 | 前置任务 | 实际报告 |
 | --- | --- | --- | --- | --- |
-| T002 | [参考](../../paper/agents/one/report.md) | [计划](../../paper/agents/one/report.md) | T001 | [交付](../../paper/agents/one/report.md) |
+| T002 | [参考](paper/one/report.md) | [计划](paper/one/report.md) | T001 | [交付](paper/one/report.md) |
 """, encoding="utf-8")
         works = {n["taskId"]: n for n in self.build()["nodes"] if n.get("taskId")}
         self.assertEqual(works["T001"]["reportIds"], [])
@@ -316,12 +316,12 @@ T002 [不算引用](../../paper/agents/one/report.md)
 
     def test_reference_subsection_within_results_is_not_a_result(self):
         self.report()
-        self.plan("### 参考资料\n\nT002 参考[已有报告](../../paper/agents/one/report.md)")
+        self.plan("### 参考资料\n\nT002 参考[已有报告](paper/one/report.md)")
         self.assertTrue(all(not n["reportIds"] for n in self.build()["nodes"] if n.get("taskId")))
 
     def test_nested_result_sections_and_explicit_prose_field(self):
         self.report()
-        self.plan("### 第一轮\n\nT001：[成果](../../paper/agents/one/report.md)\n\n## 执行记录\n\n实际报告：T002 [成果](../../paper/agents/one/report.md)")
+        self.plan("### 第一轮\n\nT001：[成果](paper/one/report.md)\n\n## 执行记录\n\n实际报告：T002 [成果](paper/one/report.md)")
         self.assertTrue(all(len(n["reportIds"]) == 1 for n in self.build()["nodes"] if n.get("taskId")))
 
     def test_nested_next_steps_keep_source_order_and_stop_at_peer_heading(self):
@@ -469,6 +469,175 @@ T002 [不算引用](../../paper/agents/one/report.md)
             self.assertEqual(manifest["assets"][name], hashlib.sha256((site / name).read_bytes()).hexdigest())
         with self.assertRaisesRegex(ValueError, "Full Git commit"):
             publication_manifest(site, "short", "b" * 40)
+
+    def test_identity_column_aliases_exclude_dependency_and_reference_ids(self):
+        for identity in ("ID", "工作 ID", "任务编号", "调研工作ID", "任务／对象 ID", "工作 ＩＤ"):
+            for reference in ("前置任务 ID", "依赖工作ID", "参考任务ID", "后续工作 ID", "任务ID（前置）"):
+                with self.subTest(identity=identity, reference=reference):
+                    self.assertEqual(work_ids([reference, identity], ["T001", "T002"]), ["T002"])
+        self.assertEqual(work_ids(["关联工作 ID"], ["T001、T002"]), ["T001", "T002"])
+
+    def test_dependency_id_column_does_not_own_an_actual_report(self):
+        self.report()
+        self.plan("""| 前置任务 ID | 工作 ID | 参考工作 ID | 实际报告 |
+| --- | --- | --- | --- |
+| T001 | T002 | T001 | [成果](paper/one/report.md) |
+""")
+        works = {n["taskId"]: n for n in self.build()["nodes"] if n.get("taskId")}
+        self.assertEqual(works["T001"]["reportIds"], [])
+        self.assertEqual(works["T002"]["reportIds"], ["report:agents/paper/one/report.md"])
+
+    def test_work_definitions_use_identity_column_even_when_dependency_comes_first(self):
+        self.write("agents/plan.md", """---
+theme_id: agents
+---
+# 计划
+## 对象与任务
+| 前置任务 ID | 工作 ID | 类型／对象 | 本次目标 |
+| --- | --- | --- | --- |
+| 无 | T001 | paper／甲 | 阅读甲 |
+| T001 | T002 | paper／乙 | 阅读乙 |
+""")
+        graph = self.build()
+        self.assertEqual({n["taskId"] for n in graph["nodes"] if n.get("taskId")}, {"T001", "T002"})
+        self.assertEqual(graph["stats"]["objects"], 2)
+        self.assertTrue(any(e["relation"] == "depends" and e["source"] == "work:agents:T001" and e["target"] == "work:agents:T002" for e in graph["edges"]))
+
+    def test_dependency_ids_alone_do_not_create_work_definitions(self):
+        self.write("agents/plan.md", "# 计划\n\n## 对象与任务\n| 前置工作 ID | 类型／对象 |\n| --- | --- |\n| T001 | paper／甲 |\n")
+        graph = self.build()
+        self.assertEqual(graph["stats"]["objects"], 0)
+        self.assertTrue(any("工作定义行" in w for w in graph["warnings"]))
+
+    def test_nested_work_and_dependency_tables_do_not_read_peer_sections(self):
+        path = self.plan()
+        content = path.read_text(encoding="utf-8").replace("## 对象与任务\n", "## 对象与任务\n\n### 论文\n")
+        content = content.replace("| P1 | T001 |", "| P1 | 无 |")
+        content += """
+## 依赖与接受条件
+### 本轮依赖
+#### 论文核对
+| 关系 | 下游 ← 前置 |
+| --- | --- |
+| D001 | T002 ← T001 |
+## 其他记录
+### 论文
+| ID | 类型／对象 |
+| --- | --- |
+| T003 | paper／丙 |
+### 本轮依赖
+| 关系 | 下游 ← 前置 |
+| --- | --- |
+| D002 | T001 ← T002 |
+"""
+        path.write_text(content, encoding="utf-8")
+        graph = self.build()
+        self.assertEqual(graph["stats"]["objects"], 2)
+        dependencies = [(e["source"], e["target"]) for e in graph["edges"] if e["relation"] == "depends"]
+        self.assertEqual(dependencies, [("work:agents:T001", "work:agents:T002")])
+
+    def test_supplemental_report_is_pending_without_creating_or_delivering_work(self):
+        self.report()
+        self.plan("T001：[主报告](paper/one/report.md)")
+        before_ids = {n["id"] for n in self.build()["nodes"] if n["kind"] == "object"}
+        self.report("agents/paper/one/details.md")
+        graph = self.build()
+        self.assertEqual({n["id"] for n in graph["nodes"] if n["kind"] == "object"}, before_ids)
+        self.assertEqual(graph["stats"]["reports"], 2)
+        work = next(n for n in graph["nodes"] if n.get("taskId") == "T001")
+        pending_id = "report:agents/paper/one/details.md"
+        self.assertEqual(work["reportIds"], ["report:agents/paper/one/report.md"])
+        self.assertEqual(work["pendingReportIds"], [pending_id])
+        pending = next(r for r in graph["reports"] if r["id"] == pending_id)
+        self.assertEqual(pending["associationStatus"], "pending")
+        self.assertEqual(pending["workIds"], [])
+        self.assertEqual(pending["candidateWorkIds"], [work["id"]])
+        self.assertTrue(any("补充报告待关联" in w for w in graph["warnings"]))
+        update_readme(self.root, graph, "https://example.com/")
+        self.assertIn("details.md)（部分完成；工作待关联）", (self.root / "README.md").read_text(encoding="utf-8"))
+
+    def test_shared_report_directory_keeps_ambiguous_supplement_pending(self):
+        self.report()
+        self.report("agents/paper/one/details.md")
+        self.plan("T001、T002：[共同报告](paper/one/report.md)")
+        graph = self.build()
+        self.assertEqual(graph["stats"]["objects"], 2)
+        pending = next(r for r in graph["reports"] if r["path"].endswith("details.md"))
+        self.assertEqual(pending["candidateWorkIds"], ["work:agents:T001", "work:agents:T002"])
+        self.assertTrue(all(n["reportIds"] == ["report:agents/paper/one/report.md"] and n["pendingReportIds"] == [pending["id"]]
+                            for n in graph["nodes"] if n["kind"] == "object"))
+
+    def test_explicit_supplement_binding_clears_pending_state_without_new_work(self):
+        self.report()
+        self.report("agents/paper/one/details.md")
+        path = self.plan("T001：[主报告](paper/one/report.md)")
+        self.assertTrue(self.build()["warnings"])
+        path.write_text(path.read_text(encoding="utf-8") + "\nT002：[补充报告](paper/one/details.md)\n", encoding="utf-8")
+        graph = self.build()
+        self.assertEqual(graph["stats"]["objects"], 2)
+        self.assertEqual(graph["warnings"], [])
+        self.assertTrue(all(r["associationStatus"] == "explicit" for r in graph["reports"]))
+        self.assertTrue(all(not n["pendingReportIds"] for n in graph["nodes"] if n["kind"] == "object"))
+
+    def test_standalone_directory_keeps_one_stable_work_and_canonical_title(self):
+        self.report()
+        before = next(n for n in self.build()["nodes"] if n["kind"] == "object")
+        supplement = self.report("agents/paper/one/aaa-details.md", run="supplement-run")
+        supplement.write_text(supplement.read_text(encoding="utf-8").replace("# 报告一", "# 补充分析"), encoding="utf-8")
+        graph = self.build()
+        after = next(n for n in graph["nodes"] if n["kind"] == "object")
+        self.assertEqual(graph["stats"]["objects"], 1)
+        self.assertEqual(after["id"], before["id"])
+        self.assertEqual(after["label"], "报告一")
+        self.assertTrue(after["path"].endswith("/report.md"))
+        self.assertEqual(after["runId"], before["runId"])
+        self.assertEqual(len(after["reportIds"]), 2)
+        self.assertEqual(graph["warnings"], [])
+
+    def test_independent_delivery_directory_still_creates_a_work(self):
+        self.report()
+        self.plan("T001：[主报告](paper/one/report.md)")
+        self.report("agents/paper/another/report.md")
+        graph = self.build()
+        self.assertEqual(graph["stats"]["objects"], 3)
+        standalone = [n for n in graph["nodes"] if n.get("sourceKind") == "report"]
+        self.assertEqual(len(standalone), 1)
+        self.assertEqual(standalone[0]["path"], "agents/paper/another/report.md")
+
+    def test_old_type_first_report_and_plan_remain_readable_without_moving(self):
+        self.report("paper/legacy/one/report.md")
+        self.write("plans/legacy/plan.md", """---
+theme_id: legacy
+title: 既有主题
+status: active
+---
+# 既有计划
+## 对象与任务
+| ID | 类型／对象 | 本次目标 |
+| --- | --- | --- |
+| T001 | paper／甲 | 核查甲 |
+## 成果索引
+T001：[既有报告](../../paper/legacy/one/report.md)
+""")
+        before = self.published_files()
+        graph = self.build()
+        self.assertEqual(graph["stats"]["objects"], 1)
+        self.assertEqual(graph["themeOverview"][0]["planPath"], "plans/legacy/plan.md")
+        work = next(n for n in graph["nodes"] if n.get("taskId"))
+        self.assertEqual(work["reportIds"], ["report:paper/legacy/one/report.md"])
+        self.assertEqual(self.published_files(), before)
+
+    def test_theme_first_chinese_official_product_name_is_indexed(self):
+        self.report("coding-agent/product/扣子/report.md")
+        graph = self.build()
+        work = next(n for n in graph["nodes"] if n["kind"] == "object")
+        self.assertEqual((work["theme"], work["type"]), ("coding-agent", "product"))
+        self.assertEqual(work["path"], "coding-agent/product/扣子/report.md")
+
+    def test_support_directories_do_not_become_theme_roots(self):
+        self.report("docs/paper/example/report.md")
+        self.write("docs/plan.md", "---\ntheme_id: docs\n---\n# 文档计划\n")
+        self.assertEqual(self.build()["nodes"], [])
 
 
 if __name__ == "__main__":

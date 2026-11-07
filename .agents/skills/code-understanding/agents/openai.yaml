@@ -1,0 +1,4 @@
+interface:
+  display_name: "代码理解"
+  short_description: "协调源码检索、架构讲解与文档关联，帮助人和 Agent 理解项目"
+  default_prompt: "使用 $code-understanding 理解当前项目，按问题选择后端并引用关键源码。"

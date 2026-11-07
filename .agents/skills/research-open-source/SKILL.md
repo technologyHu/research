@@ -17,8 +17,11 @@ description: 对开源库、框架、中间件、算法库、应用或工具开�
 
 固定版本或提交，沿关键入口、调用链、数据结构与错误路径阅读源码。按 [项目类型裁剪](references/project-types.md) 选择分析视角。下载、构建、执行测试与源码阅读是不同证据层级，不因仓库有测试文件就声称测试已通过。
 
+源码分析由 research-deep 按 [源码理解接入](../research/references/code-understanding.md) 调用 code-understanding；本类型只规定分析维度，不另设选仓、后端或回写步骤。
+
 ## 按阶段读取
 
+- 选择／排序项目，或分析其权威性、影响力与维护／资金背景时，读取 [类型评估与背景标准](references/selection-criteria.md)，使用开源项目定义及“计划中的背景字段”，区分项目与其关联公司。
 - 规划问题和组织报告时读取 [报告模板](references/report-template.md)，根据主题与深度裁剪，保留研究目标所需内容。
 - 搜集证据与交付前读取 [检查清单](references/checklist.md)。
 - 来源、事实与推断遵循 [证据规范](../research/references/evidence-policy.md)，保存与清理遵循 [交付规范](../research/references/delivery-policy.md)。

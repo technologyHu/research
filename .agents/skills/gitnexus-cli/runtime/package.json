@@ -1,0 +1,9 @@
+{
+  "name": "research-gitnexus-runtime",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Pinned runtime for the repository-local GitNexus skills",
+  "engines": { "node": "^22.18.0 || >=24.11.0" },
+  "dependencies": { "gitnexus": "1.6.12" },
+  "overrides": { "@ladybugdb/core": "0.18.3" }
+}

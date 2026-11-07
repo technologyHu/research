@@ -17,8 +17,8 @@ revision: 1
 path_mode: project-relative
 task_layout: report-local
 workspace: ../../../../..
-work_dir: paper/method-analysis/example-paper/.tmp/paper-review-001
-output_dir: paper/method-analysis/example-paper
+work_dir: method-analysis/paper/example-paper/.tmp/paper-review-001
+output_dir: method-analysis/paper/example-paper
 topic: 示例论文的方法与实验分析
 goal: 理解方法并核实主要实验结论
 time_range: 采用论文 v1 及其同期材料
@@ -37,13 +37,14 @@ execution:
   concurrency: 1
 ```
 
-- 新配置使用 `path_mode: project-relative`。workspace 相对于配置文件所在目录；outline 位于 `<type>/<theme>/<target>/.tmp/<run-id>/` 时为 `../../../../..`；自定义报告目录层级时由工具计算，不手写固定跳转层数。work_dir、output_dir 相对于项目根。脚本内部解析路径，持久化配置和命令输出保留相对形式。
+- 新配置使用 `path_mode: project-relative`。workspace 相对于配置文件所在目录；outline 位于 `<theme>/<type>/<target>/.tmp/<run-id>/` 时为 `../../../../..`；自定义报告目录层级时由工具计算，不手写固定跳转层数。work_dir、output_dir 相对于项目根。脚本内部解析路径，持久化配置和命令输出保留相对形式。
 - 新任务使用 `task_layout: report-local`，work_dir 必须恰为 output_dir 下 `.tmp/` 的单次任务目录。output_dir 必须位于项目内，不能是项目根、临时目录或 `.git`、`.agents` 子目录。旧格式仅兼容读取，不主动迁移或覆盖旧目录。
-- `object_type` 使用路由枚举；每个 item 的 `type` 可覆盖全局类型。id 为小写字母、数字和连字符组成的稳定标识，文件名使用 id，不用中文标题充当路径。
+- `object_type` 使用路由枚举；每个 item 的 `type` 可覆盖全局类型。id 为小写英文字母、数字和连字符组成的稳定标识，结构化结果文件名使用 id。调研目录遵循主题优先与英文命名规则；仅明确声明的中文正式产品／项目名可用于 target，普通中文标题不能自动变成目录。
 - `version` 可以为 null，表示未指定；实际采用的版本仍应在结果里记录。不要把组织名当作默认研究对象。
 - `revision` 在范围变化时递增；它用于解释变更，不意味着旧结果必须全部废弃。
 - `goal`、`time_range` 为可选字符串，用于明确用户目标和时间边界；改变它们会要求重新核对已有字段。
 - 任务工具记录 classification.type／theme／target，用于目录归类与展示；创建时 --theme 指定分类主题。它不参与证据问题指纹，调整分类不代表重新核实。分类与默认目录规则见 [交付规范](delivery-policy.md#类型与主题归类)，显式 output_dir 和既有报告位置优先。
+- 持续主题的长期问题、任务与阶段保存在 [主题级计划](theme-planning.md) 中；classification.theme 用于关联同一主题，单次 topic／goal／fields 仍只描述本次研究范围。计划表不替代字段证据、完成度检查或报告来源。
 
 ## 完整流程的 fields（JSON 或等价 YAML）
 

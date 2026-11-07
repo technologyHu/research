@@ -1,0 +1,117 @@
+{
+  "gitnexusVersion": "1.6.12",
+  "coreVersion": "0.18.3",
+  "extensionVersion": "0.18.1",
+  "artifacts": [
+    {
+      "platform": "win32-x64",
+      "upstreamPlatform": "win_amd64",
+      "extension": "fts",
+      "source": "https://extension.ladybugdb.com/v0.18.1/win_amd64/fts/libfts.lbug_extension",
+      "file": "vendor/extensions/win32-x64/libfts.lbug_extension.gz",
+      "sha256": "01cf0d4debae1b0c7c182bf78747ee1b148a76667bbaa5bb0cb3cc848998028d",
+      "gzipSha256": "e35103a054875470836c8f08e146e23f958c8d3588955e338c942cdad1cc2cb4",
+      "size": 14664704,
+      "compressedSize": 4992535
+    },
+    {
+      "platform": "win32-x64",
+      "upstreamPlatform": "win_amd64",
+      "extension": "vector",
+      "source": "https://extension.ladybugdb.com/v0.18.1/win_amd64/vector/libvector.lbug_extension",
+      "file": "vendor/extensions/win32-x64/libvector.lbug_extension.gz",
+      "sha256": "cc1be3ce2eff0e5491988c4664c99bec330039d3321241d50c27fb6baaaf1134",
+      "gzipSha256": "0ab610c27f7ac7a9c4c49a34b0012bcea8222f0ef283b1d1137fa190c899f110",
+      "size": 14162432,
+      "compressedSize": 4854611
+    },
+    {
+      "platform": "linux-x64",
+      "upstreamPlatform": "linux_amd64",
+      "extension": "fts",
+      "source": "https://extension.ladybugdb.com/v0.18.1/linux_amd64/fts/libfts.lbug_extension",
+      "file": "vendor/extensions/linux-x64/libfts.lbug_extension.gz",
+      "sha256": "cf687fda0f82bfbe116e775f2f17c39faf45be6300fd1937c2b1afd21142c121",
+      "gzipSha256": "ad62e06f717e6190196776e1e3fff0de5a706b925fdaf52142c1dc618ee6d8b7",
+      "size": 2225576,
+      "compressedSize": 753177
+    },
+    {
+      "platform": "linux-x64",
+      "upstreamPlatform": "linux_amd64",
+      "extension": "vector",
+      "source": "https://extension.ladybugdb.com/v0.18.1/linux_amd64/vector/libvector.lbug_extension",
+      "file": "vendor/extensions/linux-x64/libvector.lbug_extension.gz",
+      "sha256": "af4f03f9dff6ff0e4686a583a672cdb3c212fbbb6187ebb5dc60723809721949",
+      "gzipSha256": "f0a37c2d39e129e65c9875379659c43a4932f1a8e2cffcc1cb8c794095e7aaa0",
+      "size": 1056344,
+      "compressedSize": 401776
+    },
+    {
+      "platform": "linux-arm64",
+      "upstreamPlatform": "linux_arm64",
+      "extension": "fts",
+      "source": "https://extension.ladybugdb.com/v0.18.1/linux_arm64/fts/libfts.lbug_extension",
+      "file": "vendor/extensions/linux-arm64/libfts.lbug_extension.gz",
+      "sha256": "4af2602007a4a02d5b18d0b6ecb20b1cc2f493242a915faf7df1c033136107b1",
+      "gzipSha256": "5a5aee6bce0fea7fe57ce7ae229286d39719532e90682620e3765911dfa7c2ec",
+      "size": 2264728,
+      "compressedSize": 703535
+    },
+    {
+      "platform": "linux-arm64",
+      "upstreamPlatform": "linux_arm64",
+      "extension": "vector",
+      "source": "https://extension.ladybugdb.com/v0.18.1/linux_arm64/vector/libvector.lbug_extension",
+      "file": "vendor/extensions/linux-arm64/libvector.lbug_extension.gz",
+      "sha256": "1bd65e64a722ac844a65775ecdfeca91a9250299a31ff0f4aee3c2f9312272d7",
+      "gzipSha256": "54eb8c9420e9ed88db090df30acf6153340383501436bf7c3a8a0cff7bbbd2cc",
+      "size": 1043056,
+      "compressedSize": 349906
+    },
+    {
+      "platform": "darwin-x64",
+      "upstreamPlatform": "osx_amd64",
+      "extension": "fts",
+      "source": "https://extension.ladybugdb.com/v0.18.1/osx_amd64/fts/libfts.lbug_extension",
+      "file": "vendor/extensions/darwin-x64/libfts.lbug_extension.gz",
+      "sha256": "d8589c0a91c6667e959da6a81f712f69b330d0563602933da983edeebee60fc6",
+      "gzipSha256": "c5faa71148982de7dd6023b39df89a993a0e8117e0626dd31efc74f8e2823e83",
+      "size": 1560888,
+      "compressedSize": 481893
+    },
+    {
+      "platform": "darwin-x64",
+      "upstreamPlatform": "osx_amd64",
+      "extension": "vector",
+      "source": "https://extension.ladybugdb.com/v0.18.1/osx_amd64/vector/libvector.lbug_extension",
+      "file": "vendor/extensions/darwin-x64/libvector.lbug_extension.gz",
+      "sha256": "e8e3ce375cb7f0fa632f234bfdbc81f801ab57d7f7fe481a638e5f734e97b651",
+      "gzipSha256": "746ba35ce46d96e041aea9c37283522eba80fa701ffd0f84a98984cffbb2bf59",
+      "size": 713344,
+      "compressedSize": 225806
+    },
+    {
+      "platform": "darwin-arm64",
+      "upstreamPlatform": "osx_arm64",
+      "extension": "fts",
+      "source": "https://extension.ladybugdb.com/v0.18.1/osx_arm64/fts/libfts.lbug_extension",
+      "file": "vendor/extensions/darwin-arm64/libfts.lbug_extension.gz",
+      "sha256": "d3564c05ec28a0293a5488eaff2c06591624ac01a44af183d8cfacd92a29d785",
+      "gzipSha256": "70c97e19af84899e2ebd65f20f70b92c28583b1221f14a68df97a3183e8bd498",
+      "size": 1562680,
+      "compressedSize": 472217
+    },
+    {
+      "platform": "darwin-arm64",
+      "upstreamPlatform": "osx_arm64",
+      "extension": "vector",
+      "source": "https://extension.ladybugdb.com/v0.18.1/osx_arm64/vector/libvector.lbug_extension",
+      "file": "vendor/extensions/darwin-arm64/libvector.lbug_extension.gz",
+      "sha256": "aa5d014997dc9af0831bef5036920a4d63761089211c3cfe26dbfa4f4630dff9",
+      "gzipSha256": "0b01b28768dd43b788e0c95590d5d72d39221231488558f5d98804b08b571792",
+      "size": 696680,
+      "compressedSize": 222070
+    }
+  ]
+}

@@ -20,14 +20,18 @@ SOURCE = {"id": "s1", "title": "原始资料", "url": "https://example.org/origi
 
 class TaskWorkflow(unittest.TestCase):
     def setUp(self):
-        self.temp = tempfile.TemporaryDirectory(prefix="research-lifecycle-test-")
+        # Keep fixture roots short enough for nested article/image paths on Windows.
+        self.temp = tempfile.TemporaryDirectory(prefix="rs-")
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
         self.workspace = self.root / "project"
         self.workspace.mkdir()
-        self.store = self.workspace / "paper/general/示例调研/.tmp"
+        self.store = self.workspace / "general/paper/example-research/.tmp"
 
     def create(self, **kwargs):
+        if not kwargs.get("output") and not kwargs.get("target") and not kwargs.get("native_target_name"):
+            if not kwargs.get("items") or len(kwargs["items"]) > 1:
+                kwargs["target"] = "example-research"
         return task.create_task(self.workspace, "示例调研", "paper", **kwargs)
 
     def populate(self, job, partial=False):
@@ -68,7 +72,7 @@ class TaskWorkflow(unittest.TestCase):
         self.assertTrue(Path(job["fields"]).is_file())
         self.assertTrue(Path(job["output_dir"]).is_dir())
         self.assertFalse((Path(job["output_dir"]) / "report.md").exists())
-        self.assertEqual([entry.name for entry in self.workspace.iterdir()], ["paper"])
+        self.assertEqual([entry.name for entry in self.workspace.iterdir()], ["general"])
 
     def test_auto_brief_uses_light_without_fields_or_results(self):
         job = self.create(depth="brief")

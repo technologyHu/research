@@ -1,0 +1,4 @@
+interface:
+  display_name: "Fireworks Tech Graph"
+  short_description: "Generate geometry-safe technical diagrams"
+  default_prompt: "Use $fireworks-tech-graph only after confirming that the current model can actually view and understand images. Otherwise reuse existing images unchanged; do not render, convert, animate, or delegate image creation. When capable, create and check the requested diagram and outputs."

@@ -1,0 +1,3 @@
+interface:
+  display_name: "调研报告提交"
+  short_description: "按报告组织独立 Git 提交，并尽量合并同篇报告的本地修订"

@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "request": {
+    "object": "REPLACE: research object",
+    "version": "REPLACE: paper or release version",
+    "questions": [{ "id": "implementation", "roles": ["core"] }],
+    "specified_ids": []
+  },
+  "search": {
+    "checked_at": "2026-11-06",
+    "official_entry_checked": false,
+    "code_hosts_checked": false,
+    "complete": false,
+    "queries": []
+  },
+  "candidates": [
+    {
+      "id": "candidate-1",
+      "url": "https://example.org/repository",
+      "access": "unverified",
+      "authority": {
+        "kind": "unverified",
+        "evidence": [{
+          "kind": "paper",
+          "url": "https://example.org/paper",
+          "locator": "REPLACE: code availability section",
+          "note": "REPLACE: evidence linking authors and repository",
+          "verified": false
+        }]
+      },
+      "relevance": {
+        "status": "unverified",
+        "evidence": [{
+          "kind": "paper",
+          "url": "https://example.org/paper",
+          "locator": "REPLACE: method and implementation scope",
+          "note": "REPLACE: relation to the current research question",
+          "verified": false
+        }]
+      },
+      "version": {
+        "requested": "REPLACE: paper or release version",
+        "status": "unverified",
+        "evidence": [{
+          "kind": "tag_mapping",
+          "url": "https://example.org/repository/releases",
+          "locator": "REPLACE: paper-to-code or release-to-tag mapping",
+          "note": "REPLACE: actual ref and full commit after verification",
+          "verified": false
+        }]
+      },
+      "components": [{
+        "role": "core",
+        "paths": ["src/REPLACE.py"],
+        "question_ids": ["implementation"],
+        "evidence": [{
+          "kind": "source_code",
+          "url": "https://example.org/repository/source",
+          "locator": "REPLACE: fixed-commit file and symbol",
+          "note": "REPLACE: actual implementation coverage and limitations",
+          "verified": false
+        }]
+      }],
+      "runtime": { "status": "not_run" }
+    }
+  ]
+}

@@ -18,7 +18,7 @@ class ClassificationAndCleanup(unittest.TestCase):
 
     def test_single_object_is_grouped_by_actual_type_theme_and_id(self):
         job = task.create_task(self.workspace, "示例项目架构", "topic", items=["library:open-source=示例库"], theme="Agent Memory")
-        self.assertEqual(Path(job["output_dir"]).relative_to(self.workspace).as_posix(), "open-source/agent-memory/library")
+        self.assertEqual(Path(job["output_dir"]).relative_to(self.workspace).as_posix(), "agent-memory/open-source/library")
         self.assertEqual(job["classification"], {"type": "open-source", "theme": "agent-memory", "target": "library"})
         self.assertFalse((Path(job["output_dir"]) / "report.md").exists())
 
@@ -29,9 +29,12 @@ class ClassificationAndCleanup(unittest.TestCase):
         self.assertEqual(mixed["classification"]["type"], "topic")
         for job in (same, mixed):
             self.assertTrue(job["classification"]["target"].startswith("compare-"))
-            self.assertEqual(Path(job["output_dir"]).parent.name, "agent-memory")
+            self.assertEqual(Path(job["output_dir"]).parent.parent.name, "agent-memory")
 
     def test_existing_output_and_classification_survive_derivation(self):
+        legacy = self.workspace / "reports/legacy-location"
+        legacy.mkdir(parents=True)
+        (legacy / "report.md").write_text("# Existing report\n", encoding="utf-8")
         job = self.create(items=["example=示例论文"], theme="agent-memory", output="reports/legacy-location")
         path, outline, report = self.write_report(job)
         before = report.read_bytes()
@@ -80,7 +83,7 @@ class ClassificationAndCleanup(unittest.TestCase):
         run = subprocess.run(command, cwd=self.workspace, text=True, encoding="utf-8", capture_output=True)
         self.assertEqual(run.returncode, 0, run.stdout + run.stderr)
         created = json.loads(run.stdout)
-        self.assertEqual(created["output_dir"], "paper/agent-memory/paper-a")
+        self.assertEqual(created["output_dir"], "agent-memory/paper/paper-a")
         path, _, _ = self.write_report(task.describe_task(self.workspace / created["work_dir"]))
         task.verify_task(path)
         preview = subprocess.run(command[:5] + ["cleanup-plan", "--work-dir", created["work_dir"]], cwd=self.workspace, text=True, encoding="utf-8", capture_output=True)
@@ -89,6 +92,46 @@ class ClassificationAndCleanup(unittest.TestCase):
         self.assertTrue(plan["requires_confirmation"])
         self.assertEqual(plan["work_dir"], created["work_dir"])
         self.assertEqual(plan["preserve_output_dir"], created["output_dir"])
+
+    def test_chinese_research_title_requires_an_english_directory_target(self):
+        with self.assertRaisesRegex(ValueError, "English slug"):
+            task.create_task(self.workspace, "记忆机制调研", "paper", theme="agent-memory")
+        self.assertEqual(list(self.workspace.iterdir()), [])
+        job = task.create_task(self.workspace, "记忆机制调研", "paper", theme="agent-memory", target="memory-method")
+        self.assertEqual(Path(job["output_dir"]).relative_to(self.workspace).as_posix(), "agent-memory/paper/memory-method")
+        _, _, outline = task.open_task(job["work_dir"])
+        self.assertEqual(outline["topic"], "记忆机制调研")
+
+    def test_chinese_official_product_name_is_an_explicit_exception(self):
+        job = task.create_task(self.workspace, "中文产品能力调研", "product", theme="coding-agent",
+                               items=["coze:product=扣子"], native_target_name="扣子")
+        self.assertEqual(Path(job["output_dir"]).relative_to(self.workspace).as_posix(), "coding-agent/product/扣子")
+        _, _, outline = task.open_task(job["work_dir"])
+        self.assertEqual(outline["items"][0]["id"], "coze")
+        self.assertEqual(outline["directory_naming"]["native_target_name"], "扣子")
+        with self.assertRaises(ValueError):
+            task.create_task(self.workspace, "中文标题", "product", theme="coding-agent", target="普通研究标题")
+
+    def test_new_custom_output_must_use_theme_type_target(self):
+        for destination in ("paper/agent-memory/project", "reports/custom", "agent-memory/paper/普通研究标题", "agent-memory/product/project"):
+            with self.subTest(destination=destination), self.assertRaises(ValueError):
+                task.create_task(self.workspace, "研究", "paper", output=destination)
+        job = task.create_task(self.workspace, "研究", "paper", output="agent-memory/paper/project")
+        self.assertEqual(job["classification"], {"type": "paper", "theme": "agent-memory", "target": "project"})
+
+    def test_english_comparison_name_is_independent_of_chinese_report_title(self):
+        job = task.create_task(self.workspace, "多个记忆方法比较", "paper", theme="agent-memory",
+                               items=["a=方法甲", "b=方法乙"], target="memory-methods")
+        self.assertEqual(Path(job["output_dir"]).relative_to(self.workspace).as_posix(), "agent-memory/paper/compare-memory-methods")
+
+    def test_existing_chinese_named_report_can_be_reused_in_place(self):
+        destination = self.workspace / "existing-theme/product/中文产品"
+        destination.mkdir(parents=True)
+        report = destination / "report.md"
+        report.write_text("# 既有产品报告\n", encoding="utf-8")
+        job = task.create_task(self.workspace, "补查产品", "product", output=destination)
+        self.assertEqual(Path(job["output_dir"]), destination)
+        self.assertEqual(report.read_text(encoding="utf-8"), "# 既有产品报告\n")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,3 @@
+interface:
+  display_name: "静态绘图入口"
+  short_description: "按图类型选择工程绘图或信息设计技能，统一交付静态 SVG 与 PNG"

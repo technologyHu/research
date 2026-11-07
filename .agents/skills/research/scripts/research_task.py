@@ -117,7 +117,26 @@ def parse_fields(values, goal):
     return {"schema_version": 2, "fields": fields}
 
 
-def create_task(workspace, topic, kind, depth="standard", workflow="auto", items=None, fields=None, output=None, goal=None, extras=None, report="report.md", theme=None, references=None):
+def english_directory(value, label):
+    if not isinstance(value, str):
+        raise ValueError(f"{label} must be an English directory name")
+    value = re.sub(r"[\s_]+", "-", value.strip().lower())
+    if not validate_results.ID.fullmatch(value) or len(value) > 64:
+        raise ValueError(f"{label} must use an English slug (lowercase letters, digits and hyphens); provide --theme/--target rather than a Chinese research title")
+    if value in {"con", "prn", "aux", "nul", "docs", "scripts", "tests", "plans", "reports", "assets", "references", "archive"} or re.fullmatch(r"(?:com|lpt)[1-9]", value):
+        raise ValueError(f"Reserved directory name for {label}: {value}")
+    return value
+
+
+def native_directory(value):
+    # The caller explicitly declares an official Chinese product/project name;
+    # ordinary translated topic titles must still use an English directory.
+    if not isinstance(value, str) or not re.search(r"[\u3400-\u9fff]", value) or not re.fullmatch(r"[A-Za-z0-9\u3400-\u9fff]+(?:-[A-Za-z0-9\u3400-\u9fff]+)*", value) or len(value) > 64:
+        raise ValueError("--native-target-name must be a Chinese official name without path separators or punctuation")
+    return value
+
+
+def create_task(workspace, topic, kind, depth="standard", workflow="auto", items=None, fields=None, output=None, goal=None, extras=None, report="report.md", theme=None, references=None, target=None, native_target_name=None):
     workspace = Path(workspace).resolve()
     if not workspace.is_dir() or not topic.strip() or kind not in validate_results.TYPES or depth not in {"brief", "standard", "detailed"}:
         raise ValueError("An existing workspace, topic, type and valid depth are required")
@@ -128,16 +147,50 @@ def create_task(workspace, topic, kind, depth="standard", workflow="auto", items
         workflow = "light" if depth == "brief" and len(parsed) == 1 else "full"
     if workflow not in {"light", "full"} or (workflow == "light" and (depth != "brief" or len(parsed) != 1)):
         raise ValueError("Light workflow is limited to one brief object")
-    slug = re.sub(r"[^\w-]+", "-", topic.lower()).strip("-_")[:64] or "research"
-    if theme is not None and (not isinstance(theme, str) or not theme.strip() or any(char in theme for char in "/\\") or theme.strip() in {".", ".."}):
-        raise ValueError("theme must be a classification label, not a path")
-    theme_slug = re.sub(r"[^\w-]+", "-", (theme or "general").lower()).strip("-_")[:64]
-    if not theme_slug:
-        raise ValueError("theme needs a nonempty directory label")
     kinds = {item["type"] for item in parsed}
     category = next(iter(kinds)) if len(kinds) == 1 else "topic"
-    target = (parsed[0]["id"] if items else slug) if len(parsed) == 1 else "compare-" + slug
-    output = (workspace / output).resolve() if output else workspace / category / theme_slug / target
+    if theme is not None:
+        theme = english_directory(theme, "theme")
+    if target is not None:
+        target = english_directory(target, "target")
+    if native_target_name is not None:
+        native_target_name = native_directory(native_target_name)
+    if target is not None and native_target_name is not None:
+        raise ValueError("Use --target or --native-target-name, not both")
+    output = (workspace / output).resolve() if output else None
+    if output:
+        try:
+            output_parts = output.relative_to(workspace).parts
+        except ValueError as error:
+            raise ValueError("output_dir must remain inside the project") from error
+    else:
+        output_parts = ()
+    existing_report = bool(output and (output / report).is_file())
+    standard_output = len(output_parts) == 3 and output_parts[1] in validate_results.TYPES
+    if output and not standard_output and not existing_report:
+        raise ValueError("New output directories must be <theme>/<type>/<target>; existing reports may be reused in place")
+    theme_value = theme or (output_parts[0] if standard_output else "general")
+    theme_slug = theme_value if existing_report and theme is None else english_directory(theme_value, "theme")
+    if existing_report:
+        declared = native_directory(native_target_name) if native_target_name else english_directory(target, "target") if target else None
+        if declared and declared != output.name:
+            raise ValueError("Existing report directory must be reused without renaming")
+        target = output.name
+        directory_layout = "existing"
+    else:
+        if standard_output and (output_parts[0] != theme_slug or output_parts[1] != category):
+            raise ValueError("--output must match the theme and actual object type")
+        chosen = native_target_name or target or (output_parts[2] if standard_output else None)
+        chosen = chosen or (parsed[0]["id"] if items and len(parsed) == 1 else topic)
+        target = native_directory(chosen) if native_target_name else english_directory(chosen, "target")
+        if len(parsed) > 1 and not target.startswith("compare-"):
+            target = "compare-" + target
+        if len(target) > 64:
+            raise ValueError("target including compare- must not exceed 64 characters")
+        if standard_output and output_parts[2] != target:
+            raise ValueError("--output target does not match the normalized directory name")
+        output = output or workspace / theme_slug / category / target
+        directory_layout = "theme-first"
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dt%H%M%Sz").lower() + "-" + uuid.uuid4().hex[:8]
     path = store_root(output) / run_id
     no_links(path, workspace)
@@ -152,7 +205,10 @@ def create_task(workspace, topic, kind, depth="standard", workflow="auto", items
         "mode": "single" if len(parsed) == 1 else "comparison", "depth": depth,
         "workflow": workflow, "items": parsed, "delivery": delivery,
         "classification": {"type": category, "theme": theme_slug, "target": target},
+        "directory_layout": directory_layout,
     }
+    if native_target_name:
+        outline["directory_naming"] = {"native_target_name": native_target_name, "exception": "official Chinese name"}
     delivery_config(outline)
     if references:
         outline["reference_articles"] = articles.requirements({"reference_articles": references})
@@ -399,6 +455,8 @@ def main():
     create.add_argument("--field", action="append", dest="fields")
     create.add_argument("--goal")
     create.add_argument("--theme", help="Classification theme such as agent-memory; defaults to general")
+    create.add_argument("--target", help="English directory slug; for comparisons the compare- prefix is added when needed")
+    create.add_argument("--native-target-name", help="Official Chinese product/project name, retained as an explicit directory naming exception")
     create.add_argument("--reference", action="append", dest="references", help="User-specified article URL; acquisition and body review are mandatory")
     create.add_argument("--output", type=Path)
     create.add_argument("--report", default="report.md")
@@ -463,7 +521,7 @@ def main():
                 if not sep:
                     raise ValueError("--extra uses path=reason")
                 extras.append({"path": path, "reason": reason})
-            result = create_task(args.workspace, args.topic, args.kind, args.depth, args.workflow, args.items, args.fields, args.output, args.goal, extras, args.report, args.theme, args.references)
+            result = create_task(args.workspace, args.topic, args.kind, args.depth, args.workflow, args.items, args.fields, args.output, args.goal, extras, args.report, args.theme, args.references, args.target, args.native_target_name)
         elif args.command == "list":
             result = list_tasks(args.workspace, args.topic)
         elif args.command == "show":

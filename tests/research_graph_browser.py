@@ -59,6 +59,12 @@ def exercise(page, url, expected):
     page.locator(f'button[data-node-id={json.dumps(work["id"], ensure_ascii=False)}]').click()
     require(page.locator("#detail h2").inner_text() == work["label"], "selecting work shows details")
     require(page.locator("#detail .open-link").get_attribute("href") == work["url"], "detail opens correct branch source")
+    if work.get("pendingReportIds"):
+        require("尚未作为本项工作的交付成果" in page.locator("#detail").inner_text(), "supplemental reports must be labeled pending")
+        for report_id in work["pendingReportIds"]:
+            report = next(r for r in expected["reports"] if r["id"] == report_id)
+            pending_link = page.get_by_role("link", name="待关联：" + report["label"] + " ↗", exact=True)
+            require(pending_link.get_attribute("href") == report["url"], "pending links still open the correct report")
     if page.locator("#detail .detail-links li").count():
         page.locator("#detail .detail-links button").first.click()
         require(page.locator("#detail h2").inner_text() != work["label"], "relationship click navigates to neighbor")
@@ -127,10 +133,16 @@ def main():
             # this browser. It never enters graph.json, README or published data.
             with tempfile.TemporaryDirectory(dir=OUTPUT) as fixture_dir:
                 fixture_root = Path(fixture_dir)
-                plan_path = fixture_root / "plans" / "evaluation" / "plan.md"
+                plan_path = fixture_root / "evaluation" / "plan.md"
                 plan_path.parent.mkdir(parents=True)
                 plan_path.write_text('---\ntheme_id: evaluation\ntitle: 评估方法\n---\n# 评估方法\n## 对象与任务\n| ID | 类型／对象 | 本次目标 | 前置任务 | 状态 |\n| --- | --- | --- | --- | --- |\n| T001 | product／工具甲 | 分析工具甲 | 无 | planned |\n| T002 | paper／方法乙 | 分析方法乙 | T001 | planned |\n', encoding="utf-8")
-                fixture = build_graph(fixture_root, expected["repository"], expected["branch"], input_paths={"plans/evaluation/plan.md"})
+                plan_path.write_text(plan_path.read_text(encoding="utf-8") + '\n## 成果索引\n\nT001：[主报告](product/tool/report.md)\n', encoding="utf-8")
+                report_root = fixture_root / "evaluation/product/tool"
+                report_root.mkdir(parents=True)
+                (report_root / "report.md").write_text('# 主报告\n\n<!-- research-summary\n{"completion":"complete"}\n-->\n', encoding="utf-8")
+                (report_root / "details.md").write_text('# 补充报告\n\n<!-- research-summary\n{"completion":"partial"}\n-->\n', encoding="utf-8")
+                input_paths = {p.relative_to(fixture_root).as_posix() for p in fixture_root.rglob("*.md")}
+                fixture = build_graph(fixture_root, expected["repository"], expected["branch"], input_paths=input_paths)
                 page.route("**/graph-data.js", lambda route: route.fulfill(content_type="application/javascript", body="window.RESEARCH_GRAPH = " + json.dumps(fixture)))
                 exercise(page, f"http://127.0.0.1:{server.server_port}/", fixture)
             browser.close()

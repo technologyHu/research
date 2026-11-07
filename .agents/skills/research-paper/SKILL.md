@@ -19,6 +19,7 @@ description: 深入调研一篇或多篇论文，分析研究问题、方法、�
 
 ## 按阶段读取
 
+- 选择／排序论文，或分析其权威性、影响力与机构／资助背景时，读取 [类型评估与背景标准](references/selection-criteria.md)，使用论文定义及“计划中的背景字段”；不以期刊／机构名称单独赋级。
 - 规划问题和组织报告时读取 [报告模板](references/report-template.md)，根据主题与深度裁剪，保留研究目标所需内容。
 - 搜集证据与交付前读取 [检查清单](references/checklist.md)。
 - 来源、事实与推断遵循 [证据规范](../research/references/evidence-policy.md)，保存与清理遵循 [交付规范](../research/references/delivery-policy.md)。

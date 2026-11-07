@@ -4,6 +4,12 @@ on:
   push:
     branches: [openjiuwen-harness]
     paths:
+      - '*/plan.md'
+      - '*/paper/**'
+      - '*/open-source/**'
+      - '*/product/**'
+      - '*/benchmark/**'
+      - '*/topic/**'
       - 'plans/**'
       - 'paper/**'
       - 'open-source/**'
