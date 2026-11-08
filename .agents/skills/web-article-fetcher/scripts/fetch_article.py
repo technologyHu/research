@@ -6,15 +6,56 @@ from __future__ import annotations
 import argparse
 from datetime import datetime, timezone
 import hashlib
+from html import escape
 import json
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 import re
 import sys
-from urllib.parse import urljoin, urlsplit, urlunsplit
+from urllib.parse import parse_qs, urljoin, urlsplit, urlunsplit
 import xml.etree.ElementTree as ET
 
 HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; ArticleReader/1.0)", "Accept": "text/html,application/xhtml+xml", "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8"}
 IMAGE_PATTERN = r"!\[([^\]\n]*)\]\(\s*(?:<([^>]+)>|([^\s)]+))\s*\)"
+
+
+class ManualVerificationRequired(ValueError):
+    """A browser must be handed to the user before any article is written."""
+
+    def __init__(self, url, reason):
+        super().__init__(reason)
+        self.url = url
+
+
+def is_wechat_url(url):
+    return urlsplit(url).hostname == "mp.weixin.qq.com"
+
+
+def is_wechat_verification_url(url):
+    return is_wechat_url(url) and urlsplit(url).path.rstrip("/") == "/mp/wappoc_appmsgcaptcha"
+
+
+def check_wechat_verification(soup, final_url, source_url=None, article_title=None):
+    if is_wechat_verification_url(final_url):
+        raise ManualVerificationRequired(final_url, "微信返回了访问验证页面，需要用户手动完成验证。")
+    if not (is_wechat_url(final_url) or (source_url and is_wechat_url(source_url))):
+        return
+    body = soup.find(id="js_content")
+    heading = soup.find(id="activity-name") or soup.find("h1") or soup.find("title")
+    title = article_title if article_title is not None else heading.get_text(strip=True) if heading else ""
+    control = soup.find(id="js_verify") or soup.find("iframe", src=re.compile(r"(?:captcha\.gtimg\.com|t\.captcha\.qq\.com)"))
+    if control is not None and control.find_parent(id="js_content") is None:
+        raise ManualVerificationRequired(final_url, "微信显示了访问验证控件，请在同一页面手动完成验证。")
+    # Real articles may discuss CAPTCHA failures. Only use page-level text and
+    # controls as verification evidence when a readable article is absent.
+    if (body and len(body.get_text(strip=True)) >= 40 and title.strip()
+            and title.strip() not in {"环境异常", "访问验证", "安全验证", "验证码", "微信公众平台", "untitled"}):
+        return
+    text = soup.get_text(" ", strip=True)
+    challenge = (soup.find(id="js_verify") is not None
+                 or soup.find("iframe", src=re.compile(r"(?:captcha\.gtimg\.com|t\.captcha\.qq\.com)")) is not None
+                 or re.search(r"环境异常|完成验证后.{0,12}(?:继续访问|访问)|请.{0,8}(?:安全验证|完成验证)|拖动.{0,12}滑块", text))
+    if challenge:
+        raise ManualVerificationRequired(final_url, "微信要求访问验证，请在同一浏览器页面手动完成验证。")
 
 
 def article_id(url):
@@ -32,15 +73,46 @@ def clean_filename(name):
     return value or "article"
 
 
-def article_folder(output_dir, title, url):
-    """Use a readable title, reusing only folders belonging to this URL."""
+def archive_base(title, url, directory_name=None):
+    if directory_name is not None:
+        if (not isinstance(directory_name, str) or not directory_name.strip(" .")
+                or "/" in directory_name or "\\" in directory_name):
+            raise ValueError("directory_name must be one nonempty folder name; use output_dir for the parent path")
+        return clean_filename(directory_name)
+    return clean_filename(title) if title.strip() and title.strip() != "untitled" else article_id(url)
+
+
+def split_directory_name(directory_name):
+    """Keep relative version paths used by legacy managed-task Python callers."""
+    if not isinstance(directory_name, str) or "/" not in directory_name:
+        return "", directory_name
+    relative = PurePosixPath(directory_name)
+    if (relative.is_absolute() or str(relative) != directory_name
+            or any(part in {".", ".."} or clean_filename(part) != part for part in relative.parts)):
+        raise ValueError("directory_name must be a safe relative version path")
+    return relative.parent.as_posix(), relative.name
+
+
+def matches_archive_name(name, base, key):
+    conflict = base + "--" + key.removeprefix("article-")
+    if name in {base, conflict}:
+        return True
+    prefix = conflict + "-"
+    number = name[len(prefix):] if name.startswith(prefix) else ""
+    return bool(number and number.isascii() and number.isdigit()
+                and int(number) >= 2 and str(int(number)) == number)
+
+
+def article_folder(output_dir, title, url, directory_name=None):
+    """Resolve title/custom names without overwriting another source or duplicating a retained archive."""
     key = article_id(url)
-    base = clean_filename(title) if title.strip() and title.strip() != "untitled" else key
-    candidate, index = base, 0
-    while True:
+    base = archive_base(title, url, directory_name)
+    parent = Path(output_dir)
+    # Reuse existing conflict-suffixed archives even after the original competing directory is removed.
+    siblings = sorted(p.name for p in parent.iterdir()
+                      if p.name != base and matches_archive_name(p.name, base, key)) if parent.is_dir() else []
+    for candidate in [base, *siblings]:
         target = safe_target(Path(output_dir), candidate)
-        if not target.exists():
-            return candidate
         article = safe_target(target, "article.md") if target.is_dir() else None
         if article and article.is_file():
             try:
@@ -50,10 +122,13 @@ def article_folder(output_dir, title, url):
                     return candidate
             except (OSError, UnicodeError, ValueError):
                 pass
+    candidate, index = base, 0
+    while safe_target(parent, candidate).exists():
         index += 1
         candidate = base + "--" + key.removeprefix("article-")
         if index > 1:
             candidate += "-" + str(index)
+    return candidate
 
 
 def safe_target(root, relative):
@@ -82,6 +157,13 @@ def session(proxy="env"):
 def fetch_html(url, proxy="env", browser=False):
     with session(proxy) as client:
         response = client.get(url, headers=HEADERS, timeout=30)
+        try:
+            html = response.content.decode("utf-8-sig")
+        except UnicodeDecodeError:
+            html = response.text
+        if is_wechat_url(url) or is_wechat_url(response.url):
+            from bs4 import BeautifulSoup
+            check_wechat_verification(BeautifulSoup(html, "html.parser"), response.url, url)
         if response.status_code == 403 and browser:
             from playwright.sync_api import sync_playwright
             with sync_playwright() as engine:
@@ -96,10 +178,6 @@ def fetch_html(url, proxy="env", browser=False):
         content_type = response.headers.get("Content-Type", "").lower()
         if content_type and not any(kind in content_type for kind in ("text/html", "application/xhtml")):
             raise ValueError("Expected HTML; route PDF or other documents through their reader")
-        try:
-            html = response.content.decode("utf-8-sig")
-        except UnicodeDecodeError:
-            html = response.text
         return html, response.url, "http"
 
 
@@ -289,13 +367,15 @@ def validate_archive(article_dir):
     try:
         key = article_id(metadata["url"])
         article_id(metadata["final_url"])
+        if is_wechat_verification_url(metadata["final_url"]):
+            fail("metadata_consistency", "A WeChat verification page is not an article archive")
         title = metadata["title"]
         if not isinstance(title, str):
             raise ValueError("title must be a string")
-        explicit = metadata.get("directory_name")
-        expected = Path(explicit).name if explicit else article_folder(root.parent, title, metadata["url"])
-        if root.name != expected:
-            fail("directory_name", "Expected directory name: " + expected)
+        _, explicit = split_directory_name(metadata.get("directory_name"))
+        base = archive_base(title, metadata["url"], explicit)
+        if not matches_archive_name(root.name, base, key):
+            fail("directory_name", "Expected title/custom name or source-specific conflict suffix: " + base)
         if metadata.get("id") != key:
             fail("metadata_consistency", "Article ID does not match source URL")
         if not markdown.startswith("# " + title + "\n"):
@@ -414,8 +494,20 @@ def parse_html(html, final_url):
     except ImportError as exc:
         raise RuntimeError("Missing beautifulsoup4 or markdownify; use a suitable temporary environment") from exc
     soup = BeautifulSoup(html, "html.parser")
+    check_wechat_verification(soup, final_url)
+    if is_wechat_url(final_url):
+        wechat_body = soup.find(id="js_content")
+        if wechat_body is None or len(wechat_body.get_text(strip=True)) < 40:
+            raise ValueError("WeChat article body #js_content is missing or too short; do not save page controls as an article")
     title = extract_title(soup)
-    content, raw = extract_content(soup)
+    if is_wechat_url(final_url):
+        if not title or title == "untitled":
+            raise ValueError("WeChat article title is missing; do not archive an incomplete page")
+        convert_lazy_images(soup)
+        content = soup.find(id="js_content")
+        raw = _is_raw_markdown(content.get_text())
+    else:
+        content, raw = extract_content(soup)
     fallback = content is soup.body or content is soup
     if fallback and re.search(r"captcha|just a moment|security check|访问验证|安全验证|人机验证|登录后.*阅读", title + " " + content.get_text(" "), re.I):
         raise ValueError("Login or verification page; article body was not obtained")
@@ -459,20 +551,94 @@ def parse_html(html, final_url):
             "published_at": published.get("content") if published else None, "author": author.get("content") if author else None}
 
 
-def fetch_to_directory(url, output_dir, image_policy="remote", selected_images=(), proxy="env", browser=False, directory_name=None):
+def same_wechat_article(first, second):
+    """Compare article links while ignoring transient browser verification tokens."""
+    if article_id(first) == article_id(second):
+        return True
+    if not (is_wechat_url(first) and is_wechat_url(second)):
+        return False
+    first_parts, second_parts = urlsplit(first), urlsplit(second)
+    if first_parts.path != second_parts.path:
+        return False
+    if first_parts.path.startswith("/s/") and len(first_parts.path) > 3:
+        return True
+    first_query, second_query = parse_qs(first_parts.query), parse_qs(second_parts.query)
+    keys = ("__biz", "mid", "idx", "sn")
+    return (first_parts.path == "/s"
+            and all(len(first_query.get(key, [])) == 1 and first_query[key] == second_query.get(key) for key in keys))
+
+
+def load_browser_snapshot(path, source_url):
+    """Import a DOM capture from the verified tab; never request article HTML."""
+    from bs4 import BeautifulSoup
+
+    snapshot = json.loads(Path(path).read_text(encoding="utf-8-sig"))
+    if not isinstance(snapshot, dict) or snapshot.get("schema_version") != 1:
+        raise ValueError("Browser snapshot must be a JSON object with schema_version 1")
+    for field in ("source_url", "final_url", "browser_id", "tab_id", "body_html"):
+        if not isinstance(snapshot.get(field), str) or not snapshot[field].strip():
+            raise ValueError("Browser snapshot requires a nonempty string: " + field)
+    article_id(snapshot["final_url"])
+    if not is_wechat_url(source_url) or not same_wechat_article(source_url, snapshot["source_url"]):
+        raise ValueError("Browser snapshot source_url does not identify the requested WeChat article")
+    body_soup = BeautifulSoup(snapshot["body_html"], "html.parser")
+    title = snapshot.get("title")
+    if title is not None and not isinstance(title, str):
+        raise ValueError("Browser snapshot title must be a string")
+    check_wechat_verification(body_soup, snapshot["final_url"], source_url, title)
+    if not title or not title.strip():
+        raise ValueError("Browser snapshot requires a nonempty title from the verified page")
+    if not same_wechat_article(source_url, snapshot["final_url"]):
+        raise ValueError("Browser snapshot final_url does not identify the requested WeChat article")
+    bodies = body_soup.find_all(id="js_content")
+    if len(bodies) != 1:
+        raise ValueError("Browser snapshot must contain exactly one #js_content element from the verified tab")
+    title = escape(title.strip())
+    # Title before the body prevents an in-article h1 from replacing the page title.
+    html = "<html><head><title>" + title + "</title></head><body><h1>" + title + "</h1>" + str(bodies[0]) + "</body></html>"
+    parsed = parse_html(html, snapshot["final_url"])
+    order = snapshot.get("image_source_order")
+    if not isinstance(order, list) or not all(isinstance(item, str) for item in order):
+        raise ValueError("Browser snapshot requires image_source_order, including repeated images")
+    if image_targets(parsed["body"]) != order:
+        raise ValueError("Browser snapshot image order does not match the captured article DOM")
+    for field in ("author", "publisher", "published_at"):
+        if snapshot.get(field) is not None:
+            if not isinstance(snapshot[field], str):
+                raise ValueError("Browser snapshot field must be a string: " + field)
+            parsed[field] = snapshot[field]
+    context = {"browser_id": snapshot["browser_id"], "tab_id": snapshot["tab_id"]}
+    return parsed, snapshot["final_url"], context
+
+
+def fetch_to_directory(url, output_dir, image_policy="remote", selected_images=(), proxy="env", browser=False, directory_name=None,
+                       browser_snapshot=None):
     key = article_id(url)
     now = datetime.now(timezone.utc)
     result = {"schema_version": 1, "id": key, "url": url, "final_url": url, "status": "failed", "title": "",
               "accessed_at": now.date().isoformat(), "fetched_at": now.isoformat(), "article_path": None, "images": []}
     try:
         if image_policy not in {"remote", "all", "selected"}: raise ValueError("Invalid image policy")
-        html, final_url, method = fetch_html(url, proxy, browser)
-        parsed = parse_html(html, final_url)
-        folder = directory_name or article_folder(output_dir, parsed["title"], url)
+        prefix, name = split_directory_name(directory_name)
+        explicit = archive_base("", url, name) if name is not None else None
+        parent = safe_target(Path(output_dir), prefix) if prefix else Path(output_dir)
+        if browser_snapshot is not None:
+            parsed, final_url, context = load_browser_snapshot(browser_snapshot, url)
+            method = "verified-browser-dom"
+            result.update(browser_context=context, extraction_notes=[
+                "Imported #js_content from the same browser tab after user verification; no article HTTP request was made."])
+        else:
+            html, final_url, method = fetch_html(url, proxy, browser)
+            result.update(final_url=final_url, method=method)
+            parsed = parse_html(html, final_url)
+        result.update(final_url=final_url, method=method)
+        folder = article_folder(parent, parsed["title"], url, explicit)
+        if prefix:
+            folder = prefix + "/" + folder
         root = safe_target(Path(output_dir), folder)
         root.mkdir(parents=True, exist_ok=True)
         body = parsed.pop("body")
-        result.update(image_source_order=image_targets(body), image_policy=image_policy, directory_name=directory_name)
+        result.update(image_source_order=image_targets(body), image_policy=image_policy, directory_name=explicit)
         urls = parsed.pop("image_urls")
         selected = set(selected_images)
         replacements = {}
@@ -500,6 +666,13 @@ def fetch_to_directory(url, output_dir, image_policy="remote", selected_images=(
         safe_target(root, "metadata.json").write_text(json.dumps(metadata, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         for image in result["images"]:
             if image.get("path"): image["path"] = folder + "/" + image["path"]
+    except ManualVerificationRequired as exc:
+        # Managed callers use the legacy failed status to retain old bodies on refresh.
+        result.update(status="failed" if prefix else "verification_required", final_url=exc.url, error=str(exc), requires_user_action=True,
+                      user_message="请在浏览器中手动完成微信验证。正文出现后，从同一标签页提取 DOM 快照，使用 --browser-snapshot 继续；不要重新请求正文。",
+                      next_action={"type": "manual_verification", "url": exc.url, "article_url": url,
+                                   "resume_mode": "same_browser_page", "snapshot_option": "--browser-snapshot"},
+                      validation={"status": "not_run", "reason": "Waiting for user verification; no article archive was written"})
     except Exception as exc:
         result["status"] = "failed"
         result["error"] = str(exc)
@@ -511,27 +684,35 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--url")
     parser.add_argument("--output-dir", type=Path)
+    parser.add_argument("--directory-name", help="Use only when the user explicitly names this article's subdirectory")
     parser.add_argument("--validate-only", type=Path, help="Check an existing article directory without fetching or writing")
     parser.add_argument("--images", choices=("remote", "all", "selected"), default="all")
     parser.add_argument("--image-url", action="append", default=[])
     parser.add_argument("--proxy", choices=("env", "direct"), default="env")
     parser.add_argument("--browser", action="store_true", help="Allow an available Playwright browser fallback on HTTP 403")
+    parser.add_argument("--browser-snapshot", type=Path, help="Import JSON captured from the same verified WeChat browser tab; do not request article HTML")
     args = parser.parse_args()
     if hasattr(sys.stdout, "reconfigure"): sys.stdout.reconfigure(encoding="utf-8")
     if args.validate_only:
-        if args.url or args.output_dir:
-            parser.error("--validate-only cannot be combined with --url or --output-dir")
+        if args.url or args.output_dir or args.directory_name is not None or args.browser_snapshot is not None:
+            parser.error("--validate-only cannot be combined with fetching arguments")
         report = validate_archive(args.validate_only)
         print(json.dumps(report, ensure_ascii=False, indent=2))
         return 2 if report["requires_review"] else 0
     if not args.url or not args.output_dir:
         parser.error("--url and --output-dir are required for fetching")
+    if args.browser and args.browser_snapshot:
+        parser.error("--browser-snapshot resumes an existing tab and cannot be combined with --browser")
     try:
-        result = fetch_to_directory(args.url, args.output_dir, args.images, args.image_url, args.proxy, args.browser)
+        if args.directory_name is not None:
+            archive_base("", args.url, args.directory_name)
+        result = fetch_to_directory(args.url, args.output_dir, args.images, args.image_url, args.proxy, args.browser,
+                                    directory_name=args.directory_name, browser_snapshot=args.browser_snapshot)
     except (OSError, ValueError) as exc:
         result = {"status": "failed", "error": str(exc), "validation": {"status": "not_run", "reason": "Article archive was not produced"}}
     print(json.dumps(result, ensure_ascii=False, indent=2))
-    return 0 if result["status"] == "fetched" else 2 if result["status"] == "needs_review" else 1
+    return (0 if result["status"] == "fetched" else 2 if result["status"] == "needs_review"
+            else 3 if result["status"] == "verification_required" else 1)
 
 
 if __name__ == "__main__":
