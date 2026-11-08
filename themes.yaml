@@ -32,3 +32,15 @@ themes:
     slug: coding-agent
     name: 编程 Agent
     parent: null
+  - id: harness
+    slug: harness
+    name: Harness
+    parent: null
+  - id: rsi
+    slug: rsi
+    name: RSI
+    parent: null
+  - id: personal-agent
+    slug: personal-agent
+    name: Personal Agent
+    parent: null

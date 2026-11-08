@@ -32,7 +32,6 @@ class ClassificationAndCleanup(unittest.TestCase):
                 self.assertEqual(task.open_task(job["work_dir"])[2]["directory_layout"], "dated-flat")
 
     def test_report_subject_is_independent_of_object_id_and_keeps_report_directory(self):
-        task.catalog.register_theme(self.workspace, "harness", "harness", "Harness")
         jobs = []
         for subject in ("codex-context-engineering", "codex-tool-use", "codex--context-engineering",
                         "codex--context-engineering--context-compaction",
