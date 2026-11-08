@@ -6,9 +6,9 @@ Takes about 60 seconds.
 
 Three source methods are supported. Jump to the relevant section:
 
-- [§ URL](#-url) — fetch a live website
-- [§ Skill](#-skill) — read an installed Agent Skill that carries design tokens
-- [§ Folder](#-folder) — read a local design-system directory (CSS, JSON, Markdown)
+- [URL](#url) — fetch a live website
+- [Skill](#skill) — read an installed Agent Skill that carries design tokens
+- [Folder](#folder) — read a local design-system directory (CSS, JSON, Markdown)
 
 ---
 
@@ -43,7 +43,7 @@ Gate-only choices use the same finish:
 
 ---
 
-## § URL
+## URL
 
 ### Invocation
 
@@ -189,7 +189,7 @@ After onboarding, the user should:
 
 ---
 
-## § Skill
+## Skill
 
 Extract tokens from an installed Agent Skill that carries its own design system (e.g. a `brand-design` or `ui-kit` skill).
 
@@ -298,7 +298,7 @@ Same as the URL method: fill the role table, run contrast checks, show the diff,
 
 ---
 
-## § Folder
+## Folder
 
 Extract tokens from a local directory — a checked-out design system repo, a Figma export, or any folder the user points you at.
 

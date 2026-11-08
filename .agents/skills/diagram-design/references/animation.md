@@ -116,7 +116,13 @@ The final-state capture contract is synchronous: `?motion=static`, `<html data-m
 
 PNG and SVG exports are static final-state artifacts unless the user explicitly requests a named step. Before capture, open `?motion=static`, await `document.fonts.ready`, and assert `data-frame="static"`. SVG extraction omits HTML controls and scripts; source-visible semantic markup keeps the result complete.
 
-Run:
+From this installed skill, run the packaged structural check (resolve `<skill-dir>` from this reference):
+
+```bash
+python3 "<skill-dir>/scripts/self_check.py" path/to/animated-diagram.html
+```
+
+The broader motion verifier, its tests, and the skin linter below belong to an upstream maintainer checkout, not this installation. Run them only when that checkout is available, from its root:
 
 ```bash
 python3 scripts/verify-motion.py path/to/animated-diagram.html

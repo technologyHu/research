@@ -54,45 +54,12 @@ UA_DIR="$PROJECT_ROOT/$([ -d "$PROJECT_ROOT/.understand-anything" ] && echo .und
 ```
 This keeps the legacy `.understand-anything/` directory when it already exists (existing projects keep working with no migration) and uses the new `.ua/` otherwise. Because each phase may run in a fresh shell, carry `$UA_DIR` forward like `$PROJECT_ROOT`, re-resolving it with the line above if a later command block needs it.
 
-**Important:** do **not** assume the plugin root is simply two directories above the skill path string. In many installations `~/.agents/skills/understand-domain` is a symlink into the real plugin checkout. Prefer runtime-provided plugin roots first (for Claude), then fall back to universal symlinks, skill symlink resolution, and common clone-based install paths.
-
-Resolve the plugin root like this:
+**Use the prepared portable plugin.** Follow [LOCAL_INSTALL.md](LOCAL_INSTALL.md), or reuse the caller's successful preparation result. Carry `backends[0].paths.pluginRoot` as `PLUGIN_ROOT` and retain `UNDERSTAND_NO_WORKTREE_REDIRECT=1`. Resolve `<SKILL_DIR>` to the directory containing this SKILL.md, independently of the project cwd. Do not clear that path, infer the plugin root from a global skill symlink, or search other installations.
 
 ```bash
-SKILL_REAL=$(realpath ~/.agents/skills/understand-domain 2>/dev/null || readlink -f ~/.agents/skills/understand-domain 2>/dev/null || echo "")
-SELF_RELATIVE=$([ -n "$SKILL_REAL" ] && cd "$SKILL_REAL/../.." 2>/dev/null && pwd || echo "")
-COPILOT_SKILL_REAL=$(realpath ~/.copilot/skills/understand-domain 2>/dev/null || readlink -f ~/.copilot/skills/understand-domain 2>/dev/null || echo "")
-COPILOT_SELF_RELATIVE=$([ -n "$COPILOT_SKILL_REAL" ] && cd "$COPILOT_SKILL_REAL/../.." 2>/dev/null && pwd || echo "")
-
-PLUGIN_ROOT=""
-for candidate in \
-  "${PLUGIN_ROOT}" \
-    "${CLAUDE_PLUGIN_ROOT}" \
-  "$HOME/.understand-anything-plugin" \
-  "$SELF_RELATIVE" \
-  "$COPILOT_SELF_RELATIVE" \
-  "$HOME/.codex/understand-anything/understand-anything-plugin" \
-  "$HOME/.opencode/understand-anything/understand-anything-plugin" \
-  "$HOME/.pi/understand-anything/understand-anything-plugin" \
-  "$HOME/understand-anything/understand-anything-plugin"; do
-  if [ -n "$candidate" ] && [ -f "$candidate/package.json" ] && [ -f "$candidate/pnpm-workspace.yaml" ]; then
-    PLUGIN_ROOT="$candidate"
-    break
-  fi
-done
-
-if [ -z "$PLUGIN_ROOT" ]; then
-  echo "Error: Cannot find the understand-anything plugin root."
-  echo "Checked:"
-  echo "  - ${CLAUDE_PLUGIN_ROOT:-<unset CLAUDE_PLUGIN_ROOT>}"
-  echo "  - $HOME/.understand-anything-plugin"
-  echo "  - ${SELF_RELATIVE:-<unresolved path derived from ~/.agents/skills/understand-domain>}"
-  echo "  - ${COPILOT_SELF_RELATIVE:-<unresolved path derived from ~/.copilot/skills/understand-domain>}"
-  echo "  - $HOME/.codex/understand-anything/understand-anything-plugin"
-  echo "  - $HOME/.opencode/understand-anything/understand-anything-plugin"
-  echo "  - $HOME/.pi/understand-anything/understand-anything-plugin"
-  echo "  - $HOME/understand-anything/understand-anything-plugin"
-  echo "Make sure the plugin is installed correctly."
+: "${PLUGIN_ROOT:?Use the pluginRoot returned by LOCAL_INSTALL.md preparation}"
+if [ ! -f "$PLUGIN_ROOT/agents/domain-analyzer.md" ]; then
+  echo "Error: Prepared domain-analyzer prompt is missing; check backend preparation."
   exit 1
 fi
 ```
@@ -125,7 +92,7 @@ The preprocessing script does NOT produce a domain graph — it produces **raw m
 
 1. Run the preprocessing script bundled with this skill, passing `$PROJECT_ROOT` from Phase 0:
    ```
-   python ./extract-domain-context.py "$PROJECT_ROOT"
+   python "<SKILL_DIR>/extract-domain-context.py" "$PROJECT_ROOT"
    ```
    This outputs `$UA_DIR/intermediate/domain-context.json` containing:
    - File tree (respecting `.gitignore`)

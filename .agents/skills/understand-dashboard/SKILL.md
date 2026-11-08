@@ -55,56 +55,15 @@ Start the Understand Anything dashboard to visualize the knowledge graph for the
    fi
    ```
 
-3. Find the dashboard code. The dashboard is at `packages/dashboard/` relative to this plugin's root directory. Check these paths in order and use the first that exists:
-   - `${CLAUDE_PLUGIN_ROOT}/packages/dashboard/` (Claude Code runtime root, highest priority)
-   - `~/.understand-anything-plugin/packages/dashboard/` (universal symlink, all installs)
-   - Two levels up from `~/.agents/skills/understand-dashboard` real path (self-relative fallback)
-   - Two levels up from `~/.copilot/skills/understand-dashboard` real path (Copilot personal skills fallback)
-   - Common clone-based install roots:
-     - `~/.codex/understand-anything/understand-anything-plugin/packages/dashboard/`
-     - `~/.opencode/understand-anything/understand-anything-plugin/packages/dashboard/`
-     - `~/.pi/understand-anything/understand-anything-plugin/packages/dashboard/`
-     - `~/understand-anything/understand-anything-plugin/packages/dashboard/`
+3. Use the portable plugin prepared through [LOCAL_INSTALL.md](LOCAL_INSTALL.md), or reuse the caller's successful preparation result. Carry `backends[0].paths.pluginRoot` as `PLUGIN_ROOT`. The dashboard code is beneath that root; do not clear `PLUGIN_ROOT` or search global and home-directory installations.
 
-   Use the Bash tool to resolve:
    ```bash
-   SKILL_REAL=$(realpath ~/.agents/skills/understand-dashboard 2>/dev/null || readlink -f ~/.agents/skills/understand-dashboard 2>/dev/null || echo "")
-   SELF_RELATIVE=$([ -n "$SKILL_REAL" ] && cd "$SKILL_REAL/../.." 2>/dev/null && pwd || echo "")
-   COPILOT_SKILL_REAL=$(realpath ~/.copilot/skills/understand-dashboard 2>/dev/null || readlink -f ~/.copilot/skills/understand-dashboard 2>/dev/null || echo "")
-   COPILOT_SELF_RELATIVE=$([ -n "$COPILOT_SKILL_REAL" ] && cd "$COPILOT_SKILL_REAL/../.." 2>/dev/null && pwd || echo "")
-
-   PLUGIN_ROOT=""
-   for candidate in \
-     "${PLUGIN_ROOT}" \
-    "${CLAUDE_PLUGIN_ROOT}" \
-     "$HOME/.understand-anything-plugin" \
-     "$SELF_RELATIVE" \
-     "$COPILOT_SELF_RELATIVE" \
-     "$HOME/.codex/understand-anything/understand-anything-plugin" \
-     "$HOME/.opencode/understand-anything/understand-anything-plugin" \
-     "$HOME/.pi/understand-anything/understand-anything-plugin" \
-     "$HOME/understand-anything/understand-anything-plugin"; do
-     if [ -n "$candidate" ] && [ -d "$candidate/packages/dashboard" ]; then
-       PLUGIN_ROOT="$candidate"; break
-     fi
-   done
-
-   if [ -z "$PLUGIN_ROOT" ]; then
-     echo "Error: Cannot find the understand-anything plugin root."
-     echo "Checked:"
-     echo "  - ${CLAUDE_PLUGIN_ROOT:-<unset CLAUDE_PLUGIN_ROOT>}"
-     echo "  - $HOME/.understand-anything-plugin"
-     echo "  - ${SELF_RELATIVE:-<unresolved path derived from ~/.agents/skills/understand-dashboard>}"
-     echo "  - ${COPILOT_SELF_RELATIVE:-<unresolved path derived from ~/.copilot/skills/understand-dashboard>}"
-     echo "  - $HOME/.codex/understand-anything/understand-anything-plugin"
-     echo "  - $HOME/.opencode/understand-anything/understand-anything-plugin"
-     echo "  - $HOME/.pi/understand-anything/understand-anything-plugin"
-     echo "  - $HOME/understand-anything/understand-anything-plugin"
-     echo "Make sure you followed the installation instructions for your platform."
+   : "${PLUGIN_ROOT:?Use the pluginRoot returned by LOCAL_INSTALL.md preparation}"
+   DASHBOARD_DIR="$PLUGIN_ROOT/packages/dashboard"
+   if [ ! -d "$DASHBOARD_DIR" ]; then
+     echo "Error: Prepared dashboard source is missing; check backend preparation."
      exit 1
    fi
-
-   DASHBOARD_DIR="$PLUGIN_ROOT/packages/dashboard"
    ```
 
 4. **Fast path — try the prebuilt viewer first (no install, no build).** Each release ships a self-contained viewer tarball; run it pinned to the installed plugin version:

@@ -18,6 +18,12 @@ Create diagrams as self-contained HTML files with inline SVG and an editorial de
 
 Forty-five visual types. Semantic patterns describe behavior; type references describe layout.
 
+## Installed-skill paths
+
+Resolve `references/`, `assets/`, and packaged helpers from this skill directory, independently of the target project's working directory. This installation includes `scripts/self_check.py`, the three `*_extract.py` import helpers, and `scripts/export_svg.py` / `scripts/export_png.py`.
+
+References also describe the upstream maintainer checkout. Its `scripts/verify-*.py`, `scripts/test-*.py`, `scripts/build-*.py`, `scripts/lint-*.py`, `commands/`, `prompts/`, and `.github/` paths are not shipped here; resolve them only against a separately available upstream checkout. In this installation, use the packaged self-check for its documented subset and inspect the remaining type-specific requirements directly. Report unavailable automated checks accurately; do not claim the self-check covers those gates. The [doctor reference](references/doctor.md) distinguishes installed-skill and maintainer-checkout checks. Plugin slash commands mentioned in references require the corresponding host plugin; natural-language requests use the references directly.
+
 ---
 
 ## 0. First-time setup — style guide gate

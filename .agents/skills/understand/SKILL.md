@@ -76,57 +76,18 @@ Determine whether to run a full analysis or incremental update.
      fi
      ```
 
-     Set `UNDERSTAND_NO_WORKTREE_REDIRECT=1` if you intentionally want a per-worktree graph (rare — most users want the redirect).
-1.5. **Ensure the plugin is built.** Later phases invoke Node scripts that import `@understand-anything/core`. On a fresh install `packages/core/dist/` does not exist yet — build once.
+     This installation keeps `UNDERSTAND_NO_WORKTREE_REDIRECT=1` from LOCAL_INSTALL.md so the selected worktree remains the target.
+1.5. **Use the prepared portable plugin.** Follow [LOCAL_INSTALL.md](LOCAL_INSTALL.md), or reuse the caller's successful preparation result. Carry its `backends[0].paths.pluginRoot` as `PLUGIN_ROOT` and its current-worktree environment into subsequent phases. Resolve `<SKILL_DIR>` to the directory containing this SKILL.md, independently of the project cwd.
 
-   **Important:** do **not** assume the plugin root is simply two directories above the skill path string. In many installations `~/.agents/skills/understand` is a symlink into the real plugin checkout. Prefer runtime-provided plugin roots first (for Claude), then fall back to universal symlinks, skill symlink resolution, and common clone-based install paths.
-
-   Resolve the plugin root like this:
+   Do not clear `PLUGIN_ROOT`, infer a plugin root two levels above this installed skill, search a global install, or rerun upstream pnpm installation commands. Backend preparation owns the pinned source and core build. Check the returned artifact before proceeding; if missing, report the preparation failure:
 
    ```bash
-   SKILL_REAL=$(realpath ~/.agents/skills/understand 2>/dev/null || readlink -f ~/.agents/skills/understand 2>/dev/null || echo "")
-   SELF_RELATIVE=$([ -n "$SKILL_REAL" ] && cd "$SKILL_REAL/../.." 2>/dev/null && pwd || echo "")
-   COPILOT_SKILL_REAL=$(realpath ~/.copilot/skills/understand 2>/dev/null || readlink -f ~/.copilot/skills/understand 2>/dev/null || echo "")
-   COPILOT_SELF_RELATIVE=$([ -n "$COPILOT_SKILL_REAL" ] && cd "$COPILOT_SKILL_REAL/../.." 2>/dev/null && pwd || echo "")
-
-   PLUGIN_ROOT=""
-   for candidate in \
-     "${PLUGIN_ROOT}" \
-    "${CLAUDE_PLUGIN_ROOT}" \
-     "$HOME/.understand-anything-plugin" \
-     "$SELF_RELATIVE" \
-     "$COPILOT_SELF_RELATIVE" \
-     "$HOME/.codex/understand-anything/understand-anything-plugin" \
-     "$HOME/.opencode/understand-anything/understand-anything-plugin" \
-     "$HOME/.pi/understand-anything/understand-anything-plugin" \
-     "$HOME/understand-anything/understand-anything-plugin"; do
-     if [ -n "$candidate" ] && [ -f "$candidate/package.json" ] && [ -f "$candidate/pnpm-workspace.yaml" ]; then
-       PLUGIN_ROOT="$candidate"
-       break
-     fi
-   done
-
-   if [ -z "$PLUGIN_ROOT" ]; then
-     echo "Error: Cannot find the understand-anything plugin root."
-     echo "Checked:"
-     echo "  - ${CLAUDE_PLUGIN_ROOT:-<unset CLAUDE_PLUGIN_ROOT>}"
-     echo "  - $HOME/.understand-anything-plugin"
-     echo "  - ${SELF_RELATIVE:-<unresolved path derived from ~/.agents/skills/understand>}"
-     echo "  - ${COPILOT_SELF_RELATIVE:-<unresolved path derived from ~/.copilot/skills/understand>}"
-     echo "  - $HOME/.codex/understand-anything/understand-anything-plugin"
-     echo "  - $HOME/.opencode/understand-anything/understand-anything-plugin"
-     echo "  - $HOME/.pi/understand-anything/understand-anything-plugin"
-     echo "  - $HOME/understand-anything/understand-anything-plugin"
-     echo "Make sure the plugin is installed correctly."
+   : "${PLUGIN_ROOT:?Use the pluginRoot returned by LOCAL_INSTALL.md preparation}"
+   if [ ! -f "$PLUGIN_ROOT/packages/core/dist/index.js" ]; then
+     echo "Error: Prepared Understand Anything core is missing; check backend preparation."
      exit 1
    fi
-
-   if [ ! -f "$PLUGIN_ROOT/packages/core/dist/index.js" ]; then
-     cd "$PLUGIN_ROOT" && (pnpm install --frozen-lockfile 2>/dev/null || pnpm install) && pnpm --filter @understand-anything/core build
-   fi
    ```
-
-   If `pnpm` is missing, report to the user: "Install Node.js ≥ 22 and pnpm ≥ 10, then re-run `/understand`."
 
 1.7. **Resolve the data directory `$UA_DIR`.** All Understand-Anything artifacts live in the project's data directory. Resolve it once, now that `$PROJECT_ROOT` is known, and reuse `$UA_DIR` for every read and write in later phases:
    ```bash
@@ -267,7 +228,7 @@ Set up and verify the `.understandignore` file before a full scan. Incremental p
 
 Report to the user: `[Phase 1/7] Scanning project files...`
 
-Dispatch a subagent using the `project-scanner` agent definition (at `agents/project-scanner.md`). Append the following additional context:
+Dispatch a subagent using the `project-scanner` agent definition (at `$PLUGIN_ROOT/agents/project-scanner.md`). Append the following additional context:
 
 > **Additional context from main session:**
 >
@@ -345,7 +306,7 @@ Load `$UA_DIR/intermediate/batches.json` (produced by Phase 1.5). Iterate the `b
 
 Report: `[Phase 2/7] Analyzing files — <totalFiles> files in <totalBatches> batches (up to 5 concurrent)...`
 
-For each batch, dispatch a subagent using the `file-analyzer` agent definition (at `agents/file-analyzer.md`). Run up to **5 subagents concurrently**. Append the following additional context:
+For each batch, dispatch a subagent using the `file-analyzer` agent definition (at `$PLUGIN_ROOT/agents/file-analyzer.md`). Run up to **5 subagents concurrently**. Append the following additional context:
 
 > **Additional context from main session:**
 >
@@ -427,7 +388,7 @@ The strict parser emits versioned, scoped symbol evidence with separate declarat
 
 Source identity is `(file path, symbol kind, owner, name)`. Same-line functions/methods use AST scope instead of inferred line containment. Shadowed/reassigned receiver names are unconfirmed; ordinary reads, strings, and parameters are not declarations. If an old ID is reused for a different current identity, repair must supply distinct descriptors. Unsupported parsing or declaration coverage, empty extraction, ambiguous identities, and stale evidence formats remain blocking. Declaration ownership, reference bindings, and expression value regions all use one lexical scope index.
 
-The decision rules, limits, and cross-product test matrix are documented in `docs/incremental/symbol-loss-validation.md` in the repository. This validation uses structural source identities and recognized declaration/installer syntax; it does not execute programs or perform whole-program metaprogramming/type analysis.
+The implemented decision rules and limits are in [validate-incremental-symbols.mjs](validate-incremental-symbols.mjs), with retry orchestration in [prepare-symbol-retry.mjs](prepare-symbol-retry.mjs). The upstream maintainer documentation and cross-product test matrix are not included in this installation. This validation uses structural source identities and recognized declaration/installer syntax; it does not execute programs or perform whole-program metaprogramming/type analysis.
 
 Go receiver methods, Rust inherent impl methods, and C++ out-of-class definitions retain explicit type ownership and their own source ranges. Their duplicate entries in `classes[].methods` are reconciled without assuming the method body is inside the type declaration. Free functions with the same name stay distinct; unresolved receivers and Rust trait impl identities remain `unknown`. Receiver changes also affect structural fingerprints when the type declaration is in another file.
 
@@ -451,7 +412,7 @@ Run this phase for **full analysis only**. Both incremental actions skip assembl
 
 Report to the user: `[Phase 3/7] Reviewing assembled graph...`
 
-Dispatch a subagent using the `assemble-reviewer` agent definition (at `agents/assemble-reviewer.md`).
+Dispatch a subagent using the `assemble-reviewer` agent definition (at `$PLUGIN_ROOT/agents/assemble-reviewer.md`).
 
 Pass these parameters in the dispatch prompt:
 
@@ -481,7 +442,7 @@ Run this phase for full analysis and for incremental plans where `rerunArchitect
 Report to the user: `[Phase 4/7] Identifying architectural layers...`
 
 **Build the combined prompt template:**
- 1. Use the `architecture-analyzer` agent definition (at `agents/architecture-analyzer.md`).
+ 1. Use the `architecture-analyzer` agent definition (at `$PLUGIN_ROOT/agents/architecture-analyzer.md`).
  2. **Language context injection:** For each language detected in Phase 1 (e.g., `python`, `markdown`, `dockerfile`, `yaml`, `sql`, `terraform`, `graphql`, `protobuf`, `shell`, `html`, `css`), read the file at `./languages/<language-id>.md` (e.g., `./languages/python.md`, `./languages/dockerfile.md`) and append its content after the base template under a `## Language Context` header. If the file does not exist for a detected language, skip it silently and continue. These files are in the `languages/` subdirectory next to this SKILL.md file. **Include non-code language snippets** — they provide edge patterns and summary styles for non-code files.
  3. **Framework addendum injection:** For each framework detected in Phase 1 (e.g., `Django`), read the file at `./frameworks/<framework-id-lowercase>.md` (e.g., `./frameworks/django.md`) and append its full content after the language context. If the file does not exist for a detected framework, skip it silently and continue. These files are in the `frameworks/` subdirectory next to this SKILL.md file.
  4. **Output locale injection:** If `$OUTPUT_LANGUAGE` is NOT `en` (English), read the locale guidance file at `./locales/<language-code>.md` (e.g., `./locales/zh.md`, `./locales/ja.md`, `./locales/ko.md`) and append its content after the framework addendums under a `## Output Language Guidelines` header. This provides language-specific guidance for tag naming conventions, summary style, and layer name translations. If the locale file does not exist for the specified language, skip silently — the `$LANGUAGE_DIRECTIVE` still applies. These files are in the `locales/` subdirectory next to this SKILL.md file.
@@ -565,7 +526,7 @@ Run this phase for full analysis and for incremental plans where `rerunTour === 
 
 Report to the user: `[Phase 5/7] Building guided tour...`
 
-Dispatch a subagent using the `tour-builder` agent definition (at `agents/tour-builder.md`). Append the following additional context:
+Dispatch a subagent using the `tour-builder` agent definition (at `$PLUGIN_ROOT/agents/tour-builder.md`). Append the following additional context:
 
 > **Additional context from main session:**
 >
@@ -773,7 +734,7 @@ If the script exits non-zero, read stderr, fix the script, and retry once.
 
 If `--review` IS in `$ARGUMENTS`, dispatch the LLM graph-reviewer subagent as follows:
 
-Dispatch a subagent using the `graph-reviewer` agent definition (at `agents/graph-reviewer.md`). Append the following additional context:
+Dispatch a subagent using the `graph-reviewer` agent definition (at `$PLUGIN_ROOT/agents/graph-reviewer.md`). Append the following additional context:
 
 > **Additional context from main session:**
 >
