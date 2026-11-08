@@ -32,10 +32,11 @@ outline.reference_articles 支持 URL 字符串或记录：
 ```text
 <调研目录>/.tmp/<任务ID>/
 ├── articles.json
-└── sources/articles/
-    └── <文章标识>/
-        ├── versions/<版本ID>/article.md
-        └── image-downloads/<下载ID>/images/
+├── sources/articles/
+│   └── <文章标识>/versions/<版本ID>/
+│       ├── article.md
+│       └── metadata.json
+└── scratch/images/<下载ID>/assets/images/
 ```
 
 articles.json 记录本次 run_id、原始与最终 URL、标题、实际访问时间、提取方式、质量提示、正文散列、图片状态、人工核对及归档位置。访问时间与文章头部访问日期明确采用 UTC；报告可另列用户本地日期，不把两种日期混成同一口径。清单内文件路径相对于 work_dir，最终归档位置相对于报告目录，均使用相对路径。不同 URL 的同名文章不会覆盖。
