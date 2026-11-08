@@ -82,6 +82,33 @@ updated_at: 2026-11-06
         self.assertLess(text.index(newer), text.index(older))
         self.assertIn("2026-11-09 12:00:00", text)
 
+    def test_same_product_in_distinct_report_subjects_keeps_separate_work_ids(self):
+        self.write("themes.yaml", json.dumps({"schema_version": 1, "themes": [
+            {"id": "harness", "slug": "harness", "name": "Harness", "parent": None}]}))
+        paths = []
+        for key, subject in (("a", "codex__context-engineering"),
+                             ("b", "codex__context-engineering__context-compaction"),
+                             ("c", "codex--context-engineering"), ("d", "codex-context-engineering")):
+            separator = "__" if key in ("a", "b") else "-"
+            path = f"research-reports/harness/product/{subject}{separator}20261108-120000/report.md"
+            summary = {"report_id": "report-" + key * 32, "theme_id": "harness",
+                       "created_at": "2026-11-08T12:00:00+08:00", "updated_at": "2026-11-08T12:00:00+08:00",
+                       "classification": {"type": "product", "theme": "harness", "target": subject},
+                       "items": [{"id": "codex", "name": "Codex", "type": "product"}], "completion": "complete"}
+            self.write(path, f"# {subject}\n\n<!-- research-summary\n{json.dumps(summary)}\n-->\n")
+            paths.append(path)
+        graph = self.build()
+        self.assertEqual(graph["stats"], {"themes": 1, "reports": 4, "types": 1, "objects": 4})
+        self.assertEqual({node["id"] for node in graph["nodes"] if node["kind"] == "object"},
+                         {"work:report-" + key * 32 for key in ("a", "b", "c", "d")})
+        update_readme(self.root, graph, "https://example.com/")
+        content = (self.root / "README.md").read_text(encoding="utf8")
+        for path in paths:
+            self.assertIn(path, content)
+        self.assertIn("target 表示本篇报告的研究专题，不要求等于对象 ID", content)
+        self.assertIn("多个片段用 `__` 分隔", content)
+        self.assertIn("旧单连字符及双连字符名称原样保留", content)
+
     def test_flat_analysis_and_root_level_plan_use_registered_theme(self):
         self.registry()
         self.dated_report("analysis-reports/agent-memory-architecture-20261108-120000/report.md", theme="agent-memory-architecture")
@@ -91,15 +118,34 @@ updated_at: 2026-11-06
         self.assertEqual(graph["themeOverview"][0]["planPath"], "analysis-reports/agent-memory-architecture.plan.md")
         self.assertIn("Agent / 记忆 / 架构", graph["themeOverview"][0]["title"])
 
+    def test_multilevel_analysis_names_and_plans_share_identity_with_legacy_names(self):
+        self.registry()
+        new = "analysis-reports/agent__memory__architecture__mechanisms__tradeoffs__20261108-120000/report.md"
+        old = "analysis-reports/agent-memory-architecture-legacy-20261108-120000/report.md"
+        # A report without a summary must still resolve to the deepest registered theme.
+        self.write(new, "# 架构洞察\n\n分析正文。\n")
+        self.write(old, "# 旧洞察\n\n分析正文。\n")
+        plan = "analysis-reports/agent__memory__architecture.plan.md"
+        self.write(plan, "# 分析计划\n")
+        graph = self.build()
+        self.assertEqual({report["themeId"] for report in graph["reports"]}, {"agent-memory-architecture"})
+        self.assertEqual(graph["stats"]["themes"], 1)
+        self.assertEqual(graph["themeOverview"][0]["planPath"], plan)
+        update_readme(self.root, graph, "https://example.com/")
+        content = (self.root / "README.md").read_text(encoding="utf8")
+        self.assertIn(new, content)
+        self.assertIn(old, content)
+        self.assertIn(plan, content)
+
     def test_stable_work_and_report_ids_survive_timestamp_directory_changes(self):
         self.registry()
-        old = self.dated_report("analysis-reports/agent-memory-20261108-120000/report.md")
+        old = self.dated_report("analysis-reports/agent-memory__20261108-120000/report.md")
         before = self.build()
-        self.dated_report("analysis-reports/agent-memory-20261109-120000/report.md", updated="2026-11-09T12:00:00+08:00")
+        self.dated_report("analysis-reports/agent-memory__20261109-120000/report.md", updated="2026-11-09T12:00:00+08:00")
         with self.assertRaisesRegex(ValueError, "Duplicate report identity"):
             self.build()
         # Exclude the old directory from tracked inputs, as after a Git rename.
-        paths = {"themes.yaml", "analysis-reports/agent-memory-20261109-120000/report.md"}
+        paths = {"themes.yaml", "analysis-reports/agent-memory__20261109-120000/report.md"}
         after = build_graph(self.root, "owner/repo", "feature/research", input_paths=paths)
         self.assertEqual([n["id"] for n in before["nodes"]], [n["id"] for n in after["nodes"]])
         self.assertEqual(before["reports"][0]["id"], after["reports"][0]["id"])

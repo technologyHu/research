@@ -18,12 +18,12 @@ class ReportLocalTasks(unittest.TestCase):
     def test_default_tree_has_no_reports_layer_and_owns_its_local_tmp(self):
         job = self.create(items=["paper-a=论文 A"], theme="agent-memory")
         output, work = Path(job["output_dir"]), Path(job["work_dir"])
-        self.assertEqual(output.relative_to(self.workspace).as_posix(), "research-reports/agent-memory/paper/paper-a-20261108-120000")
+        self.assertEqual(output.relative_to(self.workspace).as_posix(), "research-reports/agent-memory/paper/paper-a__20261108-120000")
         self.assertEqual(work.parent, output / ".tmp")
         self.assertFalse((self.workspace / ".tmp").exists())
         self.assertFalse((self.workspace / "reports").exists())
         owner = json.loads((work / "owner.json").read_text(encoding="utf-8"))
-        self.assertEqual(owner["output_dir"], "research-reports/agent-memory/paper/paper-a-20261108-120000")
+        self.assertEqual(owner["output_dir"], "research-reports/agent-memory/paper/paper-a__20261108-120000")
 
     def test_listing_discovers_separate_reports_and_multiple_runs_without_scanning_code(self):
         first = self.create(items=["a=论文 A"], theme="memory")

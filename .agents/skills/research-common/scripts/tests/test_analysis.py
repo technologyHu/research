@@ -151,7 +151,7 @@ class AnalysisWorkflow(unittest.TestCase):
 
     def test_survey_directory_preserves_paper_classification(self):
         job = task.create_task(self.workspace, "综述论文", "paper", theme="agent-memory", target="survey-memory")
-        self.assertEqual(Path(job["output_dir"]).relative_to(self.workspace).as_posix(), "research-reports/agent-memory/paper/survey-memory-20261108-120000")
+        self.assertEqual(Path(job["output_dir"]).relative_to(self.workspace).as_posix(), "research-reports/agent-memory/paper/survey-memory__20261108-120000")
         self.assertEqual(job["classification"]["type"], "paper")
 
 

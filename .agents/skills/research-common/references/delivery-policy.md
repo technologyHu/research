@@ -1,17 +1,19 @@
 # 调研与分析洞察产物保存与清理规范
 
-本文件是 research、research-analysis 及共用技能的保存、命名与清理规则唯一详细来源。两个入口独立规划与交付，共用主题注册表、证据、任务、成稿和提交能力。用户明确的例外与保留要求优先。
+本文件是对象调研、分析洞察和报告提交共用的保存、命名与清理规则唯一详细来源。仅提供当前阶段的目录与交付约定，不选择或调用顶层入口，不自动启动提交步骤。用户明确的例外与保留要求优先。
 
 ## 最终目录
 
-主题层次统一维护在项目根的 themes.yaml。工具依据稳定主题 ID 查出父子关系和英文 slug，将完整层次压成一个主题名，例如 agent → memory → architecture 对应 agent-memory-architecture；目录中不再展开主题嵌套。注册方式见 [统一主题注册表](theme-registry.md)。
+主题层次统一维护在项目根的 themes.yaml。工具依据稳定主题 ID 查出父子关系和英文 slug，将完整层次压成一个主题名。对象调研用单连字符连接主题层级，例如 agent → memory → architecture 对应 agent-memory-architecture；分析洞察用双下划线连接层级，对应 agent__memory__architecture。每级 slug 内的单词仍用单连字符，目录中不展开主题嵌套。注册方式见 [统一主题注册表](theme-registry.md)。
 
 | 成果与入口 | 正式报告 | 当前主题计划 |
 | --- | --- | --- |
-| 对象调研，research | `research-reports/<主题名>/<type>/<target>-YYYYMMDD-HHmmss/report.md` | `research-reports/<主题名>/plan.md` |
-| 分析洞察，research-analysis | `analysis-reports/<主题名>[-<专题>]-YYYYMMDD-HHmmss/report.md` | `analysis-reports/<主题名>.plan.md` |
+| 对象调研 | `research-reports/<主题名>/<type>/<target>__YYYYMMDD-HHmmss/report.md` | `research-reports/<主题名>/plan.md` |
+| 分析洞察 | `analysis-reports/<主题名>[__<专题>]__YYYYMMDD-HHmmss/report.md` | `analysis-reports/<主题名>.plan.md` |
 
-research 的 type 为 paper、open-source、product、benchmark。analysis-reports 下只有一层报告目录，不再建主题父目录或 analysis 类型目录；未另指定专题时直接使用完整主题名，指定不同 --target 时追加专题标识。root 下的 *.plan.md 是当前分析计划，不是报告或历史副本。
+对象调研的 type 为 paper、open-source、product、benchmark。analysis-reports 下只有一层报告目录，不再建主题父目录或 analysis 类型目录；未另指定专题时直接使用完整主题名，指定不同 --target 时追加专题标识。root 下的 *.plan.md 是当前分析计划，不是报告或历史副本。
+
+分析主题支持任意注册的父子层级，主题各级、主题与可选专题、专题各片段和日期前均用 `__` 分隔。例如主题 agent → memory → architecture、专题 mechanisms__tradeoffs 对应 `analysis-reports/agent__memory__architecture__mechanisms__tradeoffs__YYYYMMDD-HHmmss/report.md`。层级来自注册表，不按文件名片段临时创建主题；分类中的 theme_id／theme_slug 仍是规范 ID／单连字符主题名。旧单连字符主题与专题的拼接格式继续原地维护，修订不自动迁移。
 
 一个报告目录对应一份独立交付，主文件默认 report.md；自定义根目录 Markdown 文件名通过 outline.delivery.report 登记。下面用 `<report-dir>` 表示上表任一种报告目录：
 
@@ -29,17 +31,24 @@ research 的 type 为 paper、open-source、product、benchmark。analysis-repor
 
 ### 目录命名
 
-- 主题 ID、显示名称、英文 slug 和 parent 关系以 themes.yaml 为准。两个入口使用同一 ID，不能在技能内各起同义主题名；新主题先登记、校验，再创建报告。别名可用于输入，持久记录采用规范 ID。
-- target 为具体对象或比较专题的稳定标识，通常使用小写英文、数字、连字符，最长 64 字符；analysis 未另指定专题时直接沿用完整主题名，按注册表的 96 字符上限。目录时间戳是独立后缀，不计入 target。空格和下划线规范成连字符，不能包含路径分隔符或 Windows 保留名称。
+- 主题 ID、显示名称、英文 slug 和 parent 关系以 themes.yaml 为准。两个入口使用同一 ID，不能在技能内各起同义主题名；新主题先登记、校验，再创建报告。别名可用于输入，持久记录采用规范 ID；目录中的主题层级连接符按上表对应入口处理。
+- target 表示本篇报告的研究专题或范围，可以是对象简称、对象加研究切面或比较专题，不要求等于 items 中的对象 ID。例如调研 Codex 的上下文工程时，item.id 为 codex，target 为 codex__context-engineering，报告保存为 `research-reports/harness/product/codex__context-engineering__YYYYMMDD-HHmmss/report.md`（harness 主题需先登记）。同一对象的不同专题可各自形成报告；修订同一报告则沿用原 target 和 report_id。
+- 英文 target 的片段内用单连字符 `-` 连接单词，片段间用双下划线 `__` 分隔，如 `codex__context-engineering__context-compaction`。片段数量不固定，可为一个、两个或更多，按报告范围从整体到具体排列，不固定为“对象＋专题”两段；只需一个片段时无需添加分隔符。每个片段使用小写英文、数字及单连字符，不能有空片段、首尾连字符或三个及以上连续下划线。
+- 旧单连字符名称（如 codex-context-engineering）和旧双连字符名称（如 codex--context-engineering）继续接受，读取、续查、修订和图谱索引时保留原样，不推断或自动重写片段边界，不迁移已有报告。新专题采用双下划线分隔；明确要求迁移已有报告时再单独处理目录与引用。
+- target 总长（含分隔符及 survey-／compare- 前缀）最长 64 字符；analysis 未另指定专题时，target 沿用注册表的单连字符规范主题名（上限 96 字符），目录则按主题层级用双下划线展示。新目录以双下划线追加时间戳，如 `codex__context-engineering__20261108-120000`；日期与时间之间仍用单连字符。时间戳是独立后缀，不计入 target，不作为专题片段。旧时间戳前的单连字符继续兼容，续查和修订保持原分隔符。工具保留双下划线边界，仅将片段内的空格和单下划线规范成单连字符，不能包含路径分隔符或 Windows 保留名称。主题 ID、每级 slug、调研报告主题目录和 item.id 的规则保持不变。
 - 正式名称本身为中文的对象可通过 --native-target-name 声明例外，仍追加时间戳，内部 item.id 保持英文。不将一般中文研究标题当作目录名。
-- survey 论文归 paper，target 使用 survey-<paper-id>；同类型比较使用 compare-<slug>，多篇 survey 比较使用 compare-survey-<slug>。跨类型对象分别维护，来源报告不能作为混合 analysis items。
+- survey 论文归 paper，target 使用 survey-<专题标识>，专题标识可采用论文简称或体现阅读范围；同类型比较使用 compare-<slug>，多篇 survey 比较使用 compare-survey-<slug>。跨类型对象分别维护，来源报告不能作为混合 analysis items。
 - 新建时工具自动追加创建时间；修订后用 stamp-report 更新为最近修订时间。格式为 YYYYMMDD-HHmmss，时区固定 Asia/Shanghai（UTC+08:00），采用 24 小时制并精确到秒。
 
 ### 修订、引用与稳定标识
 
 新任务在 outline 和成稿的 research-summary 中保存 report_id、theme_id、classification.target、created_at、updated_at；report_id 与主题 ID 不随时间、标题或目录改名变化。created_at 保留最初记录，updated_at 表示这份报告最近修订，不代替论文版本、原始来源访问日期或研究核实日期。
 
-新建或真实修订完成后，使用 [任务工具的 stamp-report](task-management.md#报告修订时间与目录更新)，再按工具返回的新 work_dir 执行最终校验。单纯阅读、检查或复用证据不更新时间；不复制旧时间目录形成快照。时间后缀相同且对象一致的并行任务共享同一交付标识，不能以再次调用 create 代替修订现有报告；继续已有成果须显式传 --output 或恢复原 work_dir。
+新建或真实修订完成后，使用 [任务工具的 stamp-report](task-management.md#报告修订时间与目录更新)，再按工具返回的新 work_dir 执行最终校验。单纯阅读、检查或复用证据不更新时间；不复制旧时间目录形成快照。规范主题、类型、target 和时间后缀均相同的并行任务共享同一交付标识，不能以再次调用 create 代替修订现有报告；同一对象的不同专题使用各自的交付标识。继续已有成果须显式传 --output 或恢复原 work_dir。
+
+目录名称不能单独证明两份任务属于同一报告。例如父主题加专题可能与子主题加专题拼成相同名称；工具检查目录内全部任务记录及报告摘要中的类型、规范主题、target、主报告文件名、report_id 和最初创建时间，仅在身份一致时复用 ID。隐式创建还核对对象 ID 与类型；有意调整同篇报告的对象范围须显式传 --output。分类不同、ID 矛盾或已有记录不完整时拒绝认领，不自动覆盖或追加数字后缀；选择能区分范围的 target 或核对正确的报告路径。任务记录已清理时，仍以正式报告摘要核对身份，不因缺少 .tmp 而忽略已有报告。
+
+创建与修订期间工具使用项目根 `.tmp/.report-write.lock` 的同一独占锁，串行化报告目录的认领和改名。锁处于固定位置，整轮修订及失败回滚期间同时保护新旧路径，不随报告目录移动。它是命名操作的临时控制文件，正常完成或异常退出函数时释放，不属于报告附件或单次研究资料；研究中间资料仍放在报告自己的 .tmp/<run-id>/。锁被占用时重试，不删除其他执行者的锁。进程被强制终止可能留下锁或不完整任务，应先核对锁内进程及现有任务记录，确认原进程已结束后再处理该精确锁文件并修复不完整记录，不自动清理或重新分配已有 ID。
 
 stamp-report 核对源、目标、链接属性和重名冲突后，在项目内移动当前报告目录，同步正式 Markdown 引用及受管任务中的相关路径，更新本报告摘要。Windows 使用原生 PowerShell 移动；冲突或写入失败时保留或恢复原目录和文件。来源原文、历史基线、代码副本和证据散列不因改名自动重写；受影响的下游依据仍需复核，旧 verify 回执不得继续放行。涉及未识别的自定义路径时保留并报告实际缺口，不宣称完成全部外部引用修复。
 
@@ -47,18 +56,20 @@ stamp-report 核对源、目标、链接属性和重名冲突后，在项目内�
 
 ### 类型与主题归类
 
-- 对象调研由 research 处理，分析洞察由独立 research-analysis 处理，内部类型 analysis 保留；两边主题 ID 共用，工作编号仍属于各自入口的计划。
+- 对象调研使用对应对象类型，分析洞察使用 analysis 类型；两边主题 ID 共用，工作编号仍属于各自任务类别的计划。
 - 对比报告包含多个同类型对象，仍是一份交付，不自动复制成多份单对象报告。
-- 新 --output 必须匹配注册主题、实际类型、对象及时间后缀；已有旧位置只按恢复规则维护，不因此接受越界或链接目录。
+- 新 --output 必须匹配注册主题、实际类型、报告专题 target 及时间后缀；已有旧位置只按恢复规则维护，不因此接受越界或链接目录。
 - 主题与对象研究范围分别记录。分类、显示名称或目录调整不等同于重新研究；无法确定主题时使用已注册 general，不凭文件标题自动创建主题。
 
 ## 主题计划的保存与收口
 
-两个入口共用计划模板和维护规则。research 的当前计划保存在 `research-reports/<主题名>/plan.md`；research-analysis 的当前计划保存在 `analysis-reports/<主题名>.plan.md`。计划 front matter 使用稳定 theme_id，不给计划文件追加报告时间戳。只有实际需要时创建，旧位置继续维护，同一入口同一主题只保留一份当前计划。
+两个入口共用计划模板和维护规则。对象调研的当前计划保存在 `research-reports/<主题名>/plan.md`；分析任务的当前计划保存在 `analysis-reports/<主题名>.plan.md`。计划 front matter 使用稳定 theme_id，不给计划文件追加报告时间戳。只有实际需要时创建，旧位置继续维护，同一入口同一主题只保留一份当前计划。
 
-research 计划只列对象调研与补查，analysis 计划只列分析主题／问题；跨入口依赖登记对方计划或报告、稳定 ID、采用版本与接受条件，不复制同一范围的计划。研究范围收口、恢复与状态归档直接更新当前文件，不另存 archive/、日期或修订号副本；历史通过 Git 追溯，保存不自动提交或推送。
+新分析计划的主题层级同样用双下划线连接，例如 `analysis-reports/agent__memory__architecture.plan.md`。已有 `agent-memory-architecture.plan.md` 等旧计划继续复用，不因命名变化创建第二份当前计划。
 
-从 research-reports/<主题名>/plan.md 引用本主题论文报告使用 `paper/<target>-<时间>/report.md`；从 analysis-reports/<主题名>.plan.md 引用调研报告使用 `../research-reports/<主题名>/paper/<target>-<时间>/report.md`。预期路径先用行内代码，文件存在后再转为实际链接。
+对象调研计划只列对象调研与补查，analysis 计划只列分析主题／问题；跨入口依赖登记对方计划或报告、稳定 ID、采用版本与接受条件，不复制同一范围的计划。研究范围收口、恢复与状态归档直接更新当前文件，不另存 archive/、日期或修订号副本；历史通过 Git 追溯，保存不自动提交或推送。
+
+从 research-reports/<主题名>/plan.md 引用本主题论文报告使用 `paper/<target>__<时间>/report.md`；从分析计划引用调研报告时，调研目录仍按单连字符主题名定位，例如从 `analysis-reports/agent__memory.plan.md` 使用 `../research-reports/agent-memory/paper/<target>__<时间>/report.md`。预期路径先用行内代码，文件存在后再转为实际链接。
 
 ### 收口与恢复
 
@@ -126,7 +137,7 @@ research 计划只列对象调研与补查，analysis 计划只列分析主题�
 ## 最终检查与清理
 
 1. 先完成文章和图片落盘，再更新报告中相对路径与目录清单；图片来源／署名放在图注或来源索引。
-2. 先按 [写作规范](writing-policy.md#报告语言润色) 完成润色和对照复核，完成归档及链接同步后，用 research_task.py report-note 生成当前状态说明，再运行 research_task.py verify。它调用 [validate_report.py](../scripts/validate_report.py)，同时检查本次完成度、版本、核心缺口、证据引用和文件规范；通过后仅在临时目录记录校验回执。不带 outline 的文件检查不能替代任务 verify。
+2. 先按 [写作规范](writing-policy.md#报告语言润色) 完成润色和对照复核，完成归档及链接同步后，用 research_task.py report-note 生成当前状态说明，再运行 research_task.py verify。它调用 [validate_report.py](../../research-common/scripts/validate_report.py)，同时检查本次完成度、版本、核心缺口、证据引用和文件规范；通过后仅在临时目录记录校验回执。不带 outline 的文件检查不能替代任务 verify。
 3. 手工复查来源、版本、论证与类型检查清单。结构有效与调研完成度分开检查：partial 可以带明确缺口交付，blocked 不宣称完成也不清理工作资料。脚本不访问远程 URL，也不能证明结论正确。
 4. 最终副本检查通过并完成人工复核后，先同步关联主题计划的成果、状态和缺口，再运行 research_task.py cleanup-plan。向用户列出待删任务相对路径、文件数、占用空间、将保留的报告目录及长期主题计划，以及仍需续查的情况，取得针对该范围的明确确认。检查通过本身不代表批准删除；不以超时、无回复或一般调研授权代替确认。
 5. 确认后及时执行：先重新运行 cleanup-plan，对照已确认的 plan_id，核对实际目标仍是同一受管任务目录。内容或范围变化时先解释变化并取得新确认；没有变化时直接按原确认清理，不再重复询问。Windows 使用原生 PowerShell 删除精确任务目录，随后检查该目录已不存在、报告仍保留；如被占用或操作失败，当轮说明实际残留原因，不把“计划清理”报告成“已清理”。

@@ -7,7 +7,7 @@ description: 协调 GitNexus、Understand Anything 与 Graphify，帮助人或 A
 
 先回答用户想理解的问题，再按证据需要选择后端。保持用户指定的项目、范围、深度和交付形式。
 
-已有 research 执行上下文时，先按 [源码交接约定](../research/references/code-understanding.md) 使用当前任务的问题、版本和产物位置；整个调用只返回一次证据，不重新建立调研计划。
+已有受管任务上下文时，先按 [源码交接约定](../research-common/references/code-understanding.md) 使用当前任务的问题、版本和产物位置；整个调用只返回一次证据，不重新建立调研计划。
 
 ## 选择工作流
 
@@ -48,7 +48,7 @@ node <skill-dir>/scripts/preflight.mjs --target <project> --backend gitnexus --p
 
 现有索引须由对应后端检查版本和覆盖范围，再决定是否更新。依赖准备失败时，说明缺失能力；能够直接阅读源码的部分继续执行，不把失败查询当作“实现不存在”。
 
-调用后端时保持已绑定的目标、版本、范围和输出目录；本地运行说明优先于上游示例的默认 cwd、全量扫描或输出位置。原生图谱／报告属于工具产物，按当前任务管理，不另开一套 research 流程。
+调用后端时保持已绑定的目标、版本、范围和输出目录；本地运行说明优先于上游示例的默认 cwd、全量扫描或输出位置。原生图谱／报告属于工具产物，按当前任务管理，不另开独立研究流程。
 
 ## 汇集证据并讲解
 
@@ -58,4 +58,4 @@ node <skill-dir>/scripts/preflight.mjs --target <project> --backend gitnexus --p
 
 按照用户问题组织回答。典型功能讲解包含入口、主要步骤、数据流、关键分支和源码位置；项目导览包含模块职责、业务路径和推荐阅读顺序。按需读取 [讲解与证据约定](references/explanation.md)。
 
-独立调用时默认在聊天中回答；用户要求文档时保存到指定或目标项目既有文档位置，不能因技能安装在 research 就把结果默认写回 research。独立接到完整开源项目调研请求且尚无 research 执行上下文时，交给 [research-open-source](../research-open-source/SKILL.md)，由调研流程决定交付位置并调用本技能取得源码证据。绘图或交互页面沿用对应技能；后端现有的图谱浏览功能可按需使用。
+独立调用时默认在聊天中回答；用户要求文档时保存到指定或目标项目既有文档位置，不能因技能安装位置就把结果默认写回本仓库。独立接到完整开源项目调研请求且尚无受管任务上下文时，可使用 [research-open-source](../research-open-source/SKILL.md) 的对象规范与共用交付规则确定范围和产物位置，再取得源码证据。绘图或交互页面沿用对应技能；后端现有的图谱浏览功能可按需使用。

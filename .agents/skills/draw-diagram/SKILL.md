@@ -7,7 +7,7 @@ description: 静态技术图的统一入口。用户要画架构图、Agent/RAG 
 
 满足下述图像能力条件时，按每张图要表达的内容选择同目录下的一个绘图技能，默认交付静态 SVG＋PNG；用户指定技能、源文件或其他格式时，以用户要求为准。
 
-由 research 调用时，沿用当前任务的 [配图要求](../research/references/writing-policy.md#自绘技术图) 和 [交付规则](../research/references/delivery-policy.md#自绘图的保存)：research 负责配图必要性、事实依据和报告验收，本入口负责后端选择、生成与绘图检查。默认生成 SVG＋PNG，但最终交付格式、目录、源文件保留和清理由 research 统一管理；不另建调研任务或正式报告。
+用于受管报告配图时，沿用当前任务的 [配图要求](../research-common/references/writing-policy.md#自绘技术图) 和 [交付规则](../research-common/references/delivery-policy.md#自绘图的保存)：调用方负责配图必要性、事实依据和报告验收，本入口负责后端选择、生成与绘图检查。默认生成 SVG＋PNG；最终交付格式、目录、源文件保留和清理由当前调用方与任务配置确定，不另建调研任务或正式报告，不回调顶层入口。
 
 ## 图像能力条件
 

@@ -29,9 +29,50 @@ class CatalogAndRevision(unittest.TestCase):
         self.assertEqual(research["theme_id"], analysis["theme_id"])
         self.assertEqual(research["theme_slug"], "agent-memory-long-term")
         self.assertEqual(Path(research["output_dir"]).relative_to(self.workspace).as_posix(),
-                         "research-reports/agent-memory-long-term/paper/survey-memory-20261108-120000")
+                         "research-reports/agent-memory-long-term/paper/survey-memory__20261108-120000")
         self.assertEqual(Path(analysis["output_dir"]).relative_to(self.workspace).as_posix(),
-                         "analysis-reports/agent-memory-long-term-20261108-120000")
+                         "analysis-reports/agent__memory__long-term__20261108-120000")
+
+    def test_multilevel_analysis_theme_and_subject_are_flat_and_keep_canonical_ids(self):
+        theme = "agent-memory-architecture"
+        for target in (None, theme, "agent__memory__architecture", "mechanisms__tradeoffs"):
+            with self.subTest(target=target):
+                job = task.create_task(self.workspace, "分析", "analysis", theme=theme, target=target)
+                expected_base = "agent__memory__architecture" + ("__" + target if target == "mechanisms__tradeoffs" else "")
+                self.assertEqual(Path(job["output_dir"]).relative_to(self.workspace).parts,
+                                 ("analysis-reports", expected_base + "__20261108-120000"))
+                self.assertEqual(job["theme_id"], theme)
+                self.assertEqual(job["theme_slug"], theme)
+                self.assertEqual(job["classification"]["target"], target if target == "mechanisms__tradeoffs" else theme)
+
+    def test_new_and_legacy_analysis_styles_survive_revision_and_restore(self):
+        subject = "mechanisms__tradeoffs"
+        for base, separator in (("agent__memory__architecture__" + subject, "__"),
+                                ("agent-memory-architecture-" + subject, "__"),
+                                ("agent-memory-architecture-" + subject, "-")):
+            with self.subTest(base=base, separator=separator):
+                job = task.create_task(self.workspace, "分析", "analysis", theme="agent-memory-architecture",
+                                       output=f"analysis-reports/{base}{separator}20261108-120000")
+                self.assertEqual(job["classification"]["target"], subject)
+                work, outline, report = self.write_report(job)
+                plan = self.workspace / "analysis-reports/agent__memory__architecture.plan.md"
+                plan.write_text(f"# 计划\n\n[报告]({report.parent.name}/report.md)\n", encoding="utf8")
+                task.verify_task(work)
+                changed = revision.stamp_report(work, "2026-11-09T13:14:15+08:00")
+                self.assertEqual(Path(changed["output_dir"]).name, base + separator + "20261109-131415")
+                self.assertEqual(changed["report_id"], outline["report_id"])
+                self.assertEqual(changed["created_at"], outline["created_at"])
+                self.assertTrue(task.verify_task(changed["work_dir"])["verified"])
+                self.assertNotIn(report.parent.name, plan.read_text(encoding="utf8"))
+                self.assertIn(Path(changed["output_dir"]).name, plan.read_text(encoding="utf8"))
+                restored = task.create_task(self.workspace, "续查", "analysis", output=changed["output_dir"])
+                self.assertEqual(restored["report_id"], outline["report_id"])
+                self.assertEqual(restored["classification"]["target"], subject)
+
+    def test_analysis_explicit_output_cannot_substitute_a_different_registered_theme(self):
+        with self.assertRaisesRegex(ValueError, "registered theme"):
+            task.create_task(self.workspace, "分析", "analysis", theme="agent-memory-architecture",
+                             output="analysis-reports/agent__orchestration__tradeoffs__20261108-120000")
 
     def test_invalid_registry_updates_leave_the_file_unchanged(self):
         path = self.workspace / "themes.yaml"
@@ -89,6 +130,51 @@ class CatalogAndRevision(unittest.TestCase):
         self.assertTrue(checked["verified"])
         self.assertEqual(checked["completion"], "partial")
 
+    def test_segmented_subject_survives_revision_reference_repair_and_restore(self):
+        for subject in ("codex__context-engineering__context-compaction",
+                        "codex--context-engineering--context-compaction", "codex-context-engineering"):
+            for separator in ("__", "-"):
+                with self.subTest(subject=subject, separator=separator):
+                    self.check_subject_revision_and_restore(subject, separator)
+
+    def check_subject_revision_and_restore(self, subject, separator):
+        output = f"research-reports/memory/product/{subject}-20261108-120000" if separator == "-" else None
+        job = task.create_task(self.workspace, "Codex 上下文压缩", "product", theme="memory",
+                               items=["codex:product=Codex"], target=subject, output=output)
+        work, outline, report = self.write_report(job)
+        task.verify_task(work)
+        old_relative = report.relative_to(self.workspace).as_posix()
+        plan = self.workspace / "research-reports/memory/plan.md"
+        plan.write_text(f"# 计划\n\n[报告](product/{report.parent.name}/report.md)\n", encoding="utf8")
+        changed = revision.stamp_report(work, "2026-11-09T13:14:15+08:00")
+        new_work, _, current = task.open_task(changed["work_dir"])
+        new_report = Path(current["output_dir"]) / "report.md"
+        self.assertEqual(new_report.relative_to(self.workspace).as_posix(),
+                         f"research-reports/memory/product/{subject}{separator}20261109-131415/report.md")
+        self.assertFalse(report.exists())
+        self.assertEqual(current["report_id"], outline["report_id"])
+        self.assertEqual(current["created_at"], outline["created_at"])
+        self.assertEqual(current["classification"]["target"], subject)
+        self.assertEqual(current["items"][0]["id"], "codex")
+        self.assertNotIn(report.parent.name, plan.read_text(encoding="utf8"))
+        self.assertIn(new_report.parent.name, plan.read_text(encoding="utf8"))
+        self.assertNotIn(old_relative, new_report.read_text(encoding="utf8"))
+        self.assertTrue(task.verify_task(new_work)["verified"])
+        restored = task.create_task(self.workspace, "续查", "product", output=new_report.parent)
+        self.assertEqual(restored["classification"]["target"], subject)
+        self.assertEqual(restored["report_id"], outline["report_id"])
+
+    def test_timestamp_parser_distinguishes_subject_segments_from_new_and_legacy_suffixes(self):
+        subject = "codex__20250101-120000__context-engineering"
+        for separator in ("__", "-"):
+            with self.subTest(separator=separator):
+                name = subject + separator + "20261108-120000"
+                self.assertEqual(catalog.split_name(name), (subject, "2026-11-08T12:00:00+08:00"))
+                self.assertEqual(catalog.date_separator(name), separator)
+                with self.assertRaisesRegex(ValueError, "Invalid.*timestamp"):
+                    catalog.split_name(subject + separator + "20261308-120000")
+        self.assertEqual(catalog.split_name("codex__context-engineering"), ("codex__context-engineering", None))
+
     def test_stamp_cli_returns_the_new_portable_work_directory(self):
         work, _, report = self.write_report(self.create())
         output = io.StringIO()
@@ -136,7 +222,7 @@ class CatalogAndRevision(unittest.TestCase):
         work, outline, report = self.write_report(self.create())
         original = report.read_bytes()
         parent = self.workspace / "research-reports/general/paper"
-        conflict = parent / "example-research-20261109-131415"
+        conflict = parent / "example-research__20261109-131415"
         conflict.mkdir()
         with self.assertRaisesRegex(ValueError, "already exists"):
             revision.stamp_report(work, "2026-11-09T13:14:15+08:00")
@@ -146,7 +232,7 @@ class CatalogAndRevision(unittest.TestCase):
                 revision.stamp_report(work, "2026-11-10T13:14:15+08:00")
         self.assertEqual(report.read_bytes(), original)
         self.assertEqual(task.open_task(work)[2]["updated_at"], outline["updated_at"])
-        self.assertFalse((parent / "example-research-20261110-131415").exists())
+        self.assertFalse((parent / "example-research__20261110-131415").exists())
 
     def test_revision_preserves_manual_quotes_next_to_generated_notes(self):
         work, _, report = self.write_report(self.create())

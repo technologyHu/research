@@ -10,7 +10,7 @@ archived_at: null
 
 # <主题名称>调研计划
 
-模板由两个独立入口共用：research 保存到 `research-reports/<主题名>/plan.md`，任务限 paper／open-source／product／benchmark；research-analysis 保存到 `analysis-reports/<主题名>.plan.md`，标题可改为分析洞察计划，任务仅为 analysis。按本轮入口裁剪示例，跨入口来源与依赖登记实际路径，不将基础报告列成分析 items。
+模板由两个独立入口共用：对象调研保存到 `research-reports/<主题名>/plan.md`，主题层级用单连字符连接，任务限 paper／open-source／product／benchmark；分析任务保存到 `analysis-reports/<主题名>.plan.md`，新计划主题层级用双下划线连接，标题可改为分析洞察计划，任务仅为 analysis。旧计划先复用原路径。按本轮入口裁剪示例，跨入口来源与依赖登记实际路径，不将基础报告列成分析 items。
 
 ## 目标与边界
 
@@ -48,7 +48,7 @@ archived_at: null
 
 不因前置 done 就认定满足，也不因 partial／cancelled 就否定已有有效片段。是否接受由本行事先明确的条件及实际证据决定；只有所需部分有效时才能采用，保留其他缺口。soft 缺少时说明为什么不影响核心验收，不能将必需证据降为辅助来绕过问题。
 
-前置成果或接受条件实质变化时保留原接受记录，检查实际使用它的直接下游；下游产出也变化才沿该路径继续检查。待复核的 hard 关系不能放行 done，无关任务不作废。记录变化原因、受影响问题、复核结论与新的接受版本；具体规则按 research 的依赖规范执行。
+前置成果或接受条件实质变化时保留原接受记录，检查实际使用它的直接下游；下游产出也变化才沿该路径继续检查。待复核的 hard 关系不能放行 done，无关任务不作废。记录变化原因、受影响问题、复核结论与新的接受版本；具体规则按 共用依赖规范执行。
 
 ## 来源、观点归属与相关背景
 
@@ -60,7 +60,7 @@ archived_at: null
 | open-source | [开源项目背景字段](../../research-open-source/references/selection-criteria.md#计划中的背景字段) |
 | product | [产品背景字段](../../research-product/references/selection-criteria.md#计划中的背景字段) |
 | benchmark | [评测背景字段](../../research-benchmark/references/selection-criteria.md#计划中的背景字段) |
-| analysis | [分析洞察背景字段](../../research-analysis/references/selection-criteria.md#计划中的背景字段) |
+| analysis | [分析洞察背景字段](analysis-criteria.md#计划中的背景字段) |
 
 | 任务／对象 ID | 实际类型 | 来源主体及角色 | 按该类型定义的背景摘要 | 来源、适用时间及核实状态 |
 | --- | --- | --- | --- | --- |
@@ -117,7 +117,7 @@ benchmark 行采用“测量有效性与评估可信度／独立评测采用与�
 
 ## 执行范围与回写记录
 
-尚无执行记录。实际执行时，按 research 的范围快照与对照规范，在受管任务中保存本次目标与验收，正式回写前再对照当前计划；这里保留持久摘要，不链接 .tmp：
+尚无执行记录。实际执行时，按 共用范围快照与对照规范，在受管任务中保存本次目标与验收，正式回写前再对照当前计划；这里保留持久摘要，不链接 .tmp：
 
 - 主题任务／问题 ID、run_id：<实际标识，保留多轮记录>
 - 起始计划修订／本次核对修订及日期：<原 revision、当前 revision、实际核对日期>

@@ -26,8 +26,8 @@ created_at: "2026-11-08T12:00:00+08:00"
 updated_at: "2026-11-08T12:00:00+08:00"
 classification: {type: paper, theme: agent-memory, target: example-paper}
 workspace: ../../../../../..
-work_dir: research-reports/agent-memory/paper/example-paper-20261108-120000/.tmp/paper-review-001
-output_dir: research-reports/agent-memory/paper/example-paper-20261108-120000
+work_dir: research-reports/agent-memory/paper/example-paper__20261108-120000/.tmp/paper-review-001
+output_dir: research-reports/agent-memory/paper/example-paper__20261108-120000
 topic: 示例论文的方法与实验分析
 goal: 理解方法并核实主要实验结论
 time_range: 采用论文 v1 及其同期材料
@@ -52,8 +52,8 @@ execution:
 - `version` 可以为 null，表示未指定；实际采用的版本仍应在结果里记录。不要把组织名当作默认研究对象。
 - `revision` 在范围变化时递增；它用于解释变更，不意味着旧结果必须全部废弃。
 - `goal`、`time_range` 为可选字符串，用于明确用户目标和时间边界；改变它们会要求重新核对已有字段。
-- 任务工具记录 classification.type／theme／target，用于目录归类与展示；创建时 --theme 指定分类主题。它不参与证据问题指纹，调整分类不代表重新核实。分类与默认目录规则见 [交付规范](delivery-policy.md#类型与主题归类)，显式 output_dir 和既有报告位置优先。
-- report_id、created_at、updated_at 和规范主题信息会进入成稿摘要；时间字段仅描述报告生命周期，不能替代来源访问日期。持续主题的长期问题、任务与阶段保存在 [主题级计划](theme-planning.md) 中；classification.theme 用于关联同一主题，单次 topic／goal／fields 仍只描述本次研究范围。计划表不替代字段证据、完成度检查或报告来源。
+- 任务工具记录 classification.type／theme／target，用于目录归类与展示；创建时 --theme 指定分类主题，--target 指定报告的研究专题或范围。classification.target 不要求等于 items[*].id：例如 target 为 codex__context-engineering__context-compaction，item.id 为 codex，结果文件仍为 results/codex.json；单对象任务未指定 target 时才默认使用对象 id。target 的片段间用双下划线，片段内用单连字符，数量不固定；旧单连字符及双连字符 target 保留原样，item.id 仍使用原有单连字符规则。它不参与证据问题指纹，调整分类不代表重新核实。分类与默认目录规则见 [交付规范](delivery-policy.md#类型与主题归类)，显式 output_dir 和既有报告位置优先。
+- report_id、created_at、updated_at 和规范主题信息会进入成稿摘要；时间字段仅描述报告生命周期，不能替代来源访问日期。theme_slug 保留注册表推导的单连字符规范主题名，theme_path 保存各级 slug 数组；分析洞察的目录将这些层级用双下划线连接，不将目录展示名写成新的主题 ID。持续主题的长期问题、任务与阶段保存在 [主题级计划](theme-planning.md) 中；classification.theme 用于关联同一主题，单次 topic／goal／fields 仍只描述本次研究范围。计划表不替代字段证据、完成度检查或报告来源。
 
 ## 完整流程的 fields（JSON 或等价 YAML）
 
@@ -77,7 +77,7 @@ fields:
 开始分析前运行：
 
 ```text
-python <skills_root>/research/scripts/validate_results.py --outline <outline.yaml> --fields <fields.yaml> --fingerprints
+python <skills_root>/research-common/scripts/validate_results.py --outline <outline.yaml> --fields <fields.yaml> --fingerprints
 ```
 
 此模式检查配置及已有文章缓存，打印 `input_fingerprints[item_id][field_id]` 和已取得正文的 `article_fingerprints[article_id]`，不读取结果，也不表示调研已经完成。将每个字段对应的范围指纹保存到其结果记录的 `input_fingerprint`。
@@ -166,7 +166,7 @@ repo: 的限制仅针对项目内本地报告引用，原始论文、官方文�
 {
   "id": "memory-survey-report",
   "title": "记忆综述论文调研报告",
-  "url": "repo:research-reports/agent-memory/paper/survey-agent-memory-20261108-120000/report.md",
+  "url": "repo:research-reports/agent-memory/paper/survey-agent-memory__20261108-120000/report.md",
   "kind": "secondary",
   "version": "实际报告版本或日期",
   "accessed_at": "实际读取日期，格式 YYYY-MM-DD",
@@ -175,7 +175,7 @@ repo: 的限制仅针对项目内本地报告引用，原始论文、官方文�
 }
 ```
 
-`repo:` 后是项目相对 Markdown 路径，不能指向计划、临时文件、技能、外部路径、链接目录或本篇输出。正文使用相对链接，如 `[已有调研](../../research-reports/agent-memory/paper/survey-agent-memory-20261108-120000/report.md#分类体系)`，不将 `repo:` 标识直接当作阅读链接。full 的 evidence 仍按 source_id 和 locator 定位；既有调研事实、贡献者观点和本次推导分别记录，推断写明 reason。
+`repo:` 后是项目相对 Markdown 路径，不能指向计划、临时文件、技能、外部路径、链接目录或本篇输出。正文使用相对链接，如 `[已有调研](../../research-reports/agent-memory/paper/survey-agent-memory__20261108-120000/report.md#分类体系)`，不将 `repo:` 标识直接当作阅读链接。full 的 evidence 仍按 source_id 和 locator 定位；既有调研事实、贡献者观点和本次推导分别记录，推断写明 reason。
 
 校验器会核对实际文件与 sha256；来源变化后先复核采用的主张及相关推导，再更新版本、散列与结果，不通过只改散列跳过复核。正文仅放行已用于证据的已有报告相对链接，并检查章节锚点；该例外不扩大普通报告、计划或图片的输出边界。不复制来源报告为本篇附件，不将报告转述当作原始证据。
 

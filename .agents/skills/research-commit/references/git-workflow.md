@@ -10,7 +10,7 @@
 2. 在独立临时目录分配一个尚不存在的索引文件。只对下面的 Git 子进程设置 `GIT_INDEX_FILE=<absolute-temporary-index>`，不修改会话全局环境，不覆盖真实索引。先执行 `git read-tree <recorded-HEAD>`，获得该篇提交之前的完整仓库基线。
 3. 在临时索引对精确路径执行 `git --literal-pathspecs update-index --force-remove -- <files>`，随后把第 1 步的原始字节输出送给 `git update-index -z --index-info` 的标准输入；若条目为空则只保留删除结果。这样加入的是所选暂存 blob，而不是工作区文本；无关暂存项不会从原索引混入候选。
 4. 用临时索引执行 `git write-tree`，记录候选 tree，并按下节核对。实际报告版本若不同于当前工作区，披露验证针对的版本与限制，不沿用工作区回执冒充候选版本已做证据复核。
-5. 提交前重新核对 HEAD 和原索引仍与第 1 步一致；同时确认候选 tree 未改变。使用该临时索引执行不带路径、不带 `--only`／`-a` 的 `git commit -m <message>`；需要 amend 时先满足主技能的历史条件，再使用 `git commit --amend`。
+5. 提交前重新核对 HEAD 和原索引仍与第 1 步一致；同时确认候选 tree 未改变。使用该临时索引执行不带路径、不带 `--only`／`-a` 的 `git commit -m <message>`；需要 amend 时先满足 [报告提交技能的历史条件](../SKILL.md#同篇报告的修订尽量合并)，再使用 `git commit --amend`。
 6. 成功后核对实际提交的 tree 与父提交关系，检查真实索引内容和工作区文件未被改写。所选暂存改动已进入 HEAD，因此它们不再显示为待提交属于正常结果；同文件的未暂存改动与无关文件的暂存改动应保持。核对完成后只清理本次临时目录；若有差异或需要诊断则保留并报告，不用覆盖真实索引来强行消除状态差异。
 
 不直接复制整份原索引作为候选，否则无关暂存项也会随 commit 进入。真实索引不应被临时替换或清空；若原索引已有变化，重新核对，不覆盖并发更新。对于尚无 HEAD 的仓库，可用空 tree 对应的空索引作为基线，但仍需核对仓库身份与用户的首次提交范围，不擅自先造一个初始化提交。
@@ -22,7 +22,7 @@
 - **普通索引提交**：候选为当前索引的 `git write-tree`。**暂存版本隔离**：候选为上节临时索引的 tree。**工作区 `--only` 提交**：先用临时索引从当前 HEAD 起步，仅对选中文件执行 `git --literal-pathspecs add -- <files>`，再 write-tree；实际提交前保持这些文件及相关 Git attributes／过滤器配置不变。
 - 用 `git diff-tree --no-commit-id --name-status -r -z <base> <candidate-tree>` 核对完整变更范围。新提交的 base 为起始 HEAD；amend 的最终范围用原 HEAD 的父提交比较，同时与原 HEAD 比较本次新增修订。根提交按空树基线处理，不引用不存在的 `HEAD^`。发生 rename 展示时保留两个路径，不按显示文本截断。
 - 从候选 tree 读取文件到隔离目录，保持仓库相对布局。可用 `git ls-tree -r -z <tree>` 得到路径及对象号，再用 `git cat-file blob <object-id>` 读取内容；不能从原工作区复制文件来冒充候选版本。检查落盘路径仍在该临时目录内，不跟随外部符号链接，不执行快照内的脚本、Git 钩子、过滤器或安装流程。
-- 对默认 `report.md` 交付可运行当前可信技能目录中的 `research/scripts/validate_report.py <snapshot-report-dir>`，检查候选中的 Markdown 和本地链接；不传 outline 时只代表文件检查。自定义主文件、已登记额外交付或平台特殊文件需按实际交付配置补充检查，不修改候选文件或虚构 outline 来让默认检查通过。
+- 对默认 `report.md` 交付可运行当前可信技能目录中的 `research-common/scripts/validate_report.py <snapshot-report-dir>`，检查候选中的 Markdown 和本地链接；不传 outline 时只代表文件检查。自定义主文件、已登记额外交付或平台特殊文件需按实际交付配置补充检查，不修改候选文件或虚构 outline 来让默认检查通过。
 - 报告引用的来源文章、补充报告、附件，以及计划中的实际成果链接，都以候选 tree 中的持久文件为准。工作区有而候选没有时，按用户授权补齐对应版本或保留缺口并暂缓，不能在“只提交暂存内容”模式自动 add 未暂存资源。
 - 记录核对通过的候选 tree。提交后实际 tree 必须一致；钩子或其他进程改变提交内容时暂停后续报告，先审查差异，不自动回滚、amend 或跳过钩子。此检查不访问来源网站、不证明论证正确，也不执行图片渲染或视觉复核。
 

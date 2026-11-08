@@ -1,0 +1,4 @@
+-r research-graph-requirements.txt
+requests==2.32.5
+beautifulsoup4==4.14.3
+markdownify==1.2.2

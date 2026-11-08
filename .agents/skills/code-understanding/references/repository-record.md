@@ -1,10 +1,10 @@
 # 仓库选择与记录
 
-本文件统一规定源码仓库的发现、采用和选择记录，由 code-understanding 执行；research 传入已有范围与来源，接收结果，不再重复选仓。
+本文件统一规定源码仓库的发现、采用和选择记录，由 code-understanding 执行；调用方传入已有范围与来源，接收结果，不再重复选仓。
 
 ## 确定源码仓库
 
-1. **有用户指定代码**：采用明确 URL、路径或对话中已绑定的项目，即使不是官方也保留其真实身份，按指定范围分析。地址、权限、版本或实现范围有问题时如实说明，不自行换仓库。只有研究对象也无法确定时才询问；不能因技能位于 research 就默认分析 research。
+1. **有用户指定代码**：采用明确 URL、路径或对话中已绑定的项目，即使不是官方也保留其真实身份，按指定范围分析。地址、权限、版本或实现范围有问题时如实说明，不自行换仓库。只有研究对象也无法确定时才询问；不能因技能位于本仓库就默认分析本仓库。
 2. **对象明确但未指定仓库**：从原论文、项目官网／文档、作者主页的代码链接开始，再结合准确名称、作者／机构和关键方法搜索代码平台。摘要只用于发现候选，必须打开原始来源与实际代码核实。
 3. **自动采用门槛**：仅采用可核验的官方实现或可信第三方复现。官方需论文、官网／官方文档或可核实作者账号的关联证据，README 自称 official 不够。复现需明确原工作和复现范围、可读的相关实现、可辨识的维护主体，以及公开复现报告、独立核验或原作者认可等复现依据。维护者身份与 Star 本身都不能证明复现可靠。普通教程、无实质复现的 fork／镜像、仅同名或概念相似的项目不自动采用。
 
@@ -16,11 +16,11 @@
 
 ## 何时使用完整记录
 
-需要自动发现／比较候选、核对论文与代码等版本映射，或跨仓库覆盖问题时，填写 JSON 并运行选择检查。普通指定文件、函数或单仓库阅读，只需记录路径、实际版本、变更及证据，直接 preflight；身处 research 或恢复任务本身不要求新建完整选仓记录。
+需要自动发现／比较候选、核对论文与代码等版本映射，或跨仓库覆盖问题时，填写 JSON 并运行选择检查。普通指定文件、函数或单仓库阅读，只需记录路径、实际版本、变更及证据，直接 preflight；身处本仓库或恢复任务本身不要求新建完整选仓记录。
 
 ## 保存和执行
 
-需要完整记录时，research 每个对象保存一份 `scratch/code/<item_id>/repository-selection.json`；多仓库放在同一份记录中，沿用当前对象与问题 ID。独立任务沿用用户指定的位置，未要求交付文件时使用本次临时位置，不为记录修改目标仓库。选择记录不新增 research 结果字段；路径隔离与证据回写见 research 的 [交接约定](../../research/references/code-understanding.md)。
+需要完整记录时，每个对象保存一份 `scratch/code/<item_id>/repository-selection.json`；多仓库放在同一份记录中，沿用当前对象与问题 ID。独立任务沿用用户指定的位置，未要求交付文件时使用本次临时位置，不为记录修改目标仓库。选择记录不新增受管任务结果字段；路径隔离与证据回写见 [交接约定](../../research-common/references/code-understanding.md)。
 
 从 [JSON 模板](repository-record.example.json) 开始，用实际检索和阅读结果替换示例，执行：
 
@@ -49,7 +49,7 @@ node <skill-dir>/scripts/repository-selection.mjs --input <current-facts.json> -
 - `relevance.status` 为 matched、unrelated 或 unverified；matched 需要实际核对的相关性证据。
 - `version` 记录 `requested`（须与 request.version 一致）、matched／mismatch／unverified 的 `status`、实际 `ref` 和完整 `commit`。非 Git 源码使用内容快照的 `snapshot_sha256`；存在本地修改时还需记录其摘要，并交给 preflight 核对。指定研究版本时附 tag_mapping／paper／official_page／reproduction_report 类型的版本映射证据；commit 固定本身不证明它对应某篇论文。
 - `components` 为 `{role, paths, question_ids, evidence}` 列表。paths 使用仓库内相对路径，需已核实的 source_code 证据。空仓库为 `[]`；SDK 只能覆盖 SDK 问题。原论文与复现实现存在差异时在证据 note 中明确限制。
-- `runtime.status` 为 not_run（默认）、blocked 或 verified。缺少权重、数据、GPU 等记入 `missing`，不会排除可读源码。verified 需实际 execution 证据；外部复现报告不能代替本次运行。运行行为仍遵循 research 的执行约定。
+- `runtime.status` 为 not_run（默认）、blocked 或 verified。缺少权重、数据、GPU 等记入 `missing`，不会排除可读源码。verified 需实际 execution 证据；外部复现报告不能代替本次运行。运行行为仍遵循共用执行约定。
 
 每条 evidence 包含 `kind`、`url`、精确 `locator`、说明支持关系与条件的 `note`、布尔值 `verified`。模板全部为 false；仅在实际打开原始来源、代码或执行记录核实后改为 true，不能为了让检查通过而填写。工具只能检查已记录的事实是否满足规则，不能证明填入的网页或代码事实真实。
 

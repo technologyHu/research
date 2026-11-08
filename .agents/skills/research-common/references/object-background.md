@@ -10,7 +10,7 @@
 | open-source | 发起／维护主体、维护者、项目支持、治理与下游 | [开源项目标准](../../research-open-source/references/selection-criteria.md#计划中的背景字段) |
 | product | 运营公司、核心团队、适用的融资／母公司支持及客户关系 | [产品标准](../../research-product/references/selection-criteria.md#计划中的背景字段) |
 | benchmark | 提出／发布／治理机构、数据与资金支持、参评及判分关系 | [评测标准](../../research-benchmark/references/selection-criteria.md#计划中的背景字段) |
-| analysis | 分析目标、已有成果依据、样本边界与可选观点归属 | [分析洞察标准](../../research-analysis/references/selection-criteria.md#计划中的背景字段) |
+| analysis | 分析目标、已有成果依据、样本边界与可选观点归属 | [分析洞察标准](analysis-criteria.md#计划中的背景字段) |
 
 同一任务涉及异类对象时分对象记录。是否存在公司或投资安排按实际主体判断；不能因为分析使用跨类型成果，或任务表有资金列，就将所有对象按公司或产品调查。双重身份需要分别说明，例如开源项目的维护公司融资与该项目自身的采用数据分别记录。
 

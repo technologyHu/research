@@ -91,15 +91,15 @@ python .agents/skills/web-article-fetcher/scripts/fetch_article.py --validate-on
 python -X utf8 -m unittest discover -s .agents/skills/web-article-fetcher/scripts -p test_fetch_article.py
 ```
 
-## 接入 research
+## 接入受管任务
 
-由 [research-deep](../research-deep/SKILL.md) 按需调用，完整流程以 [文章获取与归档](../research/references/article-acquisition.md) 为准。
+由 [research-deep](../research-deep/SKILL.md) 按需调用，完整流程以 [文章获取与归档](../research-common/references/article-acquisition.md) 为准。
 
 - 用户指定的文章必须获取，直接使用已有 URL 和任务返回的 work_dir，不重复询问是否下载或保存位置，不另建调研任务。
 - 使用 research_task.py fetch-articles，结果先进入 `<调研目录>/.tmp/<任务ID>/sources/articles/`，articles.json 保存状态。默认只保留远程图片链接，必要图片按需下载。
 - 抓取成功仍需阅读正文并用 review-article 接受或拒绝；文章定位、原始来源身份及证据是否支持结论由调研代理判断。
 - 由 research-report 将实际引用且允许保留的原文归档到 references/，保留资料源链接；只归档报告实际嵌入的图片到 assets/。未引用文章留在临时目录，确认后清理。
-- 补充文章即使标记 optional，正文引用时仍须核对及归档。research 补图使用 download-article-images，仅处理所选文章的图片；正文重查可用 fetch-articles --id 配合 --refresh。失败保留旧有效版本，内容未变不重置核对和归档，变化后的正文作为新版本等待核对。
+- 补充文章即使标记 optional，正文引用时仍须核对及归档。受管任务补图使用 download-article-images，仅处理所选文章的图片；正文重查可用 fetch-articles --id 配合 --refresh。失败保留旧有效版本，内容未变不重置核对和归档，变化后的正文作为新版本等待核对。
 - PDF 或其他已读取资料可经 import-article 导入当前任务内的 Markdown，再人工核对。不能把摘要、译文、验证页或生成文本当成原文。
 
-独立保存使用上述标题目录及自动检查。调研候选版本仍由 research_task.py 通过 directory_name 指定目录，不迁移既有任务或改变默认 remote 策略；抓取时的四项检查也会写入候选版本的 metadata.json。后续补图、人工核对、版本切换及归档以 articles.json 和 research 的交付检查为准，不要将候选版本的自动检查报告当作整份调研的完成证明。
+独立保存使用上述标题目录及自动检查。调研候选版本仍由 research_task.py 通过 directory_name 指定目录，不迁移既有任务或改变默认 remote 策略；抓取时的四项检查也会写入候选版本的 metadata.json。后续补图、人工核对、版本切换及归档以 articles.json 和共用交付检查为准，不要将候选版本的自动检查报告当作整份调研的完成证明。

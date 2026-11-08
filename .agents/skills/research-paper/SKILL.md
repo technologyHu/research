@@ -9,8 +9,8 @@ description: 深入调研一篇或多篇论文，分析研究问题、方法、�
 
 本技能提供对象类型规范，不另建一套保存、搜索或清理流程。
 
-- 从 [research](../research/SKILL.md) 路由进入时，把这里的维度用于当前 fields，随后由 [research-deep](../research-deep/SKILL.md) 执行、[research-report](../research-report/SKILL.md) 成稿。
-- 用户直接调用本技能时，复用 research 的计划建立步骤，固定类型为 `paper`，再接入相同执行与成稿阶段；不重复进行类型路由。
+- 接收已明确的对象与问题，将本类型维度用于当前 fields；需要执行和成稿时可分别使用 [research-deep](../research-deep/SKILL.md) 与 [research-report](../research-report/SKILL.md)，不回调顶层入口。
+- 用户直接调用本技能时，按 [共用计划规则](../research-common/references/theme-planning.md) 明确问题与范围，固定类型为 `paper`，再按需使用执行与成稿子技能；不重复进行类型路由，也不回调顶层入口。
 - 单对象和对比均适用。用户仅要某个维度或计划时，按该范围裁剪。
 
 ## 类型重点
@@ -19,11 +19,11 @@ description: 深入调研一篇或多篇论文，分析研究问题、方法、�
 
 ## Survey 论文
 
-survey 仍为 `paper`，单篇对象目录使用 `survey-<paper-id>`；多篇 survey 比较可使用 `compare-survey-<slug>`。按 [survey 阅读规范](references/survey.md) 设计问题与成稿，不要求综述具备原创算法、实验或复现代码。基于既有调研输出形成的主题分析洞察另归 analysis，贡献者观点可选。
+survey 仍为 `paper`，单篇报告目录使用 `survey-<专题标识>__<时间>`，专题标识可采用论文简称或体现阅读范围；多篇 survey 比较可使用 `compare-survey-<slug>`。按 [survey 阅读规范](references/survey.md) 设计问题与成稿，不要求综述具备原创算法、实验或复现代码。基于既有调研输出形成的主题分析洞察另归 analysis，贡献者观点可选。
 
 ## 按阶段读取
 
 - 选择／排序论文，或分析其权威性、影响力与机构／资助背景时，读取 [类型评估与背景标准](references/selection-criteria.md)，使用论文定义及“计划中的背景字段”；不以期刊／机构名称单独赋级。
 - 规划问题和组织报告时读取 [报告模板](references/report-template.md)，根据主题与深度裁剪，保留研究目标所需内容。
 - 搜集证据与交付前读取 [检查清单](references/checklist.md)。
-- 来源、事实与推断遵循 [证据规范](../research/references/evidence-policy.md)，保存与清理遵循 [交付规范](../research/references/delivery-policy.md)。
+- 来源、事实与推断遵循 [证据规范](../research-common/references/evidence-policy.md)，保存与清理遵循 [交付规范](../research-common/references/delivery-policy.md)。

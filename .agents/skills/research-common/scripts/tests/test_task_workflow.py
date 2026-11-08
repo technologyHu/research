@@ -34,7 +34,7 @@ class TaskWorkflow(unittest.TestCase):
         clock = patch.object(task.catalog, "now", return_value=datetime.fromisoformat("2026-11-08T12:00:00+08:00"))
         clock.start()
         self.addCleanup(clock.stop)
-        self.store = self.workspace / "research-reports/general/paper/example-research-20261108-120000/.tmp"
+        self.store = self.workspace / "research-reports/general/paper/example-research__20261108-120000/.tmp"
 
     def create(self, **kwargs):
         if not kwargs.get("output") and not kwargs.get("target") and not kwargs.get("native_target_name"):

@@ -317,7 +317,7 @@ class ResultChecks(unittest.TestCase):
             import yaml
         except ImportError:
             self.skipTest("YAML support is optional")
-        text = (SCRIPTS.parent / "references/research-config.md").read_text(encoding="utf-8")
+        text = (SCRIPTS.parents[1] / "research-common/references/research-config.md").read_text(encoding="utf-8")
         yaml_blocks = re.findall(r"```yaml\n(.*?)```", text, re.S)
         json_blocks = re.findall(r"```json\n(.*?)```", text, re.S)
         outline, fields = (yaml.safe_load(block) for block in yaml_blocks[:2])

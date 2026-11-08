@@ -1,6 +1,6 @@
 # 参考文章获取、核对与归档
 
-所有 research 类型及 light／full 都遵循本流程。抓取能力由项目内 [web-article-fetcher](../../web-article-fetcher/SKILL.md) 提供，来源判断仍遵循 [证据规范](evidence-policy.md)。下列命令从项目根执行，`<work_dir>` 使用任务返回的相对路径。
+所有受管任务类型及 light／full 都遵循本流程。抓取能力由项目内 [web-article-fetcher](../../web-article-fetcher/SKILL.md) 提供，来源判断仍遵循 [证据规范](evidence-policy.md)。下列命令从项目根执行，`<work_dir>` 使用任务返回的相对路径。
 
 ## 指定文章必须获取
 
@@ -9,8 +9,8 @@
 创建任务可重复传 `--reference URL`；已有任务使用：
 
 ```text
-python .agents/skills/research/scripts/research_task.py add-article --work-dir <work_dir> --url https://example.org/article
-python .agents/skills/research/scripts/research_task.py fetch-articles --work-dir <work_dir>
+python .agents/skills/research-common/scripts/research_task.py add-article --work-dir <work_dir> --url https://example.org/article
+python .agents/skills/research-common/scripts/research_task.py fetch-articles --work-dir <work_dir>
 ```
 
 自行发现的补充来源需要获取时，先用 `add-article --optional` 登记，再 fetch-articles。它会执行当前清单内的待获取项；可重复 `--id <文章ID>` 只处理选定文章，其他条目保持原样。相同 URL 去除 fragment 后去重，保留查询参数，不合并可能代表不同版本的 URL。已取得正文的缓存复用原日期，不假装重新访问；需要重查当前网页时用 `fetch-articles --id <文章ID> --refresh`。
@@ -44,7 +44,7 @@ articles.json 记录本次 run_id、原始与最终 URL、标题、实际访问�
 fetch-articles 默认 `--images remote`，正文保留远程图片链接。补图使用独立命令，不重抓正文、不更改正文散列、原访问日期、核对记录或已有归档：
 
 ```text
-python .agents/skills/research/scripts/research_task.py download-article-images --work-dir <work_dir> --id <文章ID> --image-url https://example.org/figure.png
+python .agents/skills/research-common/scripts/research_task.py download-article-images --work-dir <work_dir> --id <文章ID> --image-url https://example.org/figure.png
 ```
 
 可重复 --image-url，或用 --all 选择该文章列出的所有图片；--refresh 只刷新所选图片。图片失败明确返回 failures，已有有效图保留并记录失败尝试。成功下载的图仍需人工查看，实际引用后才归档到 assets/。不修改临时正文中的链接，归档阶段再选择图片并改写最终链接。
@@ -62,7 +62,7 @@ python .agents/skills/research/scripts/research_task.py download-article-images 
 HTTP 成功不等于已读、正文完整或结论正确。阅读 article.md，核对标题、正文边界、原始来源及缺失部分，再标记：
 
 ```text
-python .agents/skills/research/scripts/research_task.py review-article --work-dir <work_dir> --id <文章ID> --decision accept --reason "已对照原页面核对正文与相关章节"
+python .agents/skills/research-common/scripts/research_task.py review-article --work-dir <work_dir> --id <文章ID> --decision accept --reason "已对照原页面核对正文与相关章节"
 ```
 
 无法确认时用 --decision reject 并写明原因。工具对正文退化为整页提取会给 needs_review；明确人工核对后才可接受。验证页或抓取失败没有可接受的正文，不能仅修改状态。
@@ -70,7 +70,7 @@ python .agents/skills/research/scripts/research_task.py review-article --work-di
 其他读取方式取得的正文先存到当前任务 scratch/，再导入并核对：
 
 ```text
-python .agents/skills/research/scripts/research_task.py import-article --work-dir <work_dir> --url https://example.org/article --file <work_dir>/scratch/extracted.md --title "文章标题" --method browser
+python .agents/skills/research-common/scripts/research_task.py import-article --work-dir <work_dir> --url https://example.org/article --file <work_dir>/scratch/extracted.md --title "文章标题" --method browser
 ```
 
 method 可选 browser／pdf／provided，仅说明实际获取方式，不代表已验证。保留原文，不能用搜索摘要、译文、总结或生成内容冒充文章全文；图片链接需可解析，不把临时文件路径带进最终原文。
@@ -86,7 +86,7 @@ required 文章未获取、获取失败或未接受正文时，检查器保留 a
 先写报告草稿，再对实际引用且允许保留的文章执行：
 
 ```text
-python .agents/skills/research/scripts/research_task.py archive-article --work-dir <work_dir> --id <文章ID> --citation report.md#分析
+python .agents/skills/research-common/scripts/research_task.py archive-article --work-dir <work_dir> --id <文章ID> --citation report.md#分析
 ```
 
 生成 `references/<文章ID>.md`，保留原文内容、来源 URL 和访问日期。在报告中链接本地原文，也可同时就近链接原始 URL；归档原文必须从主报告可达。--citation 可重复，指定根目录中的报告 Markdown 与可选标题锚点，不能用来源索引代替正文引用。

@@ -5,11 +5,12 @@
 ## 调研入口与资料布局
 
 - 对象调研从 [research](.agents/skills/research/SKILL.md) 进入，基于已有成果的主题／问题分析从独立的 [research-analysis](.agents/skills/research-analysis/SKILL.md) 进入；两者可共用 [research-report](.agents/skills/research-report/SKILL.md) 成稿与交付。单个事实查询不自动扩展为完整研究。
-- 保存与清理规则以 [delivery-policy.md](.agents/skills/research/references/delivery-policy.md) 为唯一详细来源；修改这些规则时同步维护相关技能引用，避免在本文件复制整套流程。
-- 主题 ID、名称和父子关系共用根目录 [themes.yaml](themes.yaml)，主题层次压成一个目录名。调研报告放在 `research-reports/<主题名>/<type>/<target>-YYYYMMDD-HHmmss/`；分析洞察保持一层目录，放在 `analysis-reports/<主题名>[-<专题>]-YYYYMMDD-HHmmss/`，主文件默认 report.md。时间为创建或最近修订的北京时间，报告 ID 与最初创建时间保持稳定；修订使用任务工具 stamp-report 更新目录与引用，不另存时间副本。
+- 对象调研、分析洞察和报告提交是三个独立入口，不互相引用、调用或通过子技能回调。用户或外层任务按已授权目标分别选择入口；共用规则由 [research-common](.agents/skills/research-common/SKILL.md) 提供，成稿、绘图、对象证据等子技能可以共用，只返回当前阶段的结果。
+- 保存与清理规则以 [delivery-policy.md](.agents/skills/research-common/references/delivery-policy.md) 为唯一详细来源；修改这些规则时同步维护相关技能引用，避免在本文件复制整套流程。
+- 主题 ID、名称和父子关系共用根目录 [themes.yaml](themes.yaml)，主题层次压成一个目录名。调研报告放在 `research-reports/<主题名>/<type>/<target>__YYYYMMDD-HHmmss/`；分析洞察保持一层目录，放在 `analysis-reports/<主题名>[__<专题>]__YYYYMMDD-HHmmss/`，主文件默认 report.md。时间为创建或最近修订的北京时间，报告 ID 与最初创建时间保持稳定；修订使用任务工具 stamp-report 更新目录与引用，不另存时间副本。
 - 当前计划分别为 `research-reports/<主题名>/plan.md`、`analysis-reports/<主题名>.plan.md`，同一入口同一主题只维护一份，不另存快照。跨入口计划互相引用，不复制同一范围。旧报告与旧计划仍可原地读取；迁移按用户明确范围执行并同步链接。
 - 对象调研类型为 `paper`、`open-source`、`product`、`benchmark`；独立分析洞察入口内部使用 `analysis`。survey 论文归 `paper`，对象目录以 `survey-` 标识；`analysis` 主要基于已有调研输出，围绕主题或问题形成分析洞察，贡献者思考为可选输入，不作为混合类型兜底。
-- 主题和对象目录通常使用英文 slug；正式中文对象名称等例外按交付规范处理。报告内的本地链接使用相对于当前 Markdown 的路径，持久配置不写入个人机器的绝对路径。
+- 报告目录中的 target 表示本篇研究专题，不要求等于对象 ID；新名称用 `__` 分隔任意数量的命名片段，片段内用 `-` 连接单词。分析洞察支持多级主题，主题各级、主题与专题之间也用 `__`，新分析计划文件名沿用该主题名；调研报告主题目录保持单连字符。旧名称与旧计划原地维护；主题 ID、各级 slug 和对象 ID 沿用原有规则，正式中文对象名称等例外按交付规范处理。报告内的本地链接使用相对于当前 Markdown 的路径，持久配置不写入个人机器的绝对路径。
 - 仅将实际交付的报告、引用资料、图片和已登记附加文件保存到正式目录；单次任务的中间文件放在对应报告目录的 `.tmp/<run-id>/`。区分文件校验通过、研究完整度和实际完成的验证，不将部分结果写成完整结论。
 
 ## 图片使用与生成
@@ -33,6 +34,6 @@
 ## Git 跟踪与提交
 
 - `AGENTS.md` 属于应纳入版本管理的项目规则。“纳入跟踪／暂存”不等于“创建 commit”；用户只要求跟踪文件时，仅暂存明确文件，保留其他暂存内容。
-- 用户要求提交调研报告时使用 [research-commit](.agents/skills/research-commit/SKILL.md)：每篇报告及必要附件独立提交，同篇本轮修订集中提交，符合条件时合并未发布的本地修订；项目规则、技能和图谱工具维护与报告提交分开组织。
+- 调研／分析与 Git 提交分别调用。研究入口负责报告产出、校验和计划回写；提交已有成果可直接使用独立的 [research-commit](.agents/skills/research-commit/SKILL.md)，统一支持两类报告，无需重新调研。每篇报告及必要附件独立提交，同篇本轮修订集中提交，符合条件时合并未发布的本地修订；项目规则、技能和图谱工具维护与报告提交分开组织。
 - 生成或更新报告、保存计划本身不默认执行 Git 提交、推送或发布。具体授权沿用当前会话，不自动改写已发布历史，不带入无关工作区修改。
 - 精确文件路径使用 `git --literal-pathspecs`；仅有 shell 引号和 `--` 不能防止 Git 的路径表达式匹配。用户要求只提交已暂存内容时保持索引版本边界，不带入同文件的未暂存修改。

@@ -8,7 +8,7 @@
 2. **在修改报告或关联文件前**保存基线并登记范围：
 
 ```text
-python <skills_root>/research/scripts/research_task.py begin-update --work-dir <work_dir> --section "## 核心机制" --allow-file references/sources.md
+python <skills_root>/research-common/scripts/research_task.py begin-update --work-dir <work_dir> --section "## 核心机制" --allow-file references/sources.md
 ```
 
 `--section` 可重复，必须是报告中唯一、原样匹配的 ATX 标题（`##` 至 `######`），包含其子节；不能同时选父节和子节。重名标题先明确目标，不能自动采用第一个。Setext 标题、整篇重构或跨章节重排不适用这个辅助命令；按用户实际范围规划，不擅自改标题来凑通过。
@@ -34,14 +34,14 @@ python <skills_root>/research/scripts/research_task.py begin-update --work-dir <
 在写入报告前，按 [报告语言润色](writing-policy.md#保存快照并对照) 保存草稿快照、调用 humanizer 润色章节正文，并用同一快照对照。顺序固定为章节草稿、快照、润色、对照复核、apply-update，不对未复核的整篇报告润色。
 
 ```text
-python <skills_root>/research/scripts/research_polish.py snapshot --work-dir <work_dir> --file <work_dir>/scratch/sections.json
+python <skills_root>/research-common/scripts/research_polish.py snapshot --work-dir <work_dir> --file <work_dir>/scratch/sections.json
 ```
 
 读取返回的 snapshot 路径，润色后先运行 check；仅在 valid=true 且人工确认语义和证据未改变时继续：
 
 ```text
-python <skills_root>/research/scripts/research_polish.py check --work-dir <work_dir> --snapshot <snapshot>
-python <skills_root>/research/scripts/research_task.py apply-update --work-dir <work_dir> --sections-file <work_dir>/scratch/sections.json
+python <skills_root>/research-common/scripts/research_polish.py check --work-dir <work_dir> --snapshot <snapshot>
+python <skills_root>/research-common/scripts/research_task.py apply-update --work-dir <work_dir> --sections-file <work_dir>/scratch/sections.json
 ```
 
 apply-update 只替换提供的已登记章节，并自动生成本次说明；未传入的已有章节保持不变，登记的新增章节最终必须存在。它不生成分析正文、不证明论证正确。写入前检查范围外变化和并发修改，通过后用当前任务 scratch/ 内的临时文件原子替换主报告；最终仍需人工阅读并运行 verify。

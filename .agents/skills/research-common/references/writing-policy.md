@@ -44,22 +44,22 @@
 
 ### 保存快照并对照
 
-受管任务使用 [润色对照脚本](../scripts/research_polish.py)。命令从项目根执行，文件及快照路径均相对于项目根。新报告和根目录中的补充报告分别传入实际 Markdown 文件：
+受管任务使用 [润色对照脚本](../../research-common/scripts/research_polish.py)。命令从项目根执行，文件及快照路径均相对于项目根。新报告和根目录中的补充报告分别传入实际 Markdown 文件：
 
 ```text
-python <skills_root>/research/scripts/research_polish.py snapshot --work-dir <work_dir> --file <output_dir>/report.md
+python <skills_root>/research-common/scripts/research_polish.py snapshot --work-dir <work_dir> --file <output_dir>/report.md
 ```
 
 局部更新先准备已登记章节的草稿，仅对草稿操作：
 
 ```text
-python <skills_root>/research/scripts/research_polish.py snapshot --work-dir <work_dir> --file <work_dir>/scratch/sections.json
+python <skills_root>/research-common/scripts/research_polish.py snapshot --work-dir <work_dir> --file <work_dir>/scratch/sections.json
 ```
 
 命令在本任务 scratch/polish/<快照ID>/ 保存 before.md／before.json 和 snapshot.json，返回 snapshot 相对路径。随后调用 humanizer 修改同一草稿，仅改 JSON 中的章节正文，不改键、范围或数据结构；不要润色 JSON 配置本身。修改后使用返回的实际快照目录：
 
 ```text
-python <skills_root>/research/scripts/research_polish.py check --work-dir <work_dir> --snapshot <snapshot>
+python <skills_root>/research-common/scripts/research_polish.py check --work-dir <work_dir> --snapshot <snapshot>
 ```
 
 check 只读，返回 valid、changed_protected_content 与完整 diff，退出码 0／1 表示通过／存在保护内容差异或检查失败。它对常见 Markdown 的标题、锚点、代码、公式、整张表格、引用标记与目标、数字序列、直接引语及已有自动状态说明做保守比较；表格说明、引语和链接文字也保持原样。受保护内容变化时先修复草稿，不重新 snapshot 来掩盖误改；独立的新一轮润色才另建快照。

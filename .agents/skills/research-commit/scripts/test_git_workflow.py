@@ -11,7 +11,7 @@ import unittest
 
 sys.dont_write_bytecode = True
 SKILLS = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(SKILLS / "research" / "scripts"))
+sys.path.insert(0, str(SKILLS / "research-common" / "scripts"))
 from validate_report import validate  # noqa: E402
 
 

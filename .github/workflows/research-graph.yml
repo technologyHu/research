@@ -5,7 +5,7 @@ on:
     branches: [openjiuwen-harness]
     paths:
       - 'themes.yaml'
-      - '.agents/skills/research/scripts/research_catalog.py'
+      - '.agents/skills/research-common/scripts/research_catalog.py'
       - 'research-reports/**'
       - 'analysis-reports/**'
       - '*/plan.md'

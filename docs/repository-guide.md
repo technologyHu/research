@@ -16,9 +16,9 @@
 | 理解代码库、模块职责、调用链，或核对设计与实现 | [代码理解](../.agents/skills/code-understanding/SKILL.md) |
 | 润色文字，减少 AI 腔并保留原意 | [去AI味](../.agents/skills/humanizer/SKILL.md) |
 | 获取网页文章，保存供离线阅读或调研引用 | [爬取文章](../.agents/skills/web-article-fetcher/SKILL.md) |
-| 将调研报告或分析洞察报告及附件提交到本地 Git，或整理报告提交 | [提交调研报告](../.agents/skills/research-commit/SKILL.md) |
+| 独立提交已有调研报告、分析洞察报告及附件，或整理其提交历史 | [提交调研报告](../.agents/skills/research-commit/SKILL.md) |
 
-research 与分析洞察是两个独立入口，可直接选择；两者共用部分内部能力，分别维护自己的报告与计划。
+research、分析洞察和 research-commit 是三个独立入口，彼此不引用或调用；可共用成稿、绘图、对象证据和校验等子技能。用户或外层任务按目标分别选择入口；提交已有成果无需重新调研或分析，多项目标也不由某个技能自动串接其他入口。
 
 ## 目录与内容边界
 
@@ -27,9 +27,10 @@ research 与分析洞察是两个独立入口，可直接选择；两者共用�
 | `README.md` | 仓库入口；图谱标记区由生成器维护，区外可人工编辑 |
 | `AGENTS.md` | 仓库规则，应纳入版本管理 |
 | `.agents/skills/` | 调研、分析洞察、源码理解、绘图、文章获取和报告提交技能及其依赖定义 |
+| `.agents/skills/research-common/` | 内部共用子技能，集中维护主题、计划、证据、任务、写作与交付规则，不回调顶层入口 |
 | [themes.yaml](../themes.yaml) | 两个入口与图谱共用的主题注册表，统一稳定 ID、名称、父子关系与别名 |
-| [research-reports/](../research-reports/README.md) | `<主题名>/<type>/<target>-YYYYMMDD-HHmmss/report.md`，主题层次压成一层名称 |
-| [analysis-reports/](../analysis-reports/README.md) | `<主题名>[-<专题>]-YYYYMMDD-HHmmss/report.md`，只设一层报告目录 |
+| [research-reports/](../research-reports/README.md) | `<主题名>/<type>/<target>__YYYYMMDD-HHmmss/report.md`，主题层次压成一层名称 |
+| [analysis-reports/](../analysis-reports/README.md) | `<主题名>[__<专题>]__YYYYMMDD-HHmmss/report.md`，只设一层报告目录 |
 | `research-reports/<主题名>/plan.md` | 对象调研本主题唯一当前计划 |
 | `analysis-reports/<主题名>.plan.md` | 分析洞察本主题唯一当前计划，不增加目录层级 |
 | `<report-dir>/.tmp/<run-id>/` | 一轮受管调研的配置、证据、源码副本和检查记录 |
@@ -37,9 +38,13 @@ research 与分析洞察是两个独立入口，可直接选择；两者共用�
 | `scripts/`、`tests/`、`.github/workflows/` | 图谱生成、验证与发布设施 |
 | `.research-graph.json` | 图谱输入范围配置；当前排除 `.agents/**` |
 
-先从 themes.yaml 选择已注册主题；例如 Agent → Memory → Architecture 的完整名称为 agent-memory-architecture。目录不展开主题嵌套，同一主题使用同一名称与稳定 ID，README 和图谱按主题树聚合，同主题内按最近修订时间倒序展示。
+先从 themes.yaml 选择已注册主题；例如 Agent → Memory → Architecture 的规范主题名为 agent-memory-architecture，调研报告采用该名称，分析洞察则用 agent__memory__architecture。分析的主题各级、主题与专题之间均用 `__`，每级内部的单词用 `-`。目录不展开主题嵌套，两类成果共用稳定主题 ID，README 和图谱按主题树聚合，同主题内按最近修订时间倒序展示。新分析计划同样用双下划线主题名，已有旧计划先复用原路径。
 
-报告目录末尾统一使用北京时间 YYYYMMDD-HHmmss；创建时自动生成，实际修订后更新当前目录并同步引用，不产生历史副本。报告元数据保留 report_id、created_at、updated_at，时间变化不改变身份。对象类型、survey-／compare- 前缀及正式中文对象名称例外继续沿用。
+报告目录末尾统一使用北京时间 YYYYMMDD-HHmmss，新名称用 `__` 连接专题与日期，日期与时间之间仍用 `-`；创建时自动生成，实际修订后更新当前目录并同步引用，不产生历史副本。旧日期后缀的单连字符仍可读取，续查和修订保留原分隔符。报告元数据保留 report_id、created_at、updated_at，时间变化不改变身份。对象类型、survey-／compare- 前缀及正式中文对象名称例外继续沿用。
+
+调研报告的 target 表示本篇研究专题或范围，不必等于论文、项目或产品的对象 ID。片段间用 `__` 分隔，片段内用 `-` 连接单词，例如 codex__context-engineering；也可以有更多片段，如 codex__context-engineering__context-compaction，不固定为两段。专题标识总长不超过 64 字符，已有单连字符或双连字符名称保留原样。同一对象的不同专题可分别交付，修订同一篇报告则沿用原专题标识与报告 ID。每篇仍使用独立目录，正文保存在其中的 report.md。
+
+目录重名不代表同一报告。不同主题与专题组合若生成相同路径，工具会核对已有报告和任务身份，发现冲突时拒绝创建；此时应明确范围并选用可区分的专题标识，或提供正确的已有报告路径，不能直接复用对方的 ID。
 
 以上路径是布局示例，不要求预建空主题、报告、参考资料或归档目录。已有报告与旧位置计划原地维护。报告内链接相对于当前 Markdown 解析，持久配置使用项目相对路径，不写入个人机器的盘符和用户目录。
 
@@ -66,6 +71,18 @@ research 与分析洞察是两个独立入口，可直接选择；两者共用�
 重点回答记忆写入、检索、更新与淘汰如何实现，以及扩展方式和适用边界。
 主题为 agent-memory，交付中文报告；未运行的功能与无法核实的结论明确说明。
 ```
+
+围绕产品的一个研究切面生成报告：
+
+```text
+使用 research，调研 Codex 的上下文工程，重点研究上下文组织、压缩与恢复机制。
+先确认或登记 harness 主题，类型为 product，研究对象 ID 为 codex，
+报告专题标识为 codex__context-engineering，说明采用版本和证据限制。
+保存为 research-reports/harness/product/codex__context-engineering__日期-时间/report.md，
+日期和时间由工具自动生成。
+```
+
+如果本次新报告进一步聚焦压缩机制，可使用专题标识 `codex__context-engineering__context-compaction`；各片段按范围从整体到具体排列，数量不固定。继续已有报告时提供其现有路径，沿用原名称。
 
 开展多对象比较：
 
@@ -94,7 +111,7 @@ research 与分析洞察是两个独立入口，可直接选择；两者共用�
 为已有报告增加对象或问题：
 
 ```text
-使用 research，更新 research-reports/agent-memory/open-source/compare-memory-20261108-120000/report.md。
+使用 research，更新 research-reports/agent-memory/open-source/compare-memory__20261108-120000/report.md。
 新增同为开源项目的 <项目 D>，并增加“多租户隔离”这一分析维度。
 补查受影响内容，更新比较表和结论，保留未复核部分的原版本与日期。
 ```
@@ -112,17 +129,28 @@ research 与分析洞察是两个独立入口，可直接选择；两者共用�
 ```text
 使用 research，精读 <survey 论文标题或 URL> 的 <论文版本>。
 重点分析分类体系、文献覆盖、综合结论和局限，归入 paper。
-主题为 agent-memory，报告对象标识为 survey-<论文标识>，由工具生成带当前时间的目录。
+主题为 agent-memory，报告专题标识为 survey-<论文简称或阅读专题>，由工具生成带当前时间的目录。
 ```
 
 ### 分析洞察
+
+针对多级主题下的具体问题形成报告：
+
+```text
+使用分析洞察，基于已有记忆架构调研，分析共同机制及其取舍。
+归入已注册的 agent-memory-architecture 主题（agent → memory → architecture），
+专题标识为 mechanisms__tradeoffs，保留采用版本、证据依据和结论限制。
+保存为 analysis-reports/agent__memory__architecture__mechanisms__tradeoffs__日期-时间/report.md，
+日期时间由工具生成；关联计划优先复用已有位置，没有时使用
+analysis-reports/agent__memory__architecture.plan.md。
+```
 
 只制定分析计划：
 
 ```text
 使用分析洞察，围绕“记忆架构有哪些共同设计维度”制定分析计划。
 依据 research-reports/agent-memory/ 中已有成果明确问题、样本、依赖与验收条件。
-本轮只维护 analysis-reports/agent-memory.plan.md，不重复创建对象调研计划。
+本轮只维护 analysis-reports/agent__memory.plan.md，不重复创建对象调研计划。
 ```
 
 围绕主题综合已有成果：
@@ -132,7 +160,7 @@ research 与分析洞察是两个独立入口，可直接选择；两者共用�
 围绕“记忆架构有哪些共同设计维度”形成分析／洞察报告。
 对照写入、组织、检索和更新等机制，解释样本中的联系、差异与争议，
 提出有依据的核心发现和后续研究问题，说明样本范围、时间与证据限制。
-保存到 analysis-reports/agent-memory-architecture-insights-20261108-120000/report.md。
+保存到 analysis-reports/agent__memory__architecture-insights__20261108-120000/report.md。
 ```
 
 仅使用现有成果解释问题：
@@ -149,13 +177,13 @@ research 与分析洞察是两个独立入口，可直接选择；两者共用�
 使用分析洞察，基于已有调研分析“什么条件下应采用独立的长期记忆服务”。
 我的初步观点是 <实际观点与理由>，本轮选型标准是 <硬约束、偏好及优先级>。
 结合已有成果检验这些看法，说明取舍、反例、置信理由和建议改变的条件。
-保存到 analysis-reports/agent-memory-service-tradeoffs-20261108-120000/report.md。
+保存到 analysis-reports/agent__memory__service-tradeoffs__20261108-120000/report.md。
 ```
 
 为已有分析增加引用依据：
 
 ```text
-使用分析洞察，更新 analysis-reports/agent-memory-architecture-insights-20261108-120000/report.md，
+使用分析洞察，更新 analysis-reports/agent__memory__architecture-insights__20261108-120000/report.md，
 新增引用 research-reports/agent-memory/product/<产品目录>/report.md 中已核对的结论。
 只复核受这份依据影响的分析和发现，保留其他有效内容；不重新调研该产品。
 ```
@@ -197,7 +225,7 @@ research 与分析洞察是两个独立入口，可直接选择；两者共用�
 ```text
 使用提交调研报告，提交 research-reports/agent-memory/open-source/<项目目录>/ 的本轮报告修改。
 包含必要的引用资料和附件，同篇本轮修订集中为一笔本地提交。
-保留其他工作区改动，不推送。
+直接核对已有报告与交付记录，无需重新调研；保留其他工作区改动，不推送。
 ```
 
 如果只提交已暂存内容，可以这样说明范围：
@@ -207,23 +235,35 @@ research 与分析洞察是两个独立入口，可直接选择；两者共用�
 按报告分别组织提交，保留同文件未暂存的修改，不推送。
 ```
 
+分析洞察报告也使用同一提交技能：
+
+```text
+使用提交调研报告，提交 analysis-reports/<主题名>__<时间戳>/ 的本轮分析洞察报告修改。
+包含必要附件，保留作为分析依据的基础调研报告原有归属。
+无需重新开展分析，同篇本轮修订集中为一笔本地提交，保留其他工作区改动，不推送。
+```
+
 阅读报告和既有图谱只需 Markdown 阅读器或浏览器。执行任务所需环境按对应技能准备；维护图谱所需依赖见[图谱维护说明](research-graph-guide.md)，无需预先安装所有工具。
 
 ## 贡献内容
 
 ### 报告与计划
 
-贡献前先查现有主题和成果，沿用已有主题名、对象标识与报告位置。报告应说明研究问题、采用版本、证据、结论及限制；比较时核对数据集、指标、预算和基线口径，未运行的实验不写成实测结果。
+贡献前先查现有主题和成果，沿用已有主题名与对象 ID，继续同一报告时恢复其专题标识和报告位置。报告应说明研究问题、采用版本、证据、结论及限制；比较时核对数据集、指标、预算和基线口径，未运行的实验不写成实测结果。
 
 正式报告目录只保留报告、实际引用的资料与图片，以及按规范登记的必要附加交付。源码副本、实验输出和原始结果默认留在任务临时目录。计划与报告使用可长期访问的成果链接。
 
-报告的正文、引用、完整度与实际检查应一致。有关保存、附加交付及清理的完整要求，直接查阅[交付规范](../.agents/skills/research/references/delivery-policy.md)，本文不另设放行规则。
+报告的正文、引用、完整度与实际检查应一致。有关保存、附加交付及清理的完整要求，直接查阅[交付规范](../.agents/skills/research-common/references/delivery-policy.md)，本文不另设放行规则。
 
 ### 技能与工具
 
-技能维护直接修改 `.agents/skills/` 中对应技能及支持文件；新增或修改流程时同步核对入口、相对链接、脚本参数和相关测试。公共规则维护在其指定来源，其他技能引用该来源，避免复制出不同版本。
+技能维护直接修改 `.agents/skills/` 中对应技能及支持文件；新增或修改流程时同步核对入口、相对链接、脚本参数和相关测试。公共规则集中在 research-common，其他技能按需引用，避免复制出不同版本。子技能返回结果给调用方，不回调三个顶层入口。
 
-修改保存与清理规则时，更新 `research/references/delivery-policy.md` 并检查相关引用；修改脚本接口时，同步调整调用示例与测试；更新第三方后端时，同步维护版本锁、依赖锁、源码包或扩展包及校验和。
+修改技能关系后运行 `python -B -m unittest discover -s tests -p test_skill_dependencies.py -v`，检查链接、正文、元数据、脚本路径及本地导入形成的直接和间接依赖。`test_research_compat.py` 检查仅安装共用子技能时的实际流程及旧入口兼容。技能独立性工作流按 `scripts/research-skill-requirements.txt` 安装测试依赖，执行这两项检查、公共任务回归及 Git 流程测试。
+
+公共工具的正式实现位于 `.agents/skills/research-common/scripts/`，内部调用与新文档统一使用该路径；旧 `.agents/skills/research/scripts/` 仅保留兼容转发，不承载独立实现。新旧命令均接受原有参数，已有任务与报告无需迁移。
+
+修改保存与清理规则时，更新 `research-common/references/delivery-policy.md` 并检查相关引用；修改脚本接口时，同步调整调用示例与测试；更新第三方后端时，同步维护版本锁、依赖锁、源码包或扩展包及校验和。
 
 保留固定版本源码包、锁文件、初始化脚本和必要的兄弟技能目录。被 Git 忽略的运行环境仍可能是当前依赖，不能仅凭忽略状态删除。
 
@@ -239,7 +279,7 @@ git diff --cached --stat
 
 用户要求纳入跟踪时，只暂存明确文件；使用 `git --literal-pathspecs add -- <精确文件路径>`，不要用无范围的 `git add .` 或 `git add -A`。暂存不等于创建提交，生成报告或保存计划也不自动授权提交、推送或发布。
 
-调研报告、项目规则、技能和图谱维护分开组织提交。只提交已暂存内容的请求以索引版本为边界，不带入同文件未暂存修改。提交调研成果时使用上表中的“提交调研报告”入口。
+报告、项目规则、技能和图谱维护分开组织提交。只提交已暂存内容的请求以索引版本为边界，不带入同文件未暂存修改。两类报告统一使用独立的“提交调研报告”入口；研究与成稿不会自动触发提交。
 
 建议在提交说明或评审说明中写清变更解决的问题、影响范围、实际执行的检查和剩余缺口。文档与工具维护使用相应检查，不把它们当成调研报告套用报告交付校验。
 
@@ -287,7 +327,7 @@ python -X utf8 -B scripts/research_graph.py
 
 ### 临时任务与长期资料
 
-临时资料清理以[交付规范](../.agents/skills/research/references/delivery-policy.md)为准，核对精确范围并沿用用户明确授权。同范围已有明确确认时不重复询问。Windows 删除或移动前核对解析后的绝对目标及链接属性，使用原生 PowerShell 的精确路径操作；受拒时说明返回原因，不换工具绕过。
+临时资料清理以[交付规范](../.agents/skills/research-common/references/delivery-policy.md)为准，核对精确范围并沿用用户明确授权。同范围已有明确确认时不重复询问。Windows 删除或移动前核对解析后的绝对目标及链接属性，使用原生 PowerShell 的精确路径操作；受拒时说明返回原因，不换工具绕过。
 
 只清理获准的任务目录，保留报告和当前主题计划。技能运行依赖以及 `docs/`、`scripts/`、`tests/`、工作流设施不因当前没有报告就失去用途。用户已有文件、其他任务、系统缓存或源码原项目不属于默认清理范围。
 

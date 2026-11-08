@@ -6,9 +6,9 @@
 
 首次使用、开展调研、贡献报告或维护技能与图谱，请阅读[仓库使用、贡献与维护指南](docs/repository-guide.md)。项目规则见 [AGENTS.md](AGENTS.md)。
 
-对象调研从 [research](.agents/skills/research/SKILL.md) 进入，报告保存到 [research-reports](research-reports/README.md)；基于已有成果的主题分析从独立的 [research-analysis](.agents/skills/research-analysis/SKILL.md) 进入，报告保存到 [analysis-reports](analysis-reports/README.md)。两者可共用成稿、证据与提交能力。
+对象调研使用 [research](.agents/skills/research/SKILL.md)，成果位于 [research-reports](research-reports/README.md)；分析洞察使用 [research-analysis](.agents/skills/research-analysis/SKILL.md)，成果位于 [analysis-reports](analysis-reports/README.md)；提交两类已有报告使用 [research-commit](.agents/skills/research-commit/SKILL.md)。三个入口独立选择、不互相引用，可以共用规则、成稿、绘图等子技能。
 
-两个入口共用 [主题注册表](themes.yaml)，主题层次通过统一名称体现；具体报告目录追加创建或最近修订的北京时间，报告 ID 保持稳定。
+两个入口共用 [主题注册表](themes.yaml) 的稳定 ID 与父子关系；调研主题层级用 `-` 连接，分析洞察主题层级及主题与专题之间用 `__` 连接。具体报告目录追加创建或最近修订的北京时间，报告 ID 保持稳定。
 
 <!-- research-graph:start -->
 
@@ -22,7 +22,7 @@
 
 数据分支：`openjiuwen-harness`。只索引已纳入 Git 的调研内容；技能资料不进入总览。
 
-主题命名统一维护在 `themes.yaml`，主题层次压成一个目录名。调研报告：`research-reports/<主题名>/<type>/<target>-YYYYMMDD-HHmmss/`；分析洞察：`analysis-reports/<主题名>[-<专题>]-YYYYMMDD-HHmmss/`。时间采用北京时间，记录创建或最近修订时间。
+主题命名统一维护在 `themes.yaml`，主题层次压成一个目录名。调研报告：`research-reports/<主题名>/<type>/<target>__YYYYMMDD-HHmmss/`，主题层级用 `-` 连接；target 表示本篇报告的研究专题，不要求等于对象 ID，多个片段用 `__` 分隔，片段内用 `-` 连接单词，数量不固定；旧单连字符及双连字符名称原样保留。分析洞察：`analysis-reports/<主题名>[__<专题>]__YYYYMMDD-HHmmss/`，多级主题及主题与专题之间均用 `__`，保持一层报告目录。时间采用北京时间，记录创建或最近修订时间。
 
 当前计划：调研使用 `research-reports/<主题名>/plan.md`，分析洞察使用 `analysis-reports/<主题名>.plan.md`。报告按主题层次聚合，同主题内按最近修订时间倒序。
 

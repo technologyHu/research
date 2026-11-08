@@ -2,7 +2,7 @@
 
 当本轮研究问题需要核对实现时，由 research-deep 调用 code-understanding 取得源码证据，再回到当前调研任务。
 
-- research 管理问题、对象类型、任务、完成度及交付。
+- 调用方管理问题、对象类型、任务、完成度及交付。
 - code-understanding 统一负责必要的仓库选择、目标／版本复核、后端选择和源码阅读，返回按原问题映射的证据与缺口。
 - research-deep 统一写回原 light/full 记录；research-report 使用这些证据成稿。类型技能仅提供分析维度，后端仅提供分析能力，不另起计划、结果格式或正式报告。
 
@@ -15,13 +15,13 @@
 
 ## 确定源码仓库
 
-仓库发现、身份与版本门槛、问题覆盖及选择状态统一遵循 code-understanding 的 [仓库选择与记录](../../code-understanding/references/repository-record.md)，在该入口执行一次。research 传递指定代码和已核实来源，无须提前选完仓库；已有选择仍适用时复用。
+仓库发现、身份与版本门槛、问题覆盖及选择状态统一遵循 code-understanding 的 [仓库选择与记录](../../code-understanding/references/repository-record.md)，在该入口执行一次。调用方传递指定代码和已核实来源，无须提前选完仓库；已有选择仍适用时复用。
 
 仅需要完整选择记录的任务才保存 `scratch/code/<item_id>/repository-selection.json`；普通指定代码阅读直接绑定目标，在已有笔记／证据中记录实际版本即可。源码选择的 selected／partial 不等于研究完成，源码结果的未知部分仍按原研究字段保留 unknown 和缺口；没有源码实现时继续独立资料研究，不新增空对象或虚构源码章节。
 
 ## 交接给代码理解入口
 
-传递已有上下文；尚未确定的目标或选择依据可留待入口补齐，不先启动另一轮 research：
+传递已有上下文；尚未确定的目标或选择依据可留待入口补齐，不先启动另一轮顶层工作流：
 
 | 上下文 | 内容 |
 |---|---|
@@ -32,7 +32,7 @@
 | 选择依据 | 已有选择记录或来源及其缺口；有完整记录时包含身份／版本映射、问题角色分配、源码可读性与运行状态 |
 | 回写位置 | 当前任务的 `code/<item_id>/<repo_id>/` 保存确有需要的源码副本；`scratch/code/<item_id>/` 保存对象级选择记录，`repos/<repo_id>/` 保存各仓库的预检、摘记和工具结果 |
 
-技能安装位置、源码位置和调研工作目录是三个独立基准。工具与运行依赖从技能位置解析，源码和 Git 上下文绑定目标 checkout，调研证据回写当前 work_dir。research_task.py／validate_results.py 的命令仍以 outline 对应的调研 workspace 为基准；后端切换 cwd 不得改变 work_dir、output_dir 等调研路径的解释。不要把 external repo 自动当作 research 项目根，也不要因为调研保存在 research 就分析 research 自身。
+技能安装位置、源码位置和调研工作目录是三个独立基准。工具与运行依赖从技能位置解析，源码和 Git 上下文绑定目标 checkout，调研证据回写当前 work_dir。research_task.py／validate_results.py 的命令仍以 outline 对应的调研 workspace 为基准；后端切换 cwd 不得改变 work_dir、output_dir 等调研路径的解释。不要把 external repo 自动当作当前任务的项目根，也不要因为调研材料保存在本仓库就分析本仓库自身。
 
 入口对每个实际目标执行 preflight，再按问题使用后端或直接阅读源码；记录后端、版本、分析范围与限制。`repo_id` 是本任务内唯一的目录 slug，同一仓库的不同版本／checkout 也分开，不直接拼接不受控的仓库名称。示例（相对 work_dir，按需创建）：
 
@@ -91,4 +91,4 @@ code-understanding 按原问题／field_id 返回具体结论、原始源码位�
 
 证据写回后继续原 research-deep 的 validate 和完成度判断。将需保留的身份依据、研究与代码版本关系、问题覆盖及运行限制写入已有笔记／证据与报告；成稿引用原始固定源码与相应条件，不链接会被清理的选仓 JSON、索引、`.tmp` 或本地临时副本。报告和工具图谱的版本不一致时，返回当前任务补查相关字段，不由后端另开研究计划。
 
-工具生成的 Markdown、HTML、JSON、模型缓存和源码副本按原交付规范处理；用户明确要求的导览／图谱文件才登记为额外交付。清理仍由原 research 任务的精确范围确认流程管理，不删除任务外既有源码、原有索引、共享工具运行环境或用户模型缓存。
+工具生成的 Markdown、HTML、JSON、模型缓存和源码副本按原交付规范处理；用户明确要求的导览／图谱文件才登记为额外交付。清理仍由原受管任务的精确范围确认流程管理，不删除任务外既有源码、原有索引、共享工具运行环境或用户模型缓存。
