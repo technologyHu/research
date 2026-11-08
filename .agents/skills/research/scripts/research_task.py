@@ -148,7 +148,9 @@ def create_task(workspace, topic, kind, depth="standard", workflow="auto", items
     if workflow not in {"light", "full"} or (workflow == "light" and (depth != "brief" or len(parsed) != 1)):
         raise ValueError("Light workflow is limited to one brief object")
     kinds = {item["type"] for item in parsed}
-    category = next(iter(kinds)) if len(kinds) == 1 else "topic"
+    if len(kinds) != 1 or (kind == "analysis") != (kinds == {"analysis"}):
+        raise ValueError("Use separate tasks for different object types; analysis tasks contain judgments based on prior reports, not mixed source objects")
+    category = next(iter(kinds))
     if theme is not None:
         theme = english_directory(theme, "theme")
     if target is not None:

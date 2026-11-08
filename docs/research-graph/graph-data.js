@@ -9,7 +9,7 @@ window.RESEARCH_GRAPH = {
     "open-source": "开源项目",
     "product": "产品",
     "benchmark": "评测",
-    "topic": "技术专题"
+    "analysis": "分析判断"
   },
   "colors": {
     "theme": "#b0a0ff",
@@ -17,7 +17,7 @@ window.RESEARCH_GRAPH = {
     "open-source": "#57deca",
     "product": "#75acff",
     "benchmark": "#f78dc1",
-    "topic": "#c7a3ff",
+    "analysis": "#c7a3ff",
     "unknown": "#9aaac6"
   },
   "stats": {

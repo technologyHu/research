@@ -1,21 +1,30 @@
 ---
 name: research-add-items
-description: 为主题计划或已进行的调研追加对象、去重并确定对象类型，更新计划与受影响的执行任务。用于扩大现有调研范围，独立新主题由 research 规划。
+description: 为主题计划或已有调研追加对象，按同类型、跨类型和分析来源分别处理，复用已有成果并定位实际补查范围。独立新主题由 research 规划。
 ---
 
-# Research Add Items：补充对象
+# Research Add Items：补充对象与来源
 
-仅维护主题计划时，先按 [主题计划维护](../research/references/theme-planning.md) 定位长期 Markdown，去重并追加实际类型的对象／任务，补充问题关联、类型评估、依赖、预期成果与验收，递增修订并记录原因；保存汇报后结束，不要求存在 outline、fields 或 .tmp。涉及正在执行的单次调研时，再执行下列步骤并回写同一主题计划。
+先读 [路由规则](../research/references/routing.md) 并核对已有成果，明确新增内容的性质，再决定修改哪个任务。仅维护主题计划时按 [主题计划维护](../research/references/theme-planning.md) 去重、登记任务／来源和验收、记录修订后结束，不要求 outline、fields 或 .tmp 存在。
 
-更新本次执行对象／版本／范围时，按主题计划的范围对照规则保留原 scope 快照，列明受影响内容并在同步后新增口径；只改长期待办时不改写既有执行快照，后续恢复或交付须对照当前计划。
+## 先分流追加内容
 
-按 [依赖规则](../research/references/theme-planning.md#依赖的满足失效与复核) 为新增、替代或拆并任务记录实际所需成果、hard／soft 和接受条件，检查 ID、摘要一致性与循环；前置被取消或替换时保留旧关系及原因，核对现存成果再判断下游，不默认为满足或一律作废。
+| 新增内容 | 处理方式 |
+| --- | --- |
+| 与当前对象调研相同类型的新对象 | 在本任务扩充 items；新增第二个对象时改 comparison，沿用本任务输出位置 |
+| 与当前对象调研不同类型的对象 | 先寻找其已有报告或独立任务，成果满足本轮问题则复用；有缺口才建立／恢复该类型任务。不将其加入原 items，不改变原报告类型或目录 |
+| analysis 使用的一份已有报告、贡献者观点或其他依据 | 更新来源／观点记录并复核实际依赖的判断；不新增来源对象到 items，不因来源增加修改 mode |
+| analysis 要回答的新问题或新增待比较判断 | 仍使用 analysis；同一判断的细化问题交给 [增加维度](../research-add-fields/SKILL.md)，确需比较独立判断时再追加 analysis item 并更新 mode |
 
-1. 按 [任务管理](../research/references/task-management.md) list/show 定位任务，使用返回的 outline、fields 实际路径；不按固定扩展名另建配置。尚未交付的调研原地扩展；已有报告需更新且旧 full 证据仍有效时先 derive 为新任务，再按 [局部更新流程](../research/references/report-updates.md) 保存报告基线。light 先 promote 并核对逐字段证据；旧任务已清理时从报告和来源重建需要的证据。
-2. 使用用户给定对象；只有用户需要推荐更多对象时才补充搜索。按规范化名称和来源链接去重，保留别名，不能把同项目不同版本自动合并。
-3. 按 [路由规则](../research/references/routing.md) 指定类型，生成稳定 `id`，补充版本和种子来源。新增第二个对象时将 `mode` 改为 `comparison`，保留原主题与输出目录。
-4. 更新实际 outline 文件并增加 revision；检查 fields 的 applies_to／item_ids 是否覆盖新增对象，不随意扩大原本限定的字段。在临时进度中仅将新增对象的适用字段标记 pending，保留已完成且仍有效的结果。问题、版本或时间口径改变时，相关旧字段仍须复查。
-   若关联主题计划，按 [主题计划维护](../research/references/theme-planning.md) 同步新增对象、来源主体／团队和适用的资金背景、问题关联、权威性／影响力及核实依据、优先级理由、依赖和预期成果，保留稳定任务 ID 和已有完成记录；未核实评估注明暂定，不把新增待办直接标为已调研。
-5. 若用户要求继续完成调研，按 [增量执行规范](../research/references/execution-policy.md) 补查新增对象并更新报告；仅要求改计划时说明改动后结束。
+跨类型成果需要综合判断时，创建或复用独立 analysis，记录它与来源成果的实际依赖。基础成果已足够时不重复调研；用户只要求新增来源或维护计划时不自行扩成整轮分析。使用用户给定对象；仅在用户需要推荐时补充搜索。按名称、版本、来源及研究范围去重，不能把不同版本自动合并。
 
-字段定义、对象与报告之间的关系遵循 [配置约定](../research/references/research-config.md)，最终保存遵循 [交付规范](../research/references/delivery-policy.md)。
+## 修改被选中的任务
+
+1. 定位本轮实际要修改的报告／任务，按 [任务管理](../research/references/task-management.md) 使用返回的真实配置路径；只因新增另一类型任务，不派生原任务或改写原报告。已有成果可复用但执行目录已清理时，只为本轮缺口重建需要的证据。
+2. 需要修改已交付报告时，旧 full 证据仍有效可先 derive，再按 [局部更新流程](../research/references/report-updates.md) 登记范围。light 只在增加对象、需要逐字段续查或处理实质冲突时 promote；分析仅增加依据且仍符合单对象 brief 时可保留 light。
+3. 对真正新增的对象／判断生成稳定 id，补充实际类型、版本和问题，保持单次任务的 items 类型一致。检查 fields 的 applies_to／item_ids，仅将新增对象和语义改变涉及的字段标 pending／stale；其余仍有效结果和原访问日期保留。分析来源按 [配置约定](../research/references/research-config.md#分析判断引用已有报告) 登记，修改采用范围后重新核对依赖判断，不能只更新散列接受变化。
+4. 实质范围变化时更新所选 outline 的 revision，并按 [范围对照](../research/references/theme-planning.md#本次执行范围快照与回写前对照) 同步本次口径。只改长期待办时不改原执行快照。按 [依赖规则](../research/references/theme-planning.md#依赖的满足失效与复核) 记录前置成果、接受条件及受影响下游，保留原关系和接受记录。
+5. 关联主题计划时回写新增对象／问题／来源、实际成果、类型评估和补查任务。对象背景按实际类型与问题需要核查；analysis 优先检查成果依据、观点归属与推导约束，不对每份来源重做机构或资金调查。
+6. 用户要求继续交付时，对象调研的实际缺口交给 [research-deep](../research-deep/SKILL.md)，analysis 的来源采用与判断更新交给 [research-analysis](../research-analysis/SKILL.md)；两者共用 [research-report](../research-report/SKILL.md) 成稿与校验。只改计划或登记来源时汇报实际修改与剩余缺口后结束。
+
+最终保存与清理遵循 [交付规范](../research/references/delivery-policy.md)，不为分类或追加搬迁已有资料。

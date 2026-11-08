@@ -13,7 +13,7 @@ from urllib.parse import unquote, urlsplit
 
 from research_context import delivery_config, report_context, visible_note
 from research_update import check_update
-from research_paths import delivery_entries
+from research_paths import delivery_entries, relative as project_relative, repo_report_path
 import research_articles as articles
 from validate_results import load_document
 
@@ -246,7 +246,8 @@ def citation_links(text, anchor=""):
 
 
 def canonical_source(value):
-    return urlsplit(value)._replace(fragment="").geturl().rstrip("/")
+    parsed = urlsplit(value)._replace(fragment="")
+    return ("repo:" + unquote(parsed.path)) if parsed.scheme == "repo" else parsed.geturl().rstrip("/")
 
 
 def validate(root, outline_path=None, fields_path=None):
@@ -254,6 +255,7 @@ def validate(root, outline_path=None, fields_path=None):
     errors = []
     delivery = {"report": "report.md", "extra_files": []}
     context = None
+    local_sources = set()
     if outline_path is not None:
         try:
             outline = load_document(outline_path)
@@ -296,6 +298,24 @@ def validate(root, outline_path=None, fields_path=None):
     report = root / delivery["report"]
     if report not in documents or not documents.get(report, "").strip():
         errors.append(f"A nonempty {delivery['report']} is required")
+    analysis_workspace, adopted_sources = None, set()
+    if context is not None and outline.get("object_type") == "analysis":
+        analysis_workspace = Path(outline["workspace"]).resolve()
+        adopted_sources = {canonical_source(value) for value in context["source_urls"] if urlsplit(value).scheme == "repo"}
+    elif outline_path is None and fields_path is None and root.parent.name == "analysis" and len(root.parents) >= 3:
+        # A cleaned task still permits independent link checks from its saved
+        # summary. This does not restore evidence or check research consistency.
+        notes = re.findall(r"<!--\s*research-summary\s*\n(.*?)-->", documents.get(report, ""), re.S)
+        try:
+            summary = json.loads(notes[0]) if len(notes) == 1 else {}
+            items = summary.get("items")
+            sources = summary.get("source_urls")
+            if (isinstance(items, list) and items and all(isinstance(item, dict) and item.get("type") == "analysis" for item in items)
+                    and isinstance(sources, list) and all(isinstance(value, str) for value in sources)):
+                analysis_workspace = root.parents[2]
+                adopted_sources = {canonical_source(value) for value in sources if urlsplit(value).scheme == "repo"}
+        except (ValueError, TypeError, AttributeError):
+            pass
     graph = {path: set() for path in documents}
     embedded_by_document = {path: set() for path in documents}
     checked_links = 0
@@ -333,6 +353,18 @@ def validate(root, outline_path=None, fields_path=None):
                 errors.append(f"{path.relative_to(root)}: report must not link temporary files: {raw}")
                 continue
             if not resolved.is_relative_to(root):
+                if (analysis_workspace is not None and not is_image
+                        and resolved.is_relative_to(analysis_workspace)):
+                    source = "repo:" + project_relative(resolved, analysis_workspace)
+                    if source in adopted_sources:
+                        try:
+                            adopted = repo_report_path(source, analysis_workspace)
+                            if parsed.fragment and unquote(parsed.fragment) not in heading_ids(adopted.read_text(encoding="utf-8-sig")):
+                                errors.append(f"{path.relative_to(root)}: missing adopted report anchor: {raw}")
+                            local_sources.add(source)
+                            continue
+                        except (OSError, ValueError, UnicodeError) as exc:
+                            errors.append(f"{path.relative_to(root)}: invalid adopted report: {exc}")
                 errors.append(f"{path.relative_to(root)}: target outside output: {raw}")
                 continue
             if not resolved.is_file():
@@ -379,7 +411,7 @@ def validate(root, outline_path=None, fields_path=None):
         statuses = re.findall(r"^> 调研状态：(.+)$", visible, re.M)
         if len(statuses) != 1:
             errors.append("Report must show one unambiguous research status")
-        cited = set()
+        cited = set(local_sources)
         for path in reachable:
             content = without_code(documents[path])
             content = re.sub(r"(`+)([^`]*?)\1", "", content)

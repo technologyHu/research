@@ -113,8 +113,8 @@ class ResultChecks(unittest.TestCase):
 
     def test_field_type_and_item_scope(self):
         self.outline["mode"] = "comparison"
-        self.outline["items"].append({"id": "other", "name": "产品", "type": "product"})
-        self.fields["fields"].append({"id": "workflow", "description": "流程", "applies_to": ["product"], "item_ids": ["other"]})
+        self.outline["items"].append({"id": "other", "name": "另一篇论文", "type": "paper"})
+        self.fields["fields"].append({"id": "workflow", "description": "流程", "applies_to": ["paper"], "item_ids": ["other"]})
         self.assertTrue(self.run_check(selected=["sample"])["valid"])
         self.assertFalse(self.run_check()["valid"])
 
@@ -145,20 +145,21 @@ class ResultChecks(unittest.TestCase):
         self.assertFalse(json.loads(run.stdout)["valid"])
 
     def test_all_object_profiles_are_supported(self):
-        for kind in ("paper", "open-source", "product", "benchmark", "topic"):
+        for kind in ("paper", "open-source", "product", "benchmark", "analysis"):
             with self.subTest(kind=kind):
                 self.outline["object_type"] = kind
                 self.outline["items"][0]["type"] = kind
                 self.result["type"] = kind
                 self.assertTrue(self.run_check()["valid"])
 
-    def test_mixed_comparison_keeps_type_specific_dimensions(self):
-        self.outline["object_type"] = "topic"
+    def test_comparison_keeps_item_specific_dimensions(self):
+        self.outline["object_type"] = "paper"
         self.outline["mode"] = "comparison"
-        self.outline["items"].append({"id": "product", "name": "示例产品", "type": "product"})
+        self.outline["items"].append({"id": "product", "name": "另一篇论文", "type": "paper"})
         self.fields["fields"][0]["applies_to"] = ["paper"]
-        self.fields["fields"].append({"id": "capabilities", "description": "产品能力", "applies_to": ["product"]})
-        product = {"schema_version": 2, "item_id": "product", "type": "product", "version": None, "sources": [], "fields": {"capabilities": {"status": "unknown", "value": None, "reason": "未公开", "evidence": []}}}
+        self.fields["fields"][0]["item_ids"] = ["sample"]
+        self.fields["fields"].append({"id": "capabilities", "description": "另一篇论文的覆盖", "applies_to": ["paper"], "item_ids": ["product"]})
+        product = {"schema_version": 2, "item_id": "product", "type": "paper", "version": None, "sources": [], "fields": {"capabilities": {"status": "unknown", "value": None, "reason": "未公开", "evidence": []}}}
         self.bind_inputs(product)
         (self.work / "results/product.json").write_text(json.dumps(product), encoding="utf-8")
         checked = self.run_check()

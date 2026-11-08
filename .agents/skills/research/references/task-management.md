@@ -10,6 +10,8 @@ Windows 调用 Python 可加 `-X utf8 -B`，读写文档使用 UTF-8。用 subpr
 
 从主题计划进入执行、回写成果及清理前同步，使用 [流程交接表](theme-planning.md#流程接入与交接)。创建／维护主题计划本身不调用本节 list/show 代替查找计划，也不以缺少旧 .tmp 为由中断纯计划编辑。
 
+创建新任务前按 [已有成果核对](routing.md#已有成果核对与复用) 明确可采用内容与实际缺口。对象调研交给 research-deep，analysis 判断交给 research-analysis；两者共用本任务格式和公共报告流程。补查只为实际缺口创建／恢复任务，不能因输入跨类型或提出新判断重复创建全部基础调研。
+
 ```text
 python <skills_root>/research/scripts/research_task.py create --workspace . --topic "研究主题" --theme agent-memory --type paper --target memory-method --depth standard --field "method=方法怎样解决问题？" --field "limitations=主要适用边界是什么？"
 python <skills_root>/research/scripts/research_task.py list --workspace .
@@ -20,9 +22,11 @@ python <skills_root>/research/scripts/research_task.py show --work-dir <work_dir
 
 后续命令和编辑使用返回的 outline、fields 相对路径，例如 `agent-memory/paper/example-paper/.tmp/<run-id>/outline.json`。受管任务默认 outline.json、fields.json；已有 fields.yaml／fields.yml 由 show 返回实际路径。自动发现时若同时存在多个 fields 配置就报错，不静默选择一份；手工校验可明确传 --fields，但不要为追加对象或字段另建同名配置。受管 outline 始终为 outline.json，旧手工 YAML 计划用检查脚本明确传路径，不伪造 owner。
 
-create 创建调研目录及其 .tmp/ 任务目录，但不创建或覆盖 report.md。按 [目录归类规则](delivery-policy.md#类型与主题归类) 输出到 `<theme>/<type>/<target>/`；`--theme agent-memory` 指定英文主题，省略时为 general。单对象 target 优先取明确给定的英文对象 id；`--target` 可另行指定英文目录名，对比任务按需加 compare-，跨类型归入 topic。中文正式名称通过 `--native-target-name 扣子` 明确声明例外，内部仍可使用 `--item coze:product=扣子`。`--topic` 是中文或英文调研标题，不能因此把一般中文描述用作目录；无英文对象 id 时传 --target。`--output` 相对于 `--workspace`，新建位置必须匹配主题优先结构，已有报告可原地复用。
+create 创建调研目录及其 .tmp/ 任务目录，但不创建或覆盖 report.md。按 [目录归类规则](delivery-policy.md#类型与主题归类) 输出到 `<theme>/<type>/<target>/`；`--theme agent-memory` 指定英文主题，省略时为 general。单对象 target 优先取明确给定的英文对象 id；`--target` 可另行指定英文目录名，同类型对比任务按需加 compare-。跨类型对象分别创建任务；基于已有成果的判断单独使用 analysis。中文正式名称通过 `--native-target-name 扣子` 明确声明例外，内部仍可使用 `--item coze:product=扣子`。`--topic` 是中文或英文调研标题，不能因此把一般中文描述用作目录；无英文对象 id 时传 --target。`--output` 相对于 `--workspace`，新建位置必须匹配主题优先结构，已有报告可原地复用。
 
-默认只有一个对象，名称取调研标题；可重复 `--item id[:type]=名称` 明确对象，两个以上自动使用 comparison。混合比较例如 `--type topic --theme agent-memory --item paper:paper=论文 --item sdk:open-source=集成包`。create／show 返回 classification，便于核对分类，不代表证据已更新。
+默认只有一个对象，名称取调研标题；可重复 `--item id[:type]=名称` 明确对象，两个以上自动使用 comparison。同一任务中的 items 使用同一实际类型。分析判断例如 `--type analysis --theme agent-memory --target memory-selection --item selection:analysis=记忆方案取舍`，输入报告记录为来源；不把论文、项目、产品混合为分析对象。create／show 返回 classification，便于核对分类，不代表证据已更新。
+
+向已有任务追加内容时先按 [增加对象](../../research-add-items/SKILL.md) 分流：同类型对象可扩充原 items，跨类型对象复用或建立独立任务；analysis 仅新增报告或观点时更新来源／采用关系，不增加来源对象到 items、不修改 mode。只有实际增加比较对象才转 comparison，并按需要 promote。
 
 字段可重复 `--field id=问题`，默认 overview 仅是规划起点。执行前根据所选类型模板调整 fields.json，必要时增加 applies_to、item_ids 和 core。指定版本、时间范围和来源种子也在 outline.json 中完善。详细结构见 [配置约定](research-config.md)。
 

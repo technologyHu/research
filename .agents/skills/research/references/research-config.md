@@ -39,7 +39,7 @@ execution:
 
 - 新配置使用 `path_mode: project-relative`。workspace 相对于配置文件所在目录；outline 位于 `<theme>/<type>/<target>/.tmp/<run-id>/` 时为 `../../../../..`；自定义报告目录层级时由工具计算，不手写固定跳转层数。work_dir、output_dir 相对于项目根。脚本内部解析路径，持久化配置和命令输出保留相对形式。
 - 新任务使用 `task_layout: report-local`，work_dir 必须恰为 output_dir 下 `.tmp/` 的单次任务目录。output_dir 必须位于项目内，不能是项目根、临时目录或 `.git`、`.agents` 子目录。旧格式仅兼容读取，不主动迁移或覆盖旧目录。
-- `object_type` 使用路由枚举；每个 item 的 `type` 可覆盖全局类型。id 为小写英文字母、数字和连字符组成的稳定标识，结构化结果文件名使用 id。调研目录遵循主题优先与英文命名规则；仅明确声明的中文正式产品／项目名可用于 target，普通中文标题不能自动变成目录。
+- `object_type` 使用路由枚举；每个 item 的 `type` 可覆盖全局对象类型，但同一任务的 items 必须保持同一实际类型，analysis 的全局与 item 类型均为 analysis。输入报告是来源，新增来源不新增 item 或修改 mode；跨类型对象应复用或建立独立任务。id 为小写英文字母、数字和连字符组成的稳定标识，结构化结果文件名使用 id。调研目录遵循主题优先与英文命名规则；仅明确声明的中文正式产品／项目名可用于 target，普通中文标题不能自动变成目录。
 - `version` 可以为 null，表示未指定；实际采用的版本仍应在结果里记录。不要把组织名当作默认研究对象。
 - `revision` 在范围变化时递增；它用于解释变更，不意味着旧结果必须全部废弃。
 - `goal`、`time_range` 为可选字符串，用于明确用户目标和时间边界；改变它们会要求重新核对已有字段。
@@ -95,7 +95,7 @@ input_fingerprint 只绑定问题与范围。实际依赖已登记参考文章�
 
 该映射位于 full 的每个字段记录内；light 位于 outline.assessment 内，--fingerprints 无须 --fields。散列针对去掉访问日期、统一图片缓存链接后的原文，与获取记录中的文件 content_sha256 不同。
 
-正文变更后，检查器结合字段 evidence 与 conflicts.positions 中 source_id 对应的原始／重定向 URL 定位依赖；显式映射也参与检查。它返回 stale_article_fields[item_id][field_id] 或 light 的 stale_articles，并阻止成稿。先重读新版，复核数值、适用条件、定位和推理，再更新结论及此映射；未能确认时记录 unknown 与原因，并保留本次复查的正文指纹。不能通过移除引用或更新报告摘要跳过复核。
+正文变更后，检查器结合字段 evidence 与 conflicts.positions 中 source_id 对应的原始／重定向 URL 定位依赖；显式映射也参与检查。它返回 `stale_article_fields[item_id][field_id]` 或 light 的 `stale_articles`，并阻止成稿。先重读新版，复核数值、适用条件、定位和推理，再更新结论及此映射；未能确认时记录 unknown 与原因，并保留本次复查的正文指纹。不能通过移除引用或更新报告摘要跳过复核。
 
 兼容未变更文章对应的旧结果没有此映射；已有版本历史显示正文变化时仍要求复核。新结果应从首次使用文章起记录依赖，未受影响字段保持原值。正文接受、原文归档和结论复核是不同步骤；检查器不能证明已经实际阅读。
 
@@ -140,10 +140,37 @@ input_fingerprint 只绑定问题与范围。实际依赖已登记参考文章�
 - `confirmed`：有已阅读的直接证据；`inferred`：有来源支持的推断，另写 reason 解释推导。
 - `unknown`：未核实，value 为 null，reason 说明缺口；`not_applicable`：该问题对对象不适用，value 为 null 并说明原因。
 - confirmed／inferred 均需非空 value 和 evidence；每条 evidence 指向同一结果中的 source_id，并附页码、章节、固定路径行号或实验条件等 locator。
-- source 的 kind 为 primary／secondary；URL 优先使用原始资料地址；已有本地 file URI 保持兼容，交付物内部的文档和图片链接仍使用相对路径。accessed_at 为实际读取日期，未读来源不能填入已核实证据。
+- source 的 kind 为 primary／secondary；URL 优先使用原始资料地址；analysis 引用项目内已有报告时使用下节的 repo: 记录。已有本地 file URI 保持兼容，交付物内部的文档和图片链接仍使用相对路径。accessed_at 为实际读取日期，未读来源不能填入已核实证据。
 - 不同结果文件的来源 id 可独立编号。根 JSON 不再复用旧版任意分类键或 `uncertain` 数组，未知项直接保存在对应字段中。
 
 evidence 可填写非空 supports 与 conditions 来解释主张和支持条件。字段发生证据冲突时增加 conflicts 数组，完整结构和处理规则见 [证据规范](evidence-policy.md#来源冲突)。未解决冲突要求该字段 unknown；resolved 也保留双方记录与 rationale，报告不能只引用被采纳来源。
+
+## 分析判断引用已有报告
+
+`analysis` 任务的对象是待分析的问题，输入报告作为来源，不把不同类型来源作为混合 items。任务目标、用户硬约束、偏好与贡献者假设属于输入，不直接建立为待证实的事实字段，也不为其编造 URL。影响判断的输入应落实到 goal／time_range 或相关字段描述，使现有范围指纹覆盖其含义；notes.md 保留原文、提供者及采用条件。现实性能、成本等事实声明仍按公共证据要求处理。
+
+full 的 fields 只列需要核查或推导的主张；最小分析可只有 judgment，以 inferred 的 reason 解释依据、条件和推导，evidence 指向真实支持的来源事实。报告章节、来源清单和贡献者观点不必各建一个字段。输入改变时按正常范围变更规则复核，不仅更新 notes；light 沿用 assessment 与 notes，无需为此增加新配置格式。
+
+repo: 的限制仅针对项目内本地报告引用，原始论文、官方文档等外部 HTTP(S) 来源仍使用公共 sources 结构。采用项目内持久报告时，在 full 的 sources 或 light 的 assessment.sources 中记录：
+
+```json
+{
+  "id": "memory-survey-report",
+  "title": "记忆综述论文调研报告",
+  "url": "repo:agent-memory/paper/survey-agent-memory/report.md",
+  "kind": "secondary",
+  "version": "实际报告版本或日期",
+  "accessed_at": "实际读取日期，格式 YYYY-MM-DD",
+  "sha256": "采用文件字节的实际 SHA-256",
+  "locator": "实际采用的章节、主张及适用条件"
+}
+```
+
+`repo:` 后是项目相对 Markdown 路径，不能指向计划、临时文件、技能、外部路径、链接目录或本篇输出。正文使用相对链接，如 `[已有调研](../../paper/survey-agent-memory/report.md#分类体系)`，不将 `repo:` 标识直接当作阅读链接。full 的 evidence 仍按 source_id 和 locator 定位；既有调研事实、贡献者观点和本次推导分别记录，推断写明 reason。
+
+校验器会核对实际文件与 sha256；来源变化后先复核采用的主张及相关推导，再更新版本、散列与结果，不通过只改散列跳过复核。正文仅放行已用于证据的已有报告相对链接，并检查章节锚点；该例外不扩大普通报告、计划或图片的输出边界。不复制来源报告为本篇附件，不将报告转述当作原始证据。
+
+任务清理后，标准 analysis 目录中的独立文件检查可依据报告保存的 research-summary 来源清单核对这些相对链接，仍返回 consistency_checked=false；它不能恢复逐字段证据、核对原散列或证明研究一致性。再次更新判断时按实际需要重建或恢复证据。
 
 ## 增量更新
 

@@ -25,10 +25,10 @@ from markdown_it import MarkdownIt
 import yaml
 
 TYPES = {"paper": "论文", "open-source": "开源项目", "product": "产品",
-         "benchmark": "评测", "topic": "技术专题"}
+         "benchmark": "评测", "analysis": "分析判断"}
 COLORS = {"theme": "#b0a0ff", "paper": "#ffbe75",
           "open-source": "#57deca", "product": "#75acff", "benchmark": "#f78dc1",
-          "topic": "#c7a3ff", "unknown": "#9aaac6"}
+          "analysis": "#c7a3ff", "unknown": "#9aaac6"}
 STATUS = {"draft": "草案", "active": "进行中", "paused": "暂停",
           "completed": "已完成", "archived": "已归档", "planned": "待开始",
           "in_progress": "进行中", "partial": "部分完成", "blocked": "阻塞",

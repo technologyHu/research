@@ -1,0 +1,4 @@
+interface:
+  display_name: "分析判断"
+  short_description: "基于已有调研成果与贡献者思考，形成可追溯的技术分析、取舍与判断"
+  default_prompt: "使用 $research-analysis，基于已有调研与我提供的观点分析这个技术问题，明确判断标准，说明依据、推导、取舍、置信理由和结论反转条件。"

@@ -73,6 +73,16 @@ updated_at: 2026-11-06
         self.assertEqual(graph["stats"]["reports"], 1)
         self.assertEqual(graph["stats"]["themes"], 1)
 
+    def test_analysis_and_survey_use_distinct_types_and_topic_is_not_indexed(self):
+        self.report("agents/paper/survey-memory/report.md")
+        self.report("agents/analysis/memory-selection/report.md")
+        self.report("agents/topic/removed-category/report.md")
+        graph = self.build()
+        self.assertEqual(graph["stats"], {"themes": 1, "reports": 2, "types": 2, "objects": 2})
+        self.assertEqual({n["type"] for n in graph["nodes"] if n["kind"] == "object"}, {"paper", "analysis"})
+        self.assertEqual(graph["types"]["analysis"], "分析判断")
+        self.assertNotIn("topic", graph["types"])
+
     def test_only_explicit_report_links_and_not_code_links(self):
         self.report()
         self.report("agents/product/two/report.md", run="different")

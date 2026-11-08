@@ -1,13 +1,67 @@
 """Portable project-relative task files with resolved paths used only during execution."""
 
 from copy import deepcopy
+import hashlib
 import os
-from pathlib import Path
+from pathlib import Path, PurePosixPath
+from urllib.parse import unquote, urlsplit
 
 MODE = "project-relative"
 TEMP = Path(".tmp") / "research"
 LOCAL_LAYOUT = "report-local"
 PATH_KEYS = {"workspace", "work_dir", "output_dir", "outline", "fields", "notes", "report", "preserve_output_dir", "manifest"}
+
+
+def repo_report_parts(value):
+    parsed = urlsplit(value)
+    decoded = unquote(parsed.path)
+    path = PurePosixPath(decoded)
+    if (parsed.scheme != "repo" or parsed.netloc or parsed.query or parsed.fragment
+            or not decoded or path.is_absolute() or str(path) != decoded
+            or any(char in decoded for char in "\\:*?\0")
+            or any(part.casefold() in {"..", ".tmp", ".git", ".agents", "docs", "scripts", "tests", "archive"} for part in path.parts)
+            or len(path.parts) < 3 or path.suffix.lower() != ".md" or path.name.casefold() == "plan.md"):
+        raise ValueError("repo: sources must identify a project-relative research report")
+    return path
+
+
+def repo_report_path(value, workspace):
+    parts = repo_report_parts(value)
+    workspace = Path(workspace).resolve()
+    path = workspace.joinpath(*parts.parts)
+    for entry in (path, *path.parents):
+        if entry.is_symlink() or getattr(entry, "is_junction", lambda: False)():
+            raise ValueError("repo: sources cannot use linked paths")
+        if entry == workspace:
+            break
+    if not path.resolve().is_relative_to(workspace) or not path.is_file():
+        raise ValueError("repo: source report is missing or outside the project")
+    return path.resolve()
+
+
+def check_repo_source(source, outline, kind):
+    """Validate adopted local reports without persisting machine-specific file URIs."""
+    value = source.get("url", "")
+    if not isinstance(value, str):
+        return []
+    try:
+        if urlsplit(value).scheme != "repo":
+            return []
+        if kind != "analysis" or outline.get("object_type") != "analysis":
+            raise ValueError("repo: sources are limited to analysis tasks")
+        if source.get("kind") != "secondary":
+            raise ValueError("An adopted report is a secondary source")
+        if not isinstance(source.get("version"), str) or not source["version"].strip():
+            raise ValueError("Record the adopted report's actual version or date")
+        path = repo_report_path(value, outline["workspace"])
+        if path.is_relative_to(Path(outline["output_dir"]).resolve()):
+            raise ValueError("An analysis cannot cite its own deliverables as prior evidence")
+        expected = hashlib.sha256(path.read_bytes()).hexdigest()
+        if source.get("sha256") != expected:
+            raise ValueError("Adopted report changed or has no sha256; review affected conclusions before accepting it")
+    except (OSError, ValueError, TypeError, KeyError) as exc:
+        return [str(exc)]
+    return []
 
 
 def relative(path, workspace):

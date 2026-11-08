@@ -9,7 +9,7 @@ import re
 import validate_results as results
 from research_evidence import LABELS as CONFLICT_LABELS, summaries
 from research_update import update_summary
-from research_paths import checked_paths, encode_outline
+from research_paths import checked_paths, encode_outline, check_repo_source
 import research_articles as articles
 import research_dependencies as dependencies
 
@@ -63,6 +63,7 @@ def validate_light(outline_path, fingerprints_only=False):
     if not isinstance(outline.get("object_type"), str) or outline["object_type"] not in results.TYPES:
         errors.append("Invalid light object_type")
     items = outline.get("items", [])
+    kind = outline.get("object_type")
     if outline.get("workflow") != "light" or outline.get("mode") != "single" or outline.get("depth") != "brief" or not isinstance(items, list) or len(items) != 1:
         errors.append("Light workflow requires single mode, brief depth and exactly one item")
     if not isinstance(items, list) or not items or not isinstance(items[0], dict):
@@ -74,6 +75,8 @@ def validate_light(outline_path, fingerprints_only=False):
         kind = item.get("type", outline.get("object_type"))
         if not isinstance(kind, str) or kind not in results.TYPES:
             errors.append("Invalid light object type")
+        if (outline.get("object_type") == "analysis") != (kind == "analysis"):
+            errors.append("Analysis tasks must use analysis questions, not source objects")
         if item.get("version") is not None and not isinstance(item["version"], str):
             errors.append("Light requested version must be a string or null")
     for key in ("topic", "run_id"):
@@ -126,6 +129,7 @@ def validate_light(outline_path, fingerprints_only=False):
             date.fromisoformat(source.get("accessed_at", ""))
         except (ValueError, TypeError):
             errors.append("Each light source needs an ISO accessed_at date")
+        errors.extend(check_repo_source(source, outline, kind))
     try:
         notes = (paths["work_dir"] / "notes.md").read_text(encoding="utf-8-sig")
         if not notes.strip():

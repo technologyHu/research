@@ -82,11 +82,11 @@ class TaskWorkflow(unittest.TestCase):
         self.assertFalse((path / "results").exists())
 
     def test_comparison_auto_uses_full_and_retains_types(self):
-        job = self.create(depth="brief", items=["paper:paper=论文", "sdk:open-source=集成包"])
+        job = self.create(depth="brief", items=["paper:paper=论文", "other:paper=另一篇论文"])
         _, _, outline = task.open_task(job["work_dir"])
         self.assertEqual(job["workflow"], "full")
         self.assertEqual(outline["mode"], "comparison")
-        self.assertEqual(outline["items"][1]["type"], "open-source")
+        self.assertEqual(outline["items"][1]["type"], "paper")
 
     def test_list_keeps_multiple_tasks_and_separates_workspaces(self):
         self.create()

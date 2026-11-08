@@ -5,6 +5,8 @@ description: 把已有调研证据组织成中文 Markdown 单对象报告或对
 
 # Research Report：成稿与交付
 
+接收 research-deep 的对象调研证据，或 research-analysis 的成果采用记录、贡献者观点与推导，共用本流程成稿与校验。成稿发现缺口时返回原执行分支，只复核受影响范围；不把 analysis 再转成整轮对象调研，也不在成稿阶段重做来源主体背景调查。
+
 1. 通过 [任务管理](../research/references/task-management.md) 定位计划。full 读取 fields 和结果，light 读取 notes 与 assessment；结合所选类型模板与清单成稿。更新已有报告的证据或结论时先读 [局部更新流程](../research/references/report-updates.md)，在改动前保存基线；普通文字更正直接编辑。
    组织章节时按 [自绘技术图](../research/references/writing-policy.md#自绘技术图) 在已有笔记或草稿中安排配图，证据稳定后再生成。
 2. 遵循 [写作规范](../research/references/writing-policy.md)、[证据规范](../research/references/evidence-policy.md) 和 [交付规范](../research/references/delivery-policy.md)。先检查本次全部对象，不带 --item；valid 与 completion 分开处理，缺乏证据时不按模板编造结论。
@@ -20,8 +22,8 @@ description: 把已有调研证据组织成中文 Markdown 单对象报告或对
    自绘图按 [保存规则](../research/references/delivery-policy.md#自绘图的保存) 归档并检查最终嵌入效果。
 6. 用 research_task.py report-note 生成当前说明，原样放在主报告标题下；包含可见完成度、版本、核心及存在的非核心缺口和隐藏摘要，沿用来源保留原日期。apply-update 自动生成的说明在归档记录变化后也须同步；隐藏摘要不算引用，不用更新说明掩盖过期结论。核对事实、限定条件和引用位置，再运行 `python <skills_root>/research/scripts/research_task.py verify --work-dir <work_dir>`；后续再改正文需重新 verify。它只在临时目录保存回执，不修改报告、不验证远程可访问性、论证真实性或语言润色是否完成。
    报告 verify 不替代绘图检查和视觉复核；按 [配图验收规则](../research/references/writing-policy.md#自绘技术图) 核对必需图的交付情况，未完成时不得仅凭 verify 通过就宣称全部交付或回写任务 done。
-7. 按类型清单人工复核。已关联主题计划时，先按 [主题计划维护](../research/references/theme-planning.md) 回填真实报告链接、版本／日期、问题覆盖、完整／部分结果及缺口；阶段收口或主题结束按交付规范处理快照。准备交付且无需保留工作资料时，再运行 cleanup-plan，向用户展示待删目录、文件数／大小和保留目录并取得明确确认。确认后复核 plan_id 未变，及时用原生操作清理精确任务目录并检查结果；同范围不重复询问。用户尚未确认、仍需补查或要求保留时保留临时资料。不要删除技能、其他任务、用户既有资料或项目根索引。汇报产物、缺口及实际清理状态。
-   报告 verify 通过不自动表示主题任务或主题整体完成，长期计划和快照始终保留；主题归档与执行目录清理分别处理。
+7. 按类型清单人工复核。已关联主题计划时，先按 [主题计划维护](../research/references/theme-planning.md) 回填真实报告链接、版本／日期、问题覆盖、完整／部分结果及缺口；阶段收口或主题结束按交付规范直接更新当前计划的状态与收口记录。准备交付且无需保留工作资料时，再运行 cleanup-plan，向用户展示待删目录、文件数／大小和保留目录并取得明确确认。确认后复核 plan_id 未变，及时用原生操作清理精确任务目录并检查结果；同范围不重复询问。用户尚未确认、仍需补查或要求保留时保留临时资料。不要删除技能、其他任务、用户既有资料或项目根索引。汇报产物、缺口及实际清理状态。
+   报告 verify 通过不自动表示主题任务或主题整体完成，长期计划始终保留；主题归档与执行目录清理分别处理。
    本次报告修订了已被其他任务采用的结论时，回写计划同时标出相关依赖与实际下游，按规则复核影响并保留旧接受记录；不自动执行所有后续研究，清理前将相关成果、接受版本及待复核事项写入长期计划。
 
 独立 validate_report.py 不带 outline 只做文件检查，不能替代最终任务 verify。生成报告不默认执行 Git 提交、推送或发布。用户明确要求提交报告时，交给 [research-commit](../research-commit/SKILL.md)，按报告分别组织提交，同篇本轮修订尽量集中或合并。

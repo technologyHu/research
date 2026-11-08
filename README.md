@@ -2,6 +2,10 @@
 
 本分支归纳 openJiuwen Harness 组织内部的调研计划、报告与后续工作。
 
+## 使用、贡献与维护
+
+首次使用、开展调研、贡献报告或维护技能与图谱，请阅读[仓库使用、贡献与维护指南](docs/repository-guide.md)。项目规则见 [AGENTS.md](AGENTS.md)。
+
 <!-- research-graph:start -->
 
 ## 调研图谱

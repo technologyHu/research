@@ -11,11 +11,11 @@ import sys
 from urllib.parse import urlsplit
 
 from research_evidence import validate_conflicts
-from research_paths import checked_paths, resolve_outline
+from research_paths import checked_paths, resolve_outline, repo_report_parts, check_repo_source
 import research_articles as articles
 import research_dependencies as dependencies
 
-TYPES = {"paper", "open-source", "product", "benchmark", "topic"}
+TYPES = {"paper", "open-source", "product", "benchmark", "analysis"}
 STATUSES = {"confirmed", "inferred", "unknown", "not_applicable"}
 ID = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*\Z")
 FIELD_FILES = ("fields.json", "fields.yaml", "fields.yml")
@@ -49,6 +49,9 @@ def valid_url(value):
         parsed = urlsplit(value)
         if parsed.scheme in {"http", "https"}:
             return bool(parsed.netloc)
+        if parsed.scheme == "repo":
+            repo_report_parts(value)
+            return True
         return parsed.scheme == "file" and parsed.path.startswith("/")
     except ValueError:
         return False
@@ -172,7 +175,10 @@ def validate(outline_path, fields_path, results_dir=None, item_ids=None, progres
         require(isinstance(item.get("name"), str) and bool(item["name"].strip()), f"{key}: name is required")
         item_type = item.get("type", outline.get("object_type"))
         require(isinstance(item_type, str) and item_type in TYPES, f"{key}: invalid type")
+        require((outline.get("object_type") == "analysis") == (item_type == "analysis"), f"{key}: analysis tasks must use analysis questions, not source objects")
         require(item.get("version") is None or isinstance(item.get("version"), str), f"{key}: version must be a string or null")
+    require(len({item.get("type", outline.get("object_type")) for item in item_map.values() if isinstance(item.get("type", outline.get("object_type")), str)}) <= 1,
+            "Different object types require separate tasks; use prior reports as analysis sources")
     field_map = {}
     for field in fields:
         if not isinstance(field, dict) or not isinstance(field.get("id"), str) or not ID.fullmatch(field["id"]):
@@ -276,6 +282,7 @@ def validate(outline_path, fields_path, results_dir=None, item_ids=None, progres
             require(isinstance(source.get("title"), str) and bool(source["title"].strip()), f"{item_id}/{sid}: missing title")
             require(valid_url(source.get("url")), f"{item_id}/{sid}: invalid source URL")
             require(isinstance(source.get("kind"), str) and source["kind"] in {"primary", "secondary"}, f"{item_id}/{sid}: invalid source kind")
+            errors.extend(f"{item_id}/{sid}: {error}" for error in check_repo_source(source, outline, kind))
             try:
                 date.fromisoformat(source.get("accessed_at", ""))
             except (TypeError, ValueError):

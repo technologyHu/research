@@ -17,19 +17,18 @@ class ClassificationAndCleanup(unittest.TestCase):
     write_report = fixtures.TaskWorkflow.write_report
 
     def test_single_object_is_grouped_by_actual_type_theme_and_id(self):
-        job = task.create_task(self.workspace, "示例项目架构", "topic", items=["library:open-source=示例库"], theme="Agent Memory")
+        job = task.create_task(self.workspace, "示例项目架构", "open-source", items=["library:open-source=示例库"], theme="Agent Memory")
         self.assertEqual(Path(job["output_dir"]).relative_to(self.workspace).as_posix(), "agent-memory/open-source/library")
         self.assertEqual(job["classification"], {"type": "open-source", "theme": "agent-memory", "target": "library"})
         self.assertFalse((Path(job["output_dir"]) / "report.md").exists())
 
-    def test_same_type_and_mixed_type_comparisons_have_distinct_placement(self):
+    def test_same_type_comparison_is_placed_and_mixed_types_are_rejected(self):
         same = self.create(items=["a=论文 A", "b=论文 B"], theme="agent-memory")
-        mixed = self.create(items=["a:paper=论文", "b:open-source=代码库"], theme="agent-memory")
         self.assertEqual(same["classification"]["type"], "paper")
-        self.assertEqual(mixed["classification"]["type"], "topic")
-        for job in (same, mixed):
-            self.assertTrue(job["classification"]["target"].startswith("compare-"))
-            self.assertEqual(Path(job["output_dir"]).parent.parent.name, "agent-memory")
+        self.assertTrue(same["classification"]["target"].startswith("compare-"))
+        self.assertEqual(Path(same["output_dir"]).parent.parent.name, "agent-memory")
+        with self.assertRaisesRegex(ValueError, "separate tasks"):
+            self.create(items=["a:paper=论文", "b:open-source=代码库"], theme="agent-memory")
 
     def test_existing_output_and_classification_survive_derivation(self):
         legacy = self.workspace / "reports/legacy-location"
