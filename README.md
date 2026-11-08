@@ -8,6 +8,8 @@
 
 对象调研从 [research](.agents/skills/research/SKILL.md) 进入，报告保存到 [research-reports](research-reports/README.md)；基于已有成果的主题分析从独立的 [research-analysis](.agents/skills/research-analysis/SKILL.md) 进入，报告保存到 [analysis-reports](analysis-reports/README.md)。两者可共用成稿、证据与提交能力。
 
+两个入口共用 [主题注册表](themes.yaml)，主题层次通过统一名称体现；具体报告目录追加创建或最近修订的北京时间，报告 ID 保持稳定。
+
 <!-- research-graph:start -->
 
 ## 调研图谱
@@ -20,7 +22,9 @@
 
 数据分支：`openjiuwen-harness`。只索引已纳入 Git 的调研内容；技能资料不进入总览。
 
-调研报告：`research-reports/<theme>/<type>/<target>/`；分析洞察报告：`analysis-reports/<theme>/analysis/<subject>/`。各入口的主题计划位于对应根目录下的 `<theme>/plan.md`。目录通常使用英文，中文正式对象名可保留原名。
+主题命名统一维护在 `themes.yaml`，主题层次压成一个目录名。调研报告：`research-reports/<主题名>/<type>/<target>-YYYYMMDD-HHmmss/`；分析洞察：`analysis-reports/<主题名>[-<专题>]-YYYYMMDD-HHmmss/`。时间采用北京时间，记录创建或最近修订时间。
+
+当前计划：调研使用 `research-reports/<主题名>/plan.md`，分析洞察使用 `analysis-reports/<主题名>.plan.md`。报告按主题层次聚合，同主题内按最近修订时间倒序。
 
 图谱按实际关联自由布局：主题与具体调研工作连接，类型通过颜色、标签和筛选体现。
 

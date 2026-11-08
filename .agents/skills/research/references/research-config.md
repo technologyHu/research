@@ -16,9 +16,18 @@ run_id: paper-review-001
 revision: 1
 path_mode: project-relative
 task_layout: report-local
+directory_layout: dated-flat
+report_id: report-00000000000000000000000000000001
+theme_id: agent-memory
+theme_slug: agent-memory
+theme_path: [agent, memory]
+theme_name: Agent / 记忆
+created_at: "2026-11-08T12:00:00+08:00"
+updated_at: "2026-11-08T12:00:00+08:00"
+classification: {type: paper, theme: agent-memory, target: example-paper}
 workspace: ../../../../../..
-work_dir: research-reports/method-analysis/paper/example-paper/.tmp/paper-review-001
-output_dir: research-reports/method-analysis/paper/example-paper
+work_dir: research-reports/agent-memory/paper/example-paper-20261108-120000/.tmp/paper-review-001
+output_dir: research-reports/agent-memory/paper/example-paper-20261108-120000
 topic: 示例论文的方法与实验分析
 goal: 理解方法并核实主要实验结论
 time_range: 采用论文 v1 及其同期材料
@@ -37,14 +46,14 @@ execution:
   concurrency: 1
 ```
 
-- 新配置使用 `path_mode: project-relative`。workspace 相对于配置文件所在目录；outline 位于 `<report-root>/<theme>/<type>/<target>/.tmp/<run-id>/` 时为 `../../../../../..`；自定义报告目录层级时由工具计算，不手写固定跳转层数。work_dir、output_dir 相对于项目根。脚本内部解析路径，持久化配置和命令输出保留相对形式。
+- 新配置使用 `path_mode: project-relative`。workspace 相对于配置文件所在目录；对象报告 outline 的 workspace 通常为 `../../../../../..`，单层分析报告为 `../../../..`；自定义报告目录层级时由工具计算，不手写固定跳转层数。work_dir、output_dir 相对于项目根。脚本内部解析路径，持久化配置和命令输出保留相对形式。
 - 新任务使用 `task_layout: report-local`，work_dir 必须恰为 output_dir 下 `.tmp/` 的单次任务目录。output_dir 必须位于项目内，不能是项目根、临时目录或 `.git`、`.agents` 子目录。旧格式仅兼容读取，不主动迁移或覆盖旧目录。
 - `object_type` 使用路由枚举；每个 item 的 `type` 可覆盖全局对象类型，但同一任务的 items 必须保持同一实际类型，analysis 的全局与 item 类型均为 analysis。输入报告是来源，新增来源不新增 item 或修改 mode；跨类型对象应复用或建立独立任务。id 为小写英文字母、数字和连字符组成的稳定标识，结构化结果文件名使用 id。调研目录遵循主题优先与英文命名规则；仅明确声明的中文正式产品／项目名可用于 target，普通中文标题不能自动变成目录。
 - `version` 可以为 null，表示未指定；实际采用的版本仍应在结果里记录。不要把组织名当作默认研究对象。
 - `revision` 在范围变化时递增；它用于解释变更，不意味着旧结果必须全部废弃。
 - `goal`、`time_range` 为可选字符串，用于明确用户目标和时间边界；改变它们会要求重新核对已有字段。
 - 任务工具记录 classification.type／theme／target，用于目录归类与展示；创建时 --theme 指定分类主题。它不参与证据问题指纹，调整分类不代表重新核实。分类与默认目录规则见 [交付规范](delivery-policy.md#类型与主题归类)，显式 output_dir 和既有报告位置优先。
-- 持续主题的长期问题、任务与阶段保存在 [主题级计划](theme-planning.md) 中；classification.theme 用于关联同一主题，单次 topic／goal／fields 仍只描述本次研究范围。计划表不替代字段证据、完成度检查或报告来源。
+- report_id、created_at、updated_at 和规范主题信息会进入成稿摘要；时间字段仅描述报告生命周期，不能替代来源访问日期。持续主题的长期问题、任务与阶段保存在 [主题级计划](theme-planning.md) 中；classification.theme 用于关联同一主题，单次 topic／goal／fields 仍只描述本次研究范围。计划表不替代字段证据、完成度检查或报告来源。
 
 ## 完整流程的 fields（JSON 或等价 YAML）
 
@@ -157,7 +166,7 @@ repo: 的限制仅针对项目内本地报告引用，原始论文、官方文�
 {
   "id": "memory-survey-report",
   "title": "记忆综述论文调研报告",
-  "url": "repo:research-reports/agent-memory/paper/survey-agent-memory/report.md",
+  "url": "repo:research-reports/agent-memory/paper/survey-agent-memory-20261108-120000/report.md",
   "kind": "secondary",
   "version": "实际报告版本或日期",
   "accessed_at": "实际读取日期，格式 YYYY-MM-DD",
@@ -166,7 +175,7 @@ repo: 的限制仅针对项目内本地报告引用，原始论文、官方文�
 }
 ```
 
-`repo:` 后是项目相对 Markdown 路径，不能指向计划、临时文件、技能、外部路径、链接目录或本篇输出。正文使用相对链接，如 `[已有调研](../../../../research-reports/agent-memory/paper/survey-agent-memory/report.md#分类体系)`，不将 `repo:` 标识直接当作阅读链接。full 的 evidence 仍按 source_id 和 locator 定位；既有调研事实、贡献者观点和本次推导分别记录，推断写明 reason。
+`repo:` 后是项目相对 Markdown 路径，不能指向计划、临时文件、技能、外部路径、链接目录或本篇输出。正文使用相对链接，如 `[已有调研](../../research-reports/agent-memory/paper/survey-agent-memory-20261108-120000/report.md#分类体系)`，不将 `repo:` 标识直接当作阅读链接。full 的 evidence 仍按 source_id 和 locator 定位；既有调研事实、贡献者观点和本次推导分别记录，推断写明 reason。
 
 校验器会核对实际文件与 sha256；来源变化后先复核采用的主张及相关推导，再更新版本、散列与结果，不通过只改散列跳过复核。正文仅放行已用于证据的已有报告相对链接，并检查章节锚点；该例外不扩大普通报告、计划或图片的输出边界。不复制来源报告为本篇附件，不将报告转述当作原始证据。
 

@@ -302,7 +302,7 @@ def validate(root, outline_path=None, fields_path=None):
     if context is not None and outline.get("object_type") == "analysis":
         analysis_workspace = Path(outline["workspace"]).resolve()
         adopted_sources = {canonical_source(value) for value in context["source_urls"] if urlsplit(value).scheme == "repo"}
-    elif outline_path is None and fields_path is None and root.parent.name == "analysis" and len(root.parents) >= 3:
+    elif outline_path is None and fields_path is None and ((root.parent.name == "analysis" and len(root.parents) >= 3) or root.parent.name == "analysis-reports"):
         # A cleaned task still permits independent link checks from its saved
         # summary. This does not restore evidence or check research consistency.
         notes = re.findall(r"<!--\s*research-summary\s*\n(.*?)-->", documents.get(report, ""), re.S)
@@ -312,7 +312,7 @@ def validate(root, outline_path=None, fields_path=None):
             sources = summary.get("source_urls")
             if (isinstance(items, list) and items and all(isinstance(item, dict) and item.get("type") == "analysis" for item in items)
                     and isinstance(sources, list) and all(isinstance(value, str) for value in sources)):
-                analysis_workspace = root.parents[3] if root.parents[2].name == "analysis-reports" and len(root.parents) >= 4 else root.parents[2]
+                analysis_workspace = root.parent.parent if root.parent.name == "analysis-reports" else root.parents[3] if root.parents[2].name == "analysis-reports" and len(root.parents) >= 4 else root.parents[2]
                 adopted_sources = {canonical_source(value) for value in sources if urlsplit(value).scheme == "repo"}
         except (ValueError, TypeError, AttributeError):
             pass

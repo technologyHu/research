@@ -1,10 +1,12 @@
 # 临时任务管理与完整流程
 
-使用 [research_task.py](../scripts/research_task.py) 创建和恢复任务。它默认写 JSON，除可选的旧 YAML 配置外只依赖 Python 标准库。以下命令从项目根执行，使用相对路径；`<skills_root>` 在本项目为 `.agents/skills`。
+使用 [research_task.py](../scripts/research_task.py) 创建和恢复任务。任务默认写 JSON；普通 YAML 主题注册表与旧 YAML 配置需要 PyYAML，工具不自动安装依赖。以下命令从项目根执行，使用相对路径；`<skills_root>` 在本项目为 `.agents/skills`。
 
 Windows 调用 Python 可加 `-X utf8 -B`，读写文档使用 UTF-8。用 subprocess 捕获脚本输出时显式指定 `text=True, encoding="utf-8"`，不要让系统默认 GBK 解码中文或数学符号。脚本的 JSON／Markdown 输出采用 UTF-8。
 
 ## 创建与定位
+
+项目根目录须有 themes.yaml；用 themes --workspace . 查看规范 ID、父子层次、完整主题名和别名。新工作区先 init-themes，再 add-theme 登记实际主题，见 [注册表说明](theme-registry.md)。create 的 --theme 接受已登记 ID 或别名，持久保存规范 ID，不能传路径或临时发明同义名称。
 
 长期主题计划先按 [主题计划维护](theme-planning.md) 定位；单次任务的 outline／fields 继续留在本节创建的临时目录。只维护主题计划时直接编辑长期 Markdown，不必执行 create。现有命令不会自动同步或归档主题计划，也没有主题归档命令；由当前代理按规范维护。
 
@@ -18,11 +20,11 @@ python <skills_root>/research/scripts/research_task.py list --workspace .
 python <skills_root>/research/scripts/research_task.py show --work-dir <work_dir>
 ```
 
-create 按类型自动选择 report-root：paper／open-source／product／benchmark 使用 research-reports，analysis 使用 analysis-reports；两个独立入口共用本工具。返回 run_id 和相对于项目根的任务、计划与报告路径。所有中间资料集中在对应报告目录的 `<report-root>/<theme>/<type>/<target>/.tmp/<run-id>/`，包含 owner.json 标记；同名主题产生独立 run，不覆盖旧任务。完整目录模板见 [交付规范](delivery-policy.md)。list 查找当前项目各调研目录内的任务，跳过临时目录内部的源码、下载资料及其他项目任务，可用 `--topic` 筛选。多个任务匹配时明确选择 run_id／work_dir，不自动采用第一项。
+create 自动生成带北京时间戳的报告目录，并返回 report_id、theme_id、theme_slug、created_at、updated_at。analysis 使用单层目录，其他类型在完整主题名下按类型和对象组织。create 按类型自动选择 report-root：paper／open-source／product／benchmark 使用 research-reports，analysis 使用 analysis-reports；两个独立入口共用本工具。返回 run_id 和相对于项目根的任务、计划与报告路径。所有中间资料集中在对应报告目录的 `<report-dir>/.tmp/<run-id>/`，包含 owner.json 标记；同名主题产生独立 run，不覆盖旧任务。完整目录模板见 [交付规范](delivery-policy.md)。list 查找当前项目各调研目录内的任务，跳过临时目录内部的源码、下载资料及其他项目任务，可用 `--topic` 筛选。多个任务匹配时明确选择 run_id／work_dir，不自动采用第一项。
 
-后续命令和编辑使用返回的 outline、fields 相对路径，例如 `research-reports/agent-memory/paper/example-paper/.tmp/<run-id>/outline.json`。受管任务默认 outline.json、fields.json；已有 fields.yaml／fields.yml 由 show 返回实际路径。自动发现时若同时存在多个 fields 配置就报错，不静默选择一份；手工校验可明确传 --fields，但不要为追加对象或字段另建同名配置。受管 outline 始终为 outline.json，旧手工 YAML 计划用检查脚本明确传路径，不伪造 owner。
+后续命令和编辑使用返回的 outline、fields 相对路径，例如 `research-reports/agent-memory/paper/example-paper-20261108-120000/.tmp/<run-id>/outline.json`。受管任务默认 outline.json、fields.json；已有 fields.yaml／fields.yml 由 show 返回实际路径。自动发现时若同时存在多个 fields 配置就报错，不静默选择一份；手工校验可明确传 --fields，但不要为追加对象或字段另建同名配置。受管 outline 始终为 outline.json，旧手工 YAML 计划用检查脚本明确传路径，不伪造 owner。
 
-create 创建调研目录及其 .tmp/ 任务目录，但不创建或覆盖 report.md。按 [目录归类规则](delivery-policy.md#类型与主题归类) 输出到 `<report-root>/<theme>/<type>/<target>/`；`--theme agent-memory` 指定英文主题，省略时为 general。单对象 target 优先取明确给定的英文对象 id；`--target` 可另行指定英文目录名，同类型对比任务按需加 compare-。跨类型对象分别创建任务；基于已有成果的分析洞察单独使用 analysis。中文正式名称通过 `--native-target-name 扣子` 明确声明例外，内部仍可使用 `--item coze:product=扣子`。`--topic` 是中文或英文调研标题，不能因此把一般中文描述用作目录；无英文对象 id 时传 --target。`--output` 相对于 `--workspace`，新建位置必须匹配“报告根目录／主题／类型／对象”结构，已有报告可原地复用。
+create 创建调研目录及其 .tmp/ 任务目录，但不创建或覆盖 report.md。按 [目录归类规则](delivery-policy.md#类型与主题归类) 输出到 [交付规范](delivery-policy.md#最终目录) 定义的报告目录；`--theme agent-memory` 指定英文主题，省略时为 general。单对象 target 优先取明确给定的英文对象 id；`--target` 可另行指定英文目录名，同类型对比任务按需加 compare-。跨类型对象分别创建任务；基于已有成果的分析洞察单独使用 analysis。中文正式名称通过 `--native-target-name 扣子` 明确声明例外，内部仍可使用 `--item coze:product=扣子`。`--topic` 是中文或英文调研标题，不能因此把一般中文描述用作目录；无英文对象 id 时传 --target。`--output` 相对于 `--workspace`，新建位置必须匹配对应入口的扁平主题与带时间后缀的目录结构，已有报告可原地复用。
 
 默认只有一个对象，名称取调研标题；可重复 `--item id[:type]=名称` 明确对象，两个以上自动使用 comparison。同一任务中的 items 使用同一实际类型。分析洞察例如 `--type analysis --theme agent-memory --target memory-architecture --item architecture:analysis=记忆架构维度`，输入报告记录为来源；不把论文、项目、产品混合为分析对象。create／show 返回 classification，便于核对分类，不代表证据已更新。
 
@@ -119,7 +121,7 @@ python <skills_root>/research/scripts/research_task.py report-note --work-dir <w
 python <skills_root>/research/scripts/research_task.py verify --work-dir <work_dir>
 ```
 
-成稿后先按 [报告语言润色](writing-policy.md#报告语言润色) 执行 humanizer 并对照证据复核，再运行 verify。verify 同时检查结果有效性、报告与本次结果的一致性、来源引用、图片、本地链接和交付文件；通过后把报告文件散列及研究摘要记录在当前任务的 verified.json。它不修改报告，也不验证论证的语义、润色是否完成或自动访问远程 URL。完整／部分报告都能通过，但可见状态必须准确；之后改动正文须重新 verify。
+成稿后先按 [报告语言润色](writing-policy.md#报告语言润色) 执行 humanizer 并对照证据复核，新格式报告按 [修订时间更新](#报告修订时间与目录更新) 执行 stamp-report，再使用返回的新 work_dir 运行 verify。verify 同时检查结果有效性、报告与本次结果的一致性、来源引用、图片、本地链接和交付文件；通过后把报告文件散列及研究摘要记录在当前任务的 verified.json。它不修改报告，也不验证论证的语义、润色是否完成或自动访问远程 URL。完整／部分报告都能通过，但可见状态必须准确；之后改动正文须重新 verify。
 
 不带 --outline 的 validate_report.py 仍可做独立的文件检查，但不会检查研究一致性，不能替代任务最终 verify。
 
@@ -136,3 +138,17 @@ python <skills_root>/research/scripts/research_task.py cleanup-plan --work-dir <
 该命令验证目录归属、当前结果、报告及历史检查记录，任何一方变化均需重新 verify。返回待删任务相对路径、保留的报告相对路径、文件数、字节数、plan_id 和 requires_confirmation，不执行删除。eligible 仅表示技术条件满足，不能代替用户确认。
 
 向用户展示具体清理范围并取得确认后，重新运行该命令；plan_id 未变即可立即按 [交付规范](delivery-policy.md) 用原生文件操作删除精确任务目录并检查结果。同范围已有明确确认时不重复询问；计划变化、用户仍需补查或要求保留时不直接删除。不要为保存预览而向任务目录写入新文件，否则清单变化会使 plan_id 改变。检查被拒绝时不得换工具规避。
+
+## 报告修订时间与目录更新
+
+新格式报告创建完成或发生实际修订后，执行：
+
+```text
+python <skills_root>/research/scripts/research_task.py stamp-report --work-dir <当前work_dir>
+```
+
+该命令按当前北京时间更新 updated_at 和目录后缀，保留 created_at、report_id、规范主题 ID 和 target；不会另存旧时间目录。它同步正式 Markdown 引用、受管 outline／owner／结果记录的相关路径，并刷新本报告摘要。使用返回的新 work_dir 运行 verify，之后再回写计划并按实际 Git 跟踪范围重建图谱。重复检查或仅读取不调用本命令。
+
+目录重名、链接路径、任务归属错误或并发文件变化会拒绝操作。每份文件先在同目录暂存，再原子替换；写入失败恢复原路径与已替换内容。摘要刷新只替换受管说明行，保留相邻的人工日期、备注等引用块。它不接受来源的新散列、不修改历史基线或源码，也不证明下游分析已经复核；对返回的受影响引用按实际依赖检查。旧布局继续原地维护，stamp-report 不擅自迁移旧报告。
+
+正文中的相对引用会更新，但文本描述、代码样例、外部系统链接及不在受管范围的自定义记录需要人工核对。自定义主报告名沿用 outline.delivery.report；不要在目录改名后继续使用旧 work_dir。命令不提交、推送或删除临时任务。

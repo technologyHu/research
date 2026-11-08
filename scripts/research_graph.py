@@ -18,11 +18,16 @@ import math
 from pathlib import Path
 import re
 import subprocess
+import sys
 import unicodedata
 from urllib.parse import unquote, urlsplit, quote
 
 from markdown_it import MarkdownIt
 import yaml
+
+# The same catalog is used by the portable task tools and the repository graph.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / ".agents/skills/research/scripts"))
+from research_catalog import read_registry, normalize_theme, split_name
 
 TYPES = {"paper": "论文", "open-source": "开源项目", "product": "产品",
          "benchmark": "评测", "analysis": "分析洞察"}
@@ -245,6 +250,20 @@ def build_graph(root: Path, repository: str, branch: str, *, input_paths: set[st
             fnmatchcase(rel, pattern) for pattern in config["exclude_paths"])
 
     nodes, edges, warnings, source_text = {}, {}, [], {}
+    registry = read_registry(root) if "themes.yaml" in input_paths else {}
+    if registry:
+        source_text["themes.yaml"] = (root / "themes.yaml").read_text(encoding="utf-8-sig")
+    theme_lookup = {normalize_theme(value): entry for entry in registry.values()
+                    for value in [entry["id"], entry["directory"], *entry["aliases"]]}
+
+    def registered(value):
+        return theme_lookup.get(normalize_theme(value))
+
+    def theme_key(group, value):
+        entry = registered(value)
+        key = entry["id"] if entry else value
+        return f"{group}/{key}" if group in REPORT_GROUPS else key
+
 
     def node(**data):
         if data["id"] not in nodes:
@@ -265,22 +284,40 @@ def build_graph(root: Path, repository: str, branch: str, *, input_paths: set[st
         source_text[rel] = text
         return text, parse_markdown(text)
 
-    reports = {}
+    reports, primary_reports, implicit_themes = {}, {}, set()
     report_candidates = {}
     for group, categories in REPORT_GROUPS.items():
         for category in categories:
             for path in root.glob(f"{group}/*/{category}/*/*.md"):
                 theme = path.relative_to(root).parts[1]
-                report_candidates[path] = (category, f"{group}/{theme}")
+                report_candidates[path] = (category, theme_key(group, theme))
+    for path in (root / "analysis-reports").glob("*/*.md"):
+        if not accepted(path):
+            continue
+        base, timestamp = split_name(path.parent.name)
+        if timestamp is None or path.name == "plan.md":
+            continue
+        parsed = parse_markdown(path.read_text(encoding="utf-8-sig"))
+        summary = json.loads(parsed["summaries"][0]) if len(parsed["summaries"]) == 1 else {}
+        if not isinstance(summary, dict):
+            raise ValueError("Invalid research-summary in " + str(path))
+        declared = summary.get("theme_id") or parsed["meta"].get("theme_id")
+        candidates = [entry for entry in registry.values() if base == entry["directory"] or base.startswith(entry["directory"] + "-")]
+        if not declared and candidates:
+            declared = max(candidates, key=lambda entry: len(entry["directory"]))["id"]
+        if not declared:
+            raise ValueError("Flat analysis report needs a registered theme_id: " + str(path))
+        report_candidates[path] = ("analysis", theme_key("analysis-reports", declared))
     for category in TYPES:
         for path in root.glob(f"*/{category}/*/*.md"):
             theme = path.relative_to(root).parts[0]
             if theme not in SUPPORT_ROOTS:
-                report_candidates[path] = (category, theme)
+                report_candidates[path] = (category, theme_key(theme, theme))
     # Compatibility is read-only: indexing an old report never moves it.
     for category in TYPES:
         for path in (root / category).glob("*/*/*.md"):
-            report_candidates.setdefault(path, (category, path.relative_to(root).parts[1]))
+            report_candidates.setdefault(path, (category, theme_key(category, path.relative_to(root).parts[1])))
+    report_directories = {}
     for report_type in TYPES:
         for path, theme in sorted((path, theme) for path, (kind, theme) in report_candidates.items() if kind == report_type):
             if not accepted(path):
@@ -305,36 +342,78 @@ def build_graph(root: Path, repository: str, branch: str, *, input_paths: set[st
                         raise ValueError("items must be a list of objects")
                 except (ValueError, TypeError) as error:
                     raise ValueError(f"Invalid research-summary in {rel}: {error}") from error
+            metadata = {**parsed["meta"], **summary}
+            report_key = metadata.get("report_id")
+            group = path.relative_to(root).parts[0]
+            declared = metadata.get("theme_id")
+            if declared:
+                theme = theme_key(group, declared)
+            short_theme = theme.split("/", 1)[-1] if group in REPORT_GROUPS else theme
+            theme_data = registered(short_theme)
+            if report_key:
+                if not isinstance(report_key, str) or not re.fullmatch(r"report-[a-f0-9]{32}", report_key):
+                    raise ValueError("Invalid stable report_id in " + rel)
+                directory = path.parent.relative_to(root).as_posix()
+                if report_key in report_directories and report_directories[report_key] != directory:
+                    raise ValueError("Duplicate report identity in multiple directories: " + report_key)
+                report_directories[report_key] = directory
+            _, directory_time = split_name(path.parent.name)
+            stable_id = ("report:" + report_key + (":" + path.name if path.name != summary.get("delivery", {}).get("report", "report.md") else "")) if report_key else "report:" + rel
             completion = summary.get("completion", "")
             if not completion:
                 marker = re.search(r"^>\s*调研状态[：:]\s*(.+)$", text, re.M)
                 completion = marker.group(1).strip() if marker else "unknown"
-            report = node(id="report:" + rel, kind="report", type=report_type,
+            report = node(id=stable_id, kind="report", type=report_type,
                           label=parsed["title"] or path.stem, path=rel, theme=theme,
                           status=canonical_status(completion), runId=summary.get("run_id", ""),
-                          updatedAt="")
+                          updatedAt=text_value(metadata.get("updated_at")) or directory_time or "",
+                          createdAt=text_value(metadata.get("created_at")),
+                          reportKey=report_key or "", themeId=short_theme,
+                          themePath=theme_data["path"] if theme_data else [short_theme])
             reports[rel] = (report, parsed)
+
+            directory = path.parent.relative_to(root).as_posix()
+            if path.name == summary.get("delivery", {}).get("report", "report.md"):
+                primary_reports[directory] = rel
+            if not declared:
+                implicit_themes.add(rel)
+
+    # All files of one delivery share its work identity, including older
+    # supplemental summaries that do not yet carry a report_id or theme_id.
+    directory_keys = {}
+    for rel, (report, _) in reports.items():
+        directory = Path(rel).parent.as_posix()
+        if report["reportKey"]:
+            if directory in directory_keys and directory_keys[directory] != report["reportKey"]:
+                raise ValueError("Conflicting report identities in one delivery directory: " + directory)
+            directory_keys[directory] = report["reportKey"]
+        if rel in implicit_themes and directory in primary_reports:
+            primary = reports[primary_reports[directory]][0]
+            report.update({key: primary[key] for key in ("theme", "themeId", "themePath")})
 
     plans, tasks = {}, {}
     plan_candidates = {path for path in root.glob("*/plan.md") if path.parent.name not in SUPPORT_ROOTS}
     plan_candidates.update((root / "plans").glob("*/plan.md"))
     for group in REPORT_GROUPS:
-        plan_candidates.update((root / group).glob("*/plan.md"))
+        plan_candidates.update(path for path in (root / group).glob("*/plan.md")
+                               if group != "analysis-reports" or split_name(path.parent.name)[1] is None)
+    plan_candidates.update((root / "analysis-reports").glob("*.plan.md"))
     for path in sorted(plan_candidates):
         if not accepted(path):
             continue
         _, parsed = read(path)
         meta = parsed["meta"]
-        theme = text_value(meta.get("theme_id") or path.parent.name)
+        default_theme = path.name.removesuffix(".plan.md") if path.name.endswith(".plan.md") else path.parent.name
+        theme = text_value(meta.get("theme_id") or default_theme)
         group = path.relative_to(root).parts[0]
-        if group in REPORT_GROUPS:
-            theme = f"{group}/{theme}"
+        theme_data = registered(theme)
+        theme = theme_key(group, theme)
         if theme in plans:
             raise ValueError(f"Duplicate theme_id: {theme}")
         rel = path.relative_to(root).as_posix()
         label = text_value(meta.get("title")) or parsed["title"] or path.parent.name
         if group in GROUP_LABELS:
-            label = GROUP_LABELS[group] + " · " + label
+            label = GROUP_LABELS[group] + " · " + (theme_data["label"] if theme_data else label)
         theme_node = node(id="theme:" + theme, kind="theme", type="theme", theme=theme,
                           label=label,
                           status=canonical_status(text_value(meta.get("status"))), path=rel,
@@ -370,13 +449,14 @@ def build_graph(root: Path, repository: str, branch: str, *, input_paths: set[st
         theme = report["theme"]
         if theme not in plans:
             group, _, short_theme = theme.partition("/")
-            label = GROUP_LABELS[group] + " · " + short_theme if group in GROUP_LABELS else theme
+            theme_data = registered(short_theme)
+            label = GROUP_LABELS[group] + " · " + (theme_data["label"] if theme_data else short_theme) if group in GROUP_LABELS else theme
             theme_node = node(id="theme:" + theme, kind="theme", type="theme", theme=theme,
                               label=label, status="unknown", path=rel, revision=None,
                               updatedAt="", inferredFromDirectory=True)
             plans[theme] = (theme_node, {"tables": [], "links": []})
         theme_node = plans[theme][0]
-        report["updatedAt"] = theme_node["updatedAt"]
+        report["updatedAt"] = report["updatedAt"] or theme_node["updatedAt"]
         edge(theme_node["id"], report["id"], "groups", rel + " · 目录归类")
 
     for theme, (theme_node, parsed) in plans.items():
@@ -425,7 +505,7 @@ def build_graph(root: Path, repository: str, branch: str, *, input_paths: set[st
     report_metadata = {}
     report_work = {}
     for rel, (report, _) in reports.items():
-        report_metadata[report["id"]] = {k: report[k] for k in ("id", "label", "path", "url", "status", "statusLabel", "type")}
+        report_metadata[report["id"]] = {k: report[k] for k in ("id", "label", "path", "url", "status", "statusLabel", "type", "updatedAt", "createdAt", "themeId", "themePath")}
     for key, (task, _) in tasks.items():
         work = {**task, "id": f"work:{task['theme']}:{task['taskId']}", "kind": "object",
                 "reportIds": [], "pendingReportIds": [], "sourceKind": "plan"}
@@ -456,17 +536,18 @@ def build_graph(root: Path, repository: str, branch: str, *, input_paths: set[st
             warnings.append(f"{rel}: 补充报告待关联（候选工作：{', '.join(candidates)}），未新增工作或计为已交付")
             continue
         # With no matching plan item, one target directory denotes one work.
-        work_id = "work:" + digest(directory)
+        work_id = "work:" + directory_keys.get(directory, digest(directory))
         if work_id not in work_nodes:
             work_nodes[work_id] = {**report, "id": work_id, "kind": "object", "reportIds": [],
                                    "pendingReportIds": [], "sourceKind": "report"}
-        elif Path(rel).name == "report.md":
+        elif rel == primary_reports.get(directory):
             # The canonical report supplies the directory work's display name.
             work_nodes[work_id].update({key: report[key] for key in ("label", "path", "url", "status", "statusLabel", "runId", "updatedAt")})
         work_nodes[work_id]["reportIds"].append(report["id"])
         report_work[report["id"]] = {work_id}
         report_metadata[report["id"]].update(associationStatus="directory", workIds=[work_id])
     for work in work_nodes.values():
+        work["reportIds"].sort(key=lambda key: (report_metadata[key].get("updatedAt", ""), key), reverse=True)
         theme_id = "theme:" + work["theme"]
         output_edges[(theme_id, work["id"], "includes")] = {
             "source": theme_id, "target": work["id"], "relation": "includes", "evidence": work["path"]}
@@ -484,7 +565,9 @@ def build_graph(root: Path, repository: str, branch: str, *, input_paths: set[st
         overview.append({"theme": theme, "title": theme_node["label"],
                          "status": theme_node["status"], "statusLabel": theme_node["statusLabel"],
                          "planPath": None if theme_node.get("inferredFromDirectory") else theme_node["path"],
-                         "reportIds": sorted(report_ids), "nextSteps": next_steps(parsed)})
+                         "reportIds": sorted(report_ids, key=lambda key: (report_metadata[key].get("updatedAt", ""), key), reverse=True), "nextSteps": next_steps(parsed)})
+    overview.sort(key=lambda entry: (entry["theme"].split("/", 1)[0],
+                                    registered(entry["theme"].split("/", 1)[-1])["path"] if registered(entry["theme"].split("/", 1)[-1]) else [entry["theme"]]))
     assign_layout(output)
     counts = Counter(n["kind"] for n in output)
     fingerprint = digest(json.dumps({"sources": source_text, "policy": config}, ensure_ascii=False, sort_keys=True))
@@ -550,7 +633,8 @@ def update_readme(root: Path, graph: dict, site_url: str):
              f"**{counts['themes']} 个调研主题 · {counts['types']} 种类型 · {counts['objects']} 项调研工作**", "",
              f"[打开交互图谱]({site_url}) · [本地页面](docs/research-graph/index.html) · [静态预览](docs/research-graph/preview.png) · [生成与维护说明](docs/research-graph-guide.md)", "",
              f"数据分支：`{graph['branch']}`。只索引已纳入 Git 的调研内容；技能资料不进入总览。", "",
-             "调研报告：`research-reports/<theme>/<type>/<target>/`；分析洞察报告：`analysis-reports/<theme>/analysis/<subject>/`。各入口的主题计划位于对应根目录下的 `<theme>/plan.md`。目录通常使用英文，中文正式对象名可保留原名。", "",
+             "主题命名统一维护在 `themes.yaml`，主题层次压成一个目录名。调研报告：`research-reports/<主题名>/<type>/<target>-YYYYMMDD-HHmmss/`；分析洞察：`analysis-reports/<主题名>[-<专题>]-YYYYMMDD-HHmmss/`。时间采用北京时间，记录创建或最近修订时间。", "",
+             "当前计划：调研使用 `research-reports/<主题名>/plan.md`，分析洞察使用 `analysis-reports/<主题名>.plan.md`。报告按主题层次聚合，同主题内按最近修订时间倒序。", "",
              "图谱按实际关联自由布局：主题与具体调研工作连接，类型通过颜色、标签和筛选体现。", "",
              "主题状态取自计划；报告旁标注其自身完整度。下一步取自计划记录，未记录时不自动推断。", ""]
     report_index = {r["id"]: r for r in graph["reports"]}
@@ -603,7 +687,9 @@ def update_readme(root: Path, graph: dict, site_url: str):
             for report_id in topic["reportIds"]:
                 report = report_index[report_id]
                 association = "；工作待关联" if report.get("associationStatus") == "pending" else ""
-                report_links.append(markdown_link(report["label"], report["path"]) + f"（{table_text(report['statusLabel'])}{association}）")
+                updated = report.get("updatedAt", "")
+                date_label = " · " + table_text(updated.replace("T", " ").removesuffix("+08:00")) if "T" in updated else ""
+                report_links.append(markdown_link(report["label"], report["path"]) + f"（{table_text(report['statusLabel'])}{association}）" + date_label)
             reports = "<br>".join(report_links) or "暂无报告"
             actions = "<br>".join(table_text(step) for step in topic["nextSteps"]) or "未记录"
             lines.append(f"| {table_text(topic['title'])} | {table_text(topic['statusLabel'])} | {plan} | {reports} | {actions} |")

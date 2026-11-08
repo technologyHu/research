@@ -109,7 +109,7 @@ class IncrementalDeliveryChecks(unittest.TestCase):
     def test_delivery_scope_keeps_semantic_fingerprints_but_invalidates_report_note(self):
         for light in (False, True):
             with self.subTest(light=light):
-                path, outline, report = self.write_report(self.create(depth="brief" if light else "standard", output=self.workspace / "research-reports" / "general" / "paper" / ("light" if light else "full")))
+                path, outline, report = self.write_report(self.create(depth="brief" if light else "standard", output=self.workspace / "research-reports" / "general" / "paper" / ("light-20261108-120000" if light else "full-20261108-120000")))
                 if light:
                     before = context.light_fingerprint(outline)
                 else:

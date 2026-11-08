@@ -7,6 +7,8 @@ description: 为独立的 research 与 research-analysis 入口共用成稿能�
 
 接收 research-deep 的对象调研证据，或 research-analysis 的成果采用记录、综合过程、核心发现与可选贡献者观点，共用本流程成稿与校验。成稿发现缺口时返回原执行分支，只复核受影响范围；不把 analysis 再转成整轮对象调研，也不在成稿阶段重做来源主体背景调查。
 
+新格式报告完成创建或实际修订后，按 [修订时间与目录更新](../research/references/task-management.md#报告修订时间与目录更新) 执行 stamp-report；使用返回的新 work_dir 继续校验。仅复查不更新时间。工具同步本地引用，不替下游重新接受证据散列；受影响依据仍需实际复核。
+
 沿用调用入口与当前任务的位置：对象报告属于 research-reports，分析洞察报告属于 analysis-reports。共用成稿不创建第二份报告、不合并两边计划；报告完成后回写实际所属计划。
 
 1. 通过 [任务管理](../research/references/task-management.md) 定位计划。full 读取 fields 和结果，light 读取 notes 与 assessment；结合所选类型模板与清单成稿。更新已有报告的证据或结论时先读 [局部更新流程](../research/references/report-updates.md)，在改动前保存基线；普通文字更正直接编辑。

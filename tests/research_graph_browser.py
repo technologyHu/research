@@ -141,10 +141,25 @@ def main():
                 report_root.mkdir(parents=True)
                 (report_root / "report.md").write_text('# 主报告\n\n<!-- research-summary\n{"completion":"complete"}\n-->\n', encoding="utf-8")
                 (report_root / "details.md").write_text('# 补充报告\n\n<!-- research-summary\n{"completion":"partial"}\n-->\n', encoding="utf-8")
+                (fixture_root / "themes.yaml").write_text(json.dumps({"schema_version": 1, "themes": [
+                    {"id": "agent", "slug": "agent", "name": "Agent", "parent": None},
+                    {"id": "agent-memory", "slug": "memory", "name": "记忆", "parent": "agent"}]}), encoding="utf-8")
+                for key, title, day in (("a", "A 旧报告", "08"), ("b", "Z 新报告", "09")):
+                    directory = fixture_root / f"analysis-reports/agent-memory-{key}-202611{day}-120000"
+                    directory.mkdir(parents=True)
+                    summary = {"report_id": "report-" + key * 32, "theme_id": "agent-memory", "completion": "complete",
+                               "updated_at": f"2026-11-{day}T12:00:00+08:00"}
+                    (directory / "report.md").write_text("# " + title + "\n\n<!-- research-summary\n" + json.dumps(summary) + "\n-->\n", encoding="utf-8")
                 input_paths = {p.relative_to(fixture_root).as_posix() for p in fixture_root.rglob("*.md")}
+                input_paths.add("themes.yaml")
                 fixture = build_graph(fixture_root, expected["repository"], expected["branch"], input_paths=input_paths)
                 page.route("**/graph-data.js", lambda route: route.fulfill(content_type="application/javascript", body="window.RESEARCH_GRAPH = " + json.dumps(fixture)))
                 exercise(page, f"http://127.0.0.1:{server.server_port}/", fixture)
+                result_ids = page.locator(".result").evaluate_all("items => items.map(item => item.dataset.nodeId)")
+                require(result_ids.index("work:report-" + "b" * 32) < result_ids.index("work:report-" + "a" * 32),
+                        "same-theme reports follow revision time rather than title order")
+                require(result_ids.index("work:report-" + "a" * 32) < result_ids.index("theme:evaluation"),
+                        "theme nodes and works stay together in the results list")
             browser.close()
     finally:
         server.shutdown()

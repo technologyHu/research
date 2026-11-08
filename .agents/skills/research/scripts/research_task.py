@@ -16,6 +16,7 @@ from research_context import delivery_config, light_fingerprint, render_report_n
 import validate_report
 import validate_results
 import research_update
+import research_catalog as catalog
 import research_articles as articles
 from research_paths import MODE, TEMP, LOCAL_LAYOUT, REPORT_ROOTS, checked_paths, delivery_entries, display_paths, encode_outline, relative
 
@@ -151,8 +152,8 @@ def create_task(workspace, topic, kind, depth="standard", workflow="auto", items
     if len(kinds) != 1 or (kind == "analysis") != (kinds == {"analysis"}):
         raise ValueError("Use separate tasks for different object types; analysis tasks contain subjects or questions based on prior reports, not mixed source objects")
     category = next(iter(kinds))
-    if theme is not None:
-        theme = english_directory(theme, "theme")
+    if theme is not None and (not isinstance(theme, str) or not theme.strip() or any(char in theme for char in "/\\")):
+        raise ValueError("Theme must be a registered ID or alias, not a path")
     if target is not None:
         target = english_directory(target, "target")
     if native_target_name is not None:
@@ -160,42 +161,77 @@ def create_task(workspace, topic, kind, depth="standard", workflow="auto", items
     if target is not None and native_target_name is not None:
         raise ValueError("Use --target or --native-target-name, not both")
     output = (workspace / output).resolve() if output else None
-    if output:
-        try:
-            output_parts = output.relative_to(workspace).parts
-        except ValueError as error:
-            raise ValueError("output_dir must remain inside the project") from error
-    else:
-        output_parts = ()
+    if output and not output.is_relative_to(workspace):
+        raise ValueError("output_dir must remain inside the project")
+    parts = output.relative_to(workspace).parts if output else ()
     existing_report = bool(output and (output / report).is_file())
-    standard_output = len(output_parts) == 4 and output_parts[0] == REPORT_ROOTS[category] and output_parts[2] == category
-    legacy_output = len(output_parts) == 3 and output_parts[1] in validate_results.TYPES
-    if output_parts and output_parts[0] in REPORT_ROOTS.values() and not standard_output:
+    previous = catalog.report_summary(output / report) if existing_report else {}
+    dated_existing = bool(previous.get("report_id") and previous.get("directory_layout") == "dated-flat")
+    research_shape = len(parts) == 4 and parts[0] == "research-reports" and parts[2] == category and category != "analysis"
+    analysis_shape = len(parts) == 2 and parts[0] == "analysis-reports" and category == "analysis"
+    old_analysis_shape = len(parts) == 4 and parts[0] == "analysis-reports" and parts[2] == "analysis" and category == "analysis"
+    if parts and parts[0] in REPORT_ROOTS.values() and not (research_shape or analysis_shape or (existing_report and old_analysis_shape)):
         raise ValueError("The report root and type must match, including when updating an existing report")
-    if output and not standard_output and not existing_report:
-        raise ValueError("New output directories must be <report-root>/<theme>/<type>/<target> in the matching research-reports or analysis-reports root; existing reports may be reused in place")
-    theme_value = theme or (output_parts[1] if standard_output else output_parts[0] if legacy_output and existing_report else "general")
-    theme_slug = theme_value if existing_report and theme is None else english_directory(theme_value, "theme")
-    if standard_output and output_parts[1] != theme_slug:
-        raise ValueError("--output must match the theme and actual object type")
-    if existing_report:
-        declared = native_directory(native_target_name) if native_target_name else english_directory(target, "target") if target else None
-        if declared and declared != output.name:
-            raise ValueError("Existing report directory must be reused without renaming")
-        target = output.name
-        directory_layout = "existing"
+    inferred = parts[1] if research_shape or old_analysis_shape else parts[0] if len(parts) == 3 else "general"
+    theme_value = theme or previous.get("theme_id") or inferred
+    if existing_report and not dated_existing:
+        try:
+            entry = catalog.theme_entry(workspace, theme_value)
+        except ValueError:
+            if theme is not None:
+                raise
+            entry = {"id": theme_value, "directory": theme_value}
     else:
-        chosen = native_target_name or target or (output_parts[3] if standard_output else None)
-        chosen = chosen or (parsed[0]["id"] if items and len(parsed) == 1 else topic)
-        target = native_directory(chosen) if native_target_name else english_directory(chosen, "target")
+        entry = catalog.theme_entry(workspace, theme_value)
+    theme_id, theme_slug = entry["id"], entry["directory"]
+    if dated_existing and previous.get("theme_id") != theme_id:
+        raise ValueError("Existing report must retain its registered theme identity")
+    if (research_shape or old_analysis_shape) and parts[1] != theme_slug:
+        old_alias = existing_report and not dated_existing and catalog.theme_entry(workspace, parts[1])["id"] == theme_id
+        if not old_alias:
+            raise ValueError("--output must match the registered theme")
+    metadata = {}
+    if existing_report:
+        base_target = previous.get("classification", {}).get("target", output.name)
+        declared = native_target_name or target
+        if declared and declared != base_target:
+            raise ValueError("Existing report directory must be reused without changing its target")
+        target = base_target
+        directory_layout = "dated-flat" if dated_existing else "existing"
+        if dated_existing:
+            for key in ("report_id", "created_at", "updated_at"):
+                metadata[key] = previous[key]
+    else:
+        base, supplied_time = catalog.split_name(parts[-1]) if parts else (None, None)
+        if output and (not (research_shape or analysis_shape) or supplied_time is None):
+            raise ValueError("New output directories require a matching report root and a YYYYMMDD-HHmmss suffix")
+        if analysis_shape and base != theme_slug:
+            prefix = theme_slug + "-"
+            if not base.startswith(prefix):
+                raise ValueError("Analysis directory must begin with its registered theme name")
+            base = base[len(prefix):]
+        chosen = native_target_name or target or base
+        chosen = chosen or (theme_slug if category == "analysis" else parsed[0]["id"] if items and len(parsed) == 1 else topic)
+        target = (theme_slug if category == "analysis" and chosen == theme_slug else
+                  native_directory(chosen) if native_target_name else english_directory(chosen, "target"))
         if len(parsed) > 1 and not target.startswith("compare-"):
             target = "compare-" + target
-        if len(target) > 64:
+        if len(target) > 64 and not (category == "analysis" and target == theme_slug):
             raise ValueError("target including compare- must not exceed 64 characters")
-        if standard_output and output_parts[3] != target:
-            raise ValueError("--output target does not match the normalized directory name")
-        output = output or workspace / REPORT_ROOTS[category] / theme_slug / category / target
-        directory_layout = "report-root"
+        moment = supplied_time or catalog.now().isoformat()
+        expected = catalog.report_directory(workspace, category, theme_slug, target, moment)
+        if output and output != expected:
+            raise ValueError("--output does not match the normalized target and timestamp")
+        output = expected
+        # Parallel task runs for the same unfinished delivery keep one report identity.
+        for candidate in sorted((output / ".tmp").glob("*/outline.json")):
+            saved = validate_results.load_document(candidate)
+            if saved.get("directory_layout") == "dated-flat":
+                metadata = {key: saved[key] for key in ("report_id", "created_at", "updated_at")}
+                break
+        if not metadata:
+            metadata = {"report_id": "report-" + uuid.uuid4().hex, "created_at": moment, "updated_at": moment}
+        directory_layout = "dated-flat"
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dt%H%M%Sz").lower() + "-" + uuid.uuid4().hex[:8]
     path = store_root(output) / run_id
     no_links(path, workspace)
@@ -209,15 +245,21 @@ def create_task(workspace, topic, kind, depth="standard", workflow="auto", items
         "topic": topic.strip(), "goal": goal or topic.strip(), "object_type": kind,
         "mode": "single" if len(parsed) == 1 else "comparison", "depth": depth,
         "workflow": workflow, "items": parsed, "delivery": delivery,
-        "classification": {"type": category, "theme": theme_slug, "target": target},
+        "classification": {"type": category, "theme": theme_id, "target": target},
         "directory_layout": directory_layout,
     }
+    if directory_layout == "dated-flat":
+        outline.update(metadata, theme_id=theme_id, theme_slug=theme_slug,
+                       theme_path=entry["path"], theme_name=entry["label"])
     if native_target_name:
         outline["directory_naming"] = {"native_target_name": native_target_name, "exception": "official Chinese name"}
     delivery_config(outline)
     if references:
         outline["reference_articles"] = articles.requirements({"reference_articles": references})
     field_config = parse_fields(fields, outline["goal"])
+    _, path_errors = checked_paths(outline)
+    if path_errors:
+        raise ValueError("; ".join(path_errors))
     path.mkdir(parents=True, exist_ok=False)
     write_json(path / "owner.json", {"schema_version": 3, "run_id": run_id, "workspace": relative(workspace, path), "output_dir": relative(output, workspace), "token": uuid.uuid4().hex, "created_at": datetime.now(timezone.utc).isoformat()})
     write_json(path / "outline.json", outline)
@@ -237,6 +279,9 @@ def describe_task(work_dir):
     result["verification_receipt_present"] = (path / "verified.json").is_file()
     if "classification" in outline:
         result["classification"] = outline["classification"]
+    for key in ("report_id", "created_at", "updated_at", "theme_id", "theme_slug"):
+        if key in outline:
+            result[key] = outline[key]
     if outline.get("reference_articles"):
         result["reference_articles"] = articles.requirements(outline)
         result["manifest"] = str(path / "articles.json")
@@ -469,7 +514,7 @@ def main():
     listing = commands.add_parser("list")
     listing.add_argument("--workspace", required=True, type=Path)
     listing.add_argument("--topic")
-    for name in ("show", "promote", "derive", "report-note", "verify", "cleanup-plan", "begin-update", "apply-update", "add-article", "fetch-articles", "download-article-images", "import-article", "review-article", "archive-article"):
+    for name in ("stamp-report", "show", "promote", "derive", "report-note", "verify", "cleanup-plan", "begin-update", "apply-update", "add-article", "fetch-articles", "download-article-images", "import-article", "review-article", "archive-article"):
         cmd = commands.add_parser(name)
         cmd.add_argument("--work-dir", required=True, type=Path)
         if name == "promote":
@@ -515,11 +560,30 @@ def main():
             cmd.add_argument("--image", action="append", default=[])
             cmd.add_argument("--exception")
             cmd.add_argument("--replace", action="store_true")
+    for name in ("themes", "init-themes", "add-theme"):
+        cmd = commands.add_parser(name)
+        cmd.add_argument("--workspace", required=True, type=Path)
+        if name == "add-theme":
+            cmd.add_argument("--id", required=True)
+            cmd.add_argument("--slug", required=True)
+            cmd.add_argument("--name", required=True)
+            cmd.add_argument("--parent")
+            cmd.add_argument("--alias", action="append", default=[])
     args = parser.parse_args()
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
     try:
-        if args.command == "create":
+        if args.command == "themes":
+            result = {"themes": list(catalog.read_registry(args.workspace).values())}
+        elif args.command == "init-themes":
+            result = catalog.initialize_registry(args.workspace)
+        elif args.command == "add-theme":
+            result = catalog.register_theme(args.workspace, args.id, args.slug, args.name, args.parent, args.alias)
+        elif args.command == "stamp-report":
+            from research_revision import stamp_report
+            result = stamp_report(args.work_dir)
+            args.work_dir = Path(result["work_dir"])
+        elif args.command == "create":
             extras = []
             for value in args.extra:
                 path, sep, reason = value.partition("=")
@@ -562,7 +626,7 @@ def main():
             result = verify_task(args.work_dir)
         else:
             result = cleanup_plan(args.work_dir)
-        workspace = args.workspace.resolve() if args.command in {"create", "list"} else Path(open_task(args.work_dir)[2]["workspace"])
+        workspace = args.workspace.resolve() if args.command in {"create", "list", "themes", "init-themes", "add-theme"} else Path(open_task(args.work_dir)[2]["workspace"])
         print(json.dumps(display_paths(result, workspace), ensure_ascii=False, indent=2))
         return 0
     except (OSError, ValueError, TypeError, KeyError) as exc:

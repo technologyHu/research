@@ -21,13 +21,17 @@
 
 | 来源 | 工作识别规则 |
 | --- | --- |
-| `<report-root>/<theme>/plan.md` | report-root 为 research-reports 或 analysis-reports；读取主题元数据及任务表，每项具体工作对应一个对象节点 |
-| `<report-root>/<theme>/<type>/<target>/report.md` | 与计划中明确关联的工作对应；没有对应计划项时，一个独立交付目录对应一项工作，以报告标题命名 |
+| `research-reports/<主题名>/plan.md`、`analysis-reports/<主题名>.plan.md` | 按规范主题 ID 读取元数据及任务表，每项具体工作对应一个对象节点 |
+| `<report-dir>/report.md` | 与计划中明确关联的工作对应；没有对应计划项时，一个独立交付目录对应一项工作，以报告标题命名 |
 | 同一交付目录中的其他 Markdown 报告 | 需有有效的 `research-summary` 元数据；不因报告文件变多而增加工作数。若目录已有明确的计划工作关联，未登记的补充报告标为待关联，不自动作为该工作的交付；独立目录仍整体对应一项工作 |
 
 支持的类型为 `paper`、`open-source`、`product`、`benchmark`、`analysis`，其中 analysis 显示为“分析洞察”，对应基于已有调研的主题／问题分析报告。计划中的工作类型由“类型／对象”字段确定；独立报告的工作类型来自其目录。类型作为工作属性，不单独插入一层分类节点。
 
-新对象调研位于 `research-reports/<theme>/<type>/<target>/`，type 为 paper、open-source、product、benchmark；新分析洞察位于 `analysis-reports/<theme>/analysis/<subject>/`。各自计划位于对应根目录下的 `<theme>/plan.md`，同名主题与同号工作 ID 按根目录隔离，图谱标题带“调研报告”或“分析洞察报告”前缀；跨目录引用仍按实际相对路径解析，不因引用自动归并工作。
+新报告目录末尾使用北京时间 YYYYMMDD-HHmmss。对象调研位于 `research-reports/<主题名>/<type>/<target>-<时间>/`，type 为 paper、open-source、product、benchmark；分析洞察位于 `analysis-reports/<主题名>[-<专题>]-<时间>/`，只有一层目录。主题及子主题名称由已跟踪的 [themes.yaml](../themes.yaml) 统一推导，目录使用压平名称，展示使用完整父子名称。未知旧主题可兼容读取，新主题须先注册。
+
+新报告摘要的 report_id 是稳定身份，目录修订改名后报告与独立工作节点 ID 不变；计划任务的 ID 仍按入口和规范主题隔离。同一主题的不同类型报告归入同一主题组，按 updated_at 倒序；主题组按注册表的主题路径排序。两类报告总览分别展示，改名不把一个工作变成新节点，也不以旧路径哈希覆盖新身份。重复 report_id 出现在不同交付目录时明确报错，避免把时间副本误计为不同成果。跨目录引用按实际相对路径解析，不因引用自动归并工作。
+
+同一交付目录共用一个工作身份；补充报告仍使用不含 report_id 的旧摘要时，沿用该目录已登记的稳定身份，不另按路径生成工作。主文件名可由 delivery.report 指定；未声明主题的补充报告沿用主报告主题。一个目录出现不同 report_id 时明确报错。旧布局中的计划和报告同样通过注册表解析主题别名，保留实际文件路径。
 
 内部目录继续使用英文 slug，正式中文对象名称可声明例外。索引兼容读取旧 `<theme>/plan.md`、`plans/<theme>/plan.md`、`<theme>/<type>/<target>/` 及 `<type>/<theme>/<target>/`，不移动既有资料。两个根目录的 README 及 docs、scripts、tests 等辅助资料不作为研究报告。
 

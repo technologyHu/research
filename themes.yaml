@@ -1,0 +1,34 @@
+schema_version: 1
+themes:
+  - id: general
+    slug: general
+    name: 通用
+    parent: null
+  - id: agent
+    slug: agent
+    name: Agent
+    parent: null
+  - id: agent-memory
+    slug: memory
+    name: 记忆
+    parent: agent
+  - id: agent-memory-architecture
+    slug: architecture
+    name: 架构
+    parent: agent-memory
+  - id: agent-memory-evaluation
+    slug: evaluation
+    name: 评测
+    parent: agent-memory
+  - id: agent-orchestration
+    slug: orchestration
+    name: 编排
+    parent: agent
+  - id: agent-evaluation
+    slug: evaluation
+    name: 评测
+    parent: agent
+  - id: coding-agent
+    slug: coding-agent
+    name: 编程 Agent
+    parent: null

@@ -1,6 +1,6 @@
 # Survey 论文阅读与报告
 
-survey、review 等以文献综合为主要贡献的论文仍使用 `paper`。单篇对象目录为 `survey-<paper-id>`，如 `research-reports/agent-memory/paper/survey-agent-memory/report.md`；比较多篇 survey 可用 `compare-survey-<slug>`。目录约定见 [交付规范](../../research/references/delivery-policy.md)。
+survey、review 等以文献综合为主要贡献的论文仍使用 `paper`。单篇对象目录为 `survey-<paper-id>`，如 `research-reports/agent-memory/paper/survey-agent-memory-20261108-120000/report.md`；比较多篇 survey 可用 `compare-survey-<slug>`。目录约定见 [交付规范](../../research/references/delivery-policy.md)。
 
 ## 分析维度
 

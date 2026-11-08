@@ -28,7 +28,11 @@
   let phase = 0;
   const offsets = new Map();
   const phases = new Map(data.nodes.map(n => [n.id, hash(n.id) * Math.PI * 2]));
-  const themes = data.nodes.filter(n => n.kind === "theme");
+  const themeOrder = new Map(data.themeOverview.map((entry, index) => [entry.theme, index]));
+  const themeRank = n => themeOrder.get(n.theme) ?? Number.MAX_SAFE_INTEGER;
+  const themes = data.nodes.filter(n => n.kind === "theme").sort((a, b) => themeRank(a) - themeRank(b));
+  const revisionTime = n => Math.max(Date.parse(n.updatedAt) || 0,
+    ...(n.reportIds || []).map(id => Date.parse(reportById.get(id)?.updatedAt) || 0));
 
   function hash(value) {
     let h = 2166136261;
@@ -66,7 +70,7 @@
     stat.append(element("strong", "", String(data.stats[key])), element("span", "", label));
     $("stats").append(stat);
   }
-  $("provenance").textContent = `计划记录日期 ${data.updatedAt || "未标注"} · 数据 ${data.fingerprint.slice(0, 8)}`;
+  $("provenance").textContent = `最近记录日期 ${data.updatedAt || "未标注"} · 数据 ${data.fingerprint.slice(0, 8)}`;
   for (const n of themes) option($("theme-filter"), n.theme, n.label);
   for (const [type, label] of Object.entries(data.types)) {
     option($("type-filter"), type, label);
@@ -98,7 +102,8 @@
     $("results").replaceChildren();
     if (!matched.length) $("results").append(element("p", "results-empty", "暂无匹配结果"));
     const order = {theme: 0, object: 1};
-    for (const n of [...matched].sort((a, b) => order[a.kind] - order[b.kind] || a.label.localeCompare(b.label, "zh-CN"))) {
+    for (const n of [...matched].sort((a, b) => themeRank(a) - themeRank(b) || order[a.kind] - order[b.kind] ||
+      revisionTime(b) - revisionTime(a) || a.label.localeCompare(b.label, "zh-CN"))) {
       const button = element("button", "result");
       button.dataset.nodeId = n.id;
       button.setAttribute("aria-pressed", String(n.id === selected));

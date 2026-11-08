@@ -4,6 +4,8 @@ on:
   push:
     branches: [openjiuwen-harness]
     paths:
+      - 'themes.yaml'
+      - '.agents/skills/research/scripts/research_catalog.py'
       - 'research-reports/**'
       - 'analysis-reports/**'
       - '*/plan.md'

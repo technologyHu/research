@@ -6,7 +6,8 @@
 
 - 对象调研从 [research](.agents/skills/research/SKILL.md) 进入，基于已有成果的主题／问题分析从独立的 [research-analysis](.agents/skills/research-analysis/SKILL.md) 进入；两者可共用 [research-report](.agents/skills/research-report/SKILL.md) 成稿与交付。单个事实查询不自动扩展为完整研究。
 - 保存与清理规则以 [delivery-policy.md](.agents/skills/research/references/delivery-policy.md) 为唯一详细来源；修改这些规则时同步维护相关技能引用，避免在本文件复制整套流程。
-- 调研报告放在 `research-reports/<theme>/<type>/<target>/`，分析洞察报告放在 `analysis-reports/<theme>/analysis/<subject>/`；内部目录与命名规则沿用，主文件默认 `report.md`。各入口的主题计划位于对应根目录下的 `<theme>/plan.md`，同一入口同一主题只维护一份当前计划，不另存快照。跨入口计划互相引用，不复制同一范围。旧报告与旧计划仍可读取；迁移按用户明确范围执行并同步链接。
+- 主题 ID、名称和父子关系共用根目录 [themes.yaml](themes.yaml)，主题层次压成一个目录名。调研报告放在 `research-reports/<主题名>/<type>/<target>-YYYYMMDD-HHmmss/`；分析洞察保持一层目录，放在 `analysis-reports/<主题名>[-<专题>]-YYYYMMDD-HHmmss/`，主文件默认 report.md。时间为创建或最近修订的北京时间，报告 ID 与最初创建时间保持稳定；修订使用任务工具 stamp-report 更新目录与引用，不另存时间副本。
+- 当前计划分别为 `research-reports/<主题名>/plan.md`、`analysis-reports/<主题名>.plan.md`，同一入口同一主题只维护一份，不另存快照。跨入口计划互相引用，不复制同一范围。旧报告与旧计划仍可原地读取；迁移按用户明确范围执行并同步链接。
 - 对象调研类型为 `paper`、`open-source`、`product`、`benchmark`；独立分析洞察入口内部使用 `analysis`。survey 论文归 `paper`，对象目录以 `survey-` 标识；`analysis` 主要基于已有调研输出，围绕主题或问题形成分析洞察，贡献者思考为可选输入，不作为混合类型兜底。
 - 主题和对象目录通常使用英文 slug；正式中文对象名称等例外按交付规范处理。报告内的本地链接使用相对于当前 Markdown 的路径，持久配置不写入个人机器的绝对路径。
 - 仅将实际交付的报告、引用资料、图片和已登记附加文件保存到正式目录；单次任务的中间文件放在对应报告目录的 `.tmp/<run-id>/`。区分文件校验通过、研究完整度和实际完成的验证，不将部分结果写成完整结论。

@@ -18,7 +18,7 @@ class ClassificationAndCleanup(unittest.TestCase):
 
     def test_single_object_is_grouped_by_actual_type_theme_and_id(self):
         job = task.create_task(self.workspace, "示例项目架构", "open-source", items=["library:open-source=示例库"], theme="Agent Memory")
-        self.assertEqual(Path(job["output_dir"]).relative_to(self.workspace).as_posix(), "research-reports/agent-memory/open-source/library")
+        self.assertEqual(Path(job["output_dir"]).relative_to(self.workspace).as_posix(), "research-reports/agent-memory/open-source/library-20261108-120000")
         self.assertEqual(job["classification"], {"type": "open-source", "theme": "agent-memory", "target": "library"})
         self.assertFalse((Path(job["output_dir"]) / "report.md").exists())
 
@@ -28,8 +28,8 @@ class ClassificationAndCleanup(unittest.TestCase):
                 job = task.create_task(self.workspace, "研究", kind, theme="memory", target="example")
                 expected_root = "analysis-reports" if kind == "analysis" else "research-reports"
                 self.assertEqual(Path(job["output_dir"]).relative_to(self.workspace).parts,
-                                 (expected_root, "memory", kind, "example"))
-                self.assertEqual(task.open_task(job["work_dir"])[2]["directory_layout"], "report-root")
+                                 ((expected_root, "memory-example-20261108-120000") if kind == "analysis" else (expected_root, "memory", kind, "example-20261108-120000")))
+                self.assertEqual(task.open_task(job["work_dir"])[2]["directory_layout"], "dated-flat")
 
     def test_new_outputs_cannot_cross_roots_or_use_the_old_top_level(self):
         for kind, destination in (("paper", "analysis-reports/memory/paper/example"),
@@ -124,7 +124,7 @@ class ClassificationAndCleanup(unittest.TestCase):
         run = subprocess.run(command, cwd=self.workspace, text=True, encoding="utf-8", capture_output=True)
         self.assertEqual(run.returncode, 0, run.stdout + run.stderr)
         created = json.loads(run.stdout)
-        self.assertEqual(created["output_dir"], "research-reports/agent-memory/paper/paper-a")
+        self.assertRegex(created["output_dir"], r"^research-reports/agent-memory/paper/paper-a-\d{8}-\d{6}$")
         path, _, _ = self.write_report(task.describe_task(self.workspace / created["work_dir"]))
         task.verify_task(path)
         preview = subprocess.run(command[:5] + ["cleanup-plan", "--work-dir", created["work_dir"]], cwd=self.workspace, text=True, encoding="utf-8", capture_output=True)
@@ -137,16 +137,16 @@ class ClassificationAndCleanup(unittest.TestCase):
     def test_chinese_research_title_requires_an_english_directory_target(self):
         with self.assertRaisesRegex(ValueError, "English slug"):
             task.create_task(self.workspace, "记忆机制调研", "paper", theme="agent-memory")
-        self.assertEqual(list(self.workspace.iterdir()), [])
+        self.assertEqual({p.name for p in self.workspace.iterdir()}, {"themes.yaml"})
         job = task.create_task(self.workspace, "记忆机制调研", "paper", theme="agent-memory", target="memory-method")
-        self.assertEqual(Path(job["output_dir"]).relative_to(self.workspace).as_posix(), "research-reports/agent-memory/paper/memory-method")
+        self.assertEqual(Path(job["output_dir"]).relative_to(self.workspace).as_posix(), "research-reports/agent-memory/paper/memory-method-20261108-120000")
         _, _, outline = task.open_task(job["work_dir"])
         self.assertEqual(outline["topic"], "记忆机制调研")
 
     def test_chinese_official_product_name_is_an_explicit_exception(self):
         job = task.create_task(self.workspace, "中文产品能力调研", "product", theme="coding-agent",
                                items=["coze:product=扣子"], native_target_name="扣子")
-        self.assertEqual(Path(job["output_dir"]).relative_to(self.workspace).as_posix(), "research-reports/coding-agent/product/扣子")
+        self.assertEqual(Path(job["output_dir"]).relative_to(self.workspace).as_posix(), "research-reports/coding-agent/product/扣子-20261108-120000")
         _, _, outline = task.open_task(job["work_dir"])
         self.assertEqual(outline["items"][0]["id"], "coze")
         self.assertEqual(outline["directory_naming"]["native_target_name"], "扣子")
@@ -157,13 +157,13 @@ class ClassificationAndCleanup(unittest.TestCase):
         for destination in ("paper/agent-memory/project", "reports/custom", "agent-memory/paper/普通研究标题", "agent-memory/product/project"):
             with self.subTest(destination=destination), self.assertRaises(ValueError):
                 task.create_task(self.workspace, "研究", "paper", output=destination)
-        job = task.create_task(self.workspace, "研究", "paper", output="research-reports/agent-memory/paper/project")
+        job = task.create_task(self.workspace, "研究", "paper", output="research-reports/agent-memory/paper/project-20261108-120000")
         self.assertEqual(job["classification"], {"type": "paper", "theme": "agent-memory", "target": "project"})
 
     def test_english_comparison_name_is_independent_of_chinese_report_title(self):
         job = task.create_task(self.workspace, "多个记忆方法比较", "paper", theme="agent-memory",
                                items=["a=方法甲", "b=方法乙"], target="memory-methods")
-        self.assertEqual(Path(job["output_dir"]).relative_to(self.workspace).as_posix(), "research-reports/agent-memory/paper/compare-memory-methods")
+        self.assertEqual(Path(job["output_dir"]).relative_to(self.workspace).as_posix(), "research-reports/agent-memory/paper/compare-memory-methods-20261108-120000")
 
     def test_existing_chinese_named_report_can_be_reused_in_place(self):
         destination = self.workspace / "existing-theme/product/中文产品"

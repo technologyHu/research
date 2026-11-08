@@ -37,12 +37,12 @@ class RelativePaths(unittest.TestCase):
         self.assertTrue(task.cleanup_plan(path)["eligible"])
 
     def test_cli_paths_are_relative_and_output_is_relative_to_workspace(self):
-        command = [sys.executable, "-X", "utf8", "-B", str(Path(task.__file__).resolve()), "create", "--workspace", ".", "--topic", "相对路径", "--type", "paper", "--output", "research-reports/method-analysis/paper/custom"]
+        command = [sys.executable, "-X", "utf8", "-B", str(Path(task.__file__).resolve()), "create", "--workspace", ".", "--topic", "相对路径", "--type", "paper", "--output", "research-reports/method-analysis/paper/custom-20261108-120000"]
         run = subprocess.run(command, cwd=self.workspace, text=True, encoding="utf-8", capture_output=True)
         self.assertEqual(run.returncode, 0, run.stdout + run.stderr)
         job = json.loads(run.stdout)
         self.assertEqual(Path(job["work_dir"]).parent.as_posix(), job["output_dir"] + "/.tmp")
-        self.assertEqual(job["output_dir"], "research-reports/method-analysis/paper/custom")
+        self.assertEqual(job["output_dir"], "research-reports/method-analysis/paper/custom-20261108-120000")
         for key in ("work_dir", "outline", "fields", "output_dir"):
             self.assertFalse(Path(job[key]).is_absolute())
         self.assertTrue((self.workspace / job["outline"]).is_file())

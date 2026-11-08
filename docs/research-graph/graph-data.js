@@ -3,7 +3,7 @@ window.RESEARCH_GRAPH = {
   "schemaVersion": 2,
   "repository": "technologyHu/research",
   "branch": "openjiuwen-harness",
-  "fingerprint": "0f73da56e3cdb2b7",
+  "fingerprint": "c8e72fada0b18844",
   "types": {
     "paper": "论文",
     "open-source": "开源项目",

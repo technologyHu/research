@@ -214,6 +214,10 @@ def report_context(outline_path, fields_path=None):
         "workflow": outline.get("workflow", "full"), "items": versions, "core_gaps": gaps,
         "source_urls": sorted(source_urls), "delivery": delivery, "research_digest": digest(payload),
     }
+    if outline.get("directory_layout") == "dated-flat":
+        for key in ("directory_layout", "classification", "report_id", "created_at", "updated_at",
+                    "theme_id", "theme_slug", "theme_path", "theme_name"):
+            context[key] = outline[key]
     if update is not None:
         context["update"] = update
     if other_gaps:

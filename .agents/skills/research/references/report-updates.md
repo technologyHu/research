@@ -46,7 +46,7 @@ python <skills_root>/research/scripts/research_task.py apply-update --work-dir <
 
 apply-update 只替换提供的已登记章节，并自动生成本次说明；未传入的已有章节保持不变，登记的新增章节最终必须存在。它不生成分析正文、不证明论证正确。写入前检查范围外变化和并发修改，通过后用当前任务 scratch/ 内的临时文件原子替换主报告；最终仍需人工阅读并运行 verify。
 
-写入后按文章流程完成实际引用资料归档并同步链接，重新生成 report-note 更新本次说明，再执行 research_task.py verify。不要为刷新说明而重写未复核章节。快照和对照只保护这轮语言编辑，不替代最终 verify，也不证明论证正确。
+写入后按文章流程完成实际引用资料归档并同步链接，重新生成 report-note 更新本次说明；新格式报告按 [修订时间更新](task-management.md#报告修订时间与目录更新) 执行 stamp-report，使用返回的新 work_dir 执行 verify，旧布局继续原地校验。不要为刷新说明而重写未复核章节。快照和对照只保护这轮语言编辑，不替代最终 verify，也不证明论证正确。
 
 也可以用编辑工具把已润色、已对照的章节写回报告，但保留完整正文并重新生成 report-note；verify 同样检查范围。不能用整篇重写、更换基线或覆盖润色前快照绕过检查。
 

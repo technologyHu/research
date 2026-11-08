@@ -6,6 +6,8 @@ import sys
 import tempfile
 import unittest
 from unittest.mock import patch
+from datetime import datetime
+import yaml
 
 SCRIPTS = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SCRIPTS))
@@ -26,7 +28,13 @@ class TaskWorkflow(unittest.TestCase):
         self.root = Path(self.temp.name)
         self.workspace = self.root / "project"
         self.workspace.mkdir()
-        self.store = self.workspace / "research-reports/general/paper/example-research/.tmp"
+        registry = yaml.safe_load((SCRIPTS.parents[3] / "themes.yaml").read_text(encoding="utf8"))
+        registry["themes"] += [{"id": key, "slug": key, "name": key, "parent": None} for key in ("memory", "method-analysis", "coding")]
+        (self.workspace / "themes.yaml").write_text(json.dumps(registry), encoding="utf8")
+        clock = patch.object(task.catalog, "now", return_value=datetime.fromisoformat("2026-11-08T12:00:00+08:00"))
+        clock.start()
+        self.addCleanup(clock.stop)
+        self.store = self.workspace / "research-reports/general/paper/example-research-20261108-120000/.tmp"
 
     def create(self, **kwargs):
         if not kwargs.get("output") and not kwargs.get("target") and not kwargs.get("native_target_name"):
@@ -72,7 +80,7 @@ class TaskWorkflow(unittest.TestCase):
         self.assertTrue(Path(job["fields"]).is_file())
         self.assertTrue(Path(job["output_dir"]).is_dir())
         self.assertFalse((Path(job["output_dir"]) / "report.md").exists())
-        self.assertEqual([entry.name for entry in self.workspace.iterdir()], ["research-reports"])
+        self.assertEqual({entry.name for entry in self.workspace.iterdir()}, {"research-reports", "themes.yaml"})
 
     def test_auto_brief_uses_light_without_fields_or_results(self):
         job = self.create(depth="brief")

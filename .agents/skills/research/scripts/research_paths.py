@@ -150,6 +150,24 @@ def checked_paths(outline):
         expected = (group, classification.get("theme"), kind, classification.get("target"))
         if group is None or output.relative_to(workspace).parts != expected:
             errors.append("Report path must match its report root, theme, type and target")
+    if outline.get("directory_layout") == "dated-flat":
+        from datetime import datetime
+        import re
+        from research_catalog import report_directory, theme_entry
+        try:
+            classification = outline["classification"]
+            entry = theme_entry(workspace, outline["theme_id"])
+            if entry["id"] != outline["theme_id"] or entry["id"] != classification["theme"] or entry["directory"] != outline["theme_slug"]:
+                raise ValueError("Report theme metadata does not match themes.yaml")
+            created, updated = (datetime.fromisoformat(outline[key]) for key in ("created_at", "updated_at"))
+            if created.tzinfo is None or updated.tzinfo is None or updated < created:
+                raise ValueError("Report timestamps must be timezone-aware and ordered")
+            expected = report_directory(workspace, classification["type"], outline["theme_slug"],
+                                        classification["target"], outline["updated_at"])
+            if output != expected or not isinstance(outline.get("report_id"), str) or not re.fullmatch(r"report-[a-f0-9]{32}", outline["report_id"]):
+                raise ValueError("Report path does not match its identity, registered theme and timestamp")
+        except (KeyError, TypeError, ValueError) as error:
+            errors.append("Report path metadata is invalid: " + str(error))
     return paths, errors
 
 

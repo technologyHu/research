@@ -322,9 +322,9 @@ class ResultChecks(unittest.TestCase):
         json_blocks = re.findall(r"```json\n(.*?)```", text, re.S)
         outline, fields = (yaml.safe_load(block) for block in yaml_blocks[:2])
         data = json.loads(json_blocks[0])
-        work = self.workspace / "paper/method-analysis/example-paper/.tmp/paper-review-001"
+        work = self.workspace / outline["work_dir"]
         (work / "results").mkdir(parents=True)
-        outline.update(workspace="../../../../..", work_dir="paper/method-analysis/example-paper/.tmp/paper-review-001", output_dir="paper/method-analysis/example-paper")
+        (self.workspace / "themes.yaml").write_bytes((SCRIPTS.parents[3] / "themes.yaml").read_bytes())
         outline_path, fields_path = work / "example-outline.json", work / "example-fields.json"
         outline_path.write_text(json.dumps(outline, ensure_ascii=False), encoding="utf-8")
         fields_path.write_text(json.dumps(fields, ensure_ascii=False), encoding="utf-8")

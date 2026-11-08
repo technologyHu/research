@@ -50,7 +50,136 @@ updated_at: 2026-11-06
 
     def build(self):
         paths = {p.relative_to(self.root).as_posix() for p in self.root.rglob("*.md")}
+        if (self.root / "themes.yaml").is_file():
+            paths.add("themes.yaml")
         return build_graph(self.root, "owner/repo", "feature/research", input_paths=paths)
+
+    def registry(self):
+        self.write("themes.yaml", json.dumps({"schema_version": 1, "themes": [
+            {"id": "agent", "slug": "agent", "name": "Agent", "parent": None},
+            {"id": "agent-memory", "slug": "memory", "name": "记忆", "parent": "agent", "aliases": ["memory"]},
+            {"id": "agent-memory-architecture", "slug": "architecture", "name": "架构", "parent": "agent-memory"}]}))
+
+    def dated_report(self, path, key="a", theme="agent-memory", updated="2026-11-08T12:00:00+08:00"):
+        summary = {"report_id": "report-" + key * 32, "theme_id": theme,
+                   "created_at": "2026-11-08T10:00:00+08:00", "updated_at": updated,
+                   "items": [], "completion": "complete"}
+        return self.write(path, "# 报告 " + key + "\n<!-- research-summary\n" + json.dumps(summary) + "\n-->\n")
+
+    def test_registered_aliases_group_types_and_sort_reports_by_revision_time(self):
+        self.registry()
+        older = "research-reports/agent-memory/paper/one-20261108-120000/report.md"
+        newer = "research-reports/agent-memory/open-source/two-20261109-120000/report.md"
+        self.dated_report(older, theme="memory")
+        self.dated_report(newer, key="b", updated="2026-11-09T12:00:00+08:00")
+        graph = self.build()
+        self.assertEqual(graph["stats"]["themes"], 1)
+        self.assertEqual({report["themeId"] for report in graph["reports"]}, {"agent-memory"})
+        self.assertEqual(graph["themeOverview"][0]["reportIds"], ["report:report-" + "b" * 32, "report:report-" + "a" * 32])
+        update_readme(self.root, graph, "https://example.com/")
+        text = (self.root / "README.md").read_text(encoding="utf8")
+        self.assertIn("Agent / 记忆", text)
+        self.assertLess(text.index(newer), text.index(older))
+        self.assertIn("2026-11-09 12:00:00", text)
+
+    def test_flat_analysis_and_root_level_plan_use_registered_theme(self):
+        self.registry()
+        self.dated_report("analysis-reports/agent-memory-architecture-20261108-120000/report.md", theme="agent-memory-architecture")
+        self.write("analysis-reports/agent-memory-architecture.plan.md", "---\ntheme_id: agent-memory-architecture\n---\n# 分析计划\n")
+        graph = self.build()
+        self.assertEqual(graph["stats"], {"themes": 1, "reports": 1, "types": 1, "objects": 1})
+        self.assertEqual(graph["themeOverview"][0]["planPath"], "analysis-reports/agent-memory-architecture.plan.md")
+        self.assertIn("Agent / 记忆 / 架构", graph["themeOverview"][0]["title"])
+
+    def test_stable_work_and_report_ids_survive_timestamp_directory_changes(self):
+        self.registry()
+        old = self.dated_report("analysis-reports/agent-memory-20261108-120000/report.md")
+        before = self.build()
+        self.dated_report("analysis-reports/agent-memory-20261109-120000/report.md", updated="2026-11-09T12:00:00+08:00")
+        with self.assertRaisesRegex(ValueError, "Duplicate report identity"):
+            self.build()
+        # Exclude the old directory from tracked inputs, as after a Git rename.
+        paths = {"themes.yaml", "analysis-reports/agent-memory-20261109-120000/report.md"}
+        after = build_graph(self.root, "owner/repo", "feature/research", input_paths=paths)
+        self.assertEqual([n["id"] for n in before["nodes"]], [n["id"] for n in after["nodes"]])
+        self.assertEqual(before["reports"][0]["id"], after["reports"][0]["id"])
+        self.assertNotEqual(before["reports"][0]["path"], after["reports"][0]["path"])
+
+    def test_untracked_registry_does_not_change_graph_fingerprint(self):
+        self.report()
+        paths = {"agents/paper/one/report.md"}
+        before = build_graph(self.root, "owner/repo", "feature/research", input_paths=paths)
+        self.registry()
+        after = build_graph(self.root, "owner/repo", "feature/research", input_paths=paths)
+        self.assertEqual(before, after)
+
+    def test_untracked_malformed_flat_analysis_is_not_read(self):
+        self.report()
+        paths = {"agents/paper/one/report.md"}
+        before = build_graph(self.root, "owner/repo", "feature/research", input_paths=paths)
+        self.write("analysis-reports/invalid-20261399-120000/report.md", "<!-- research-summary\n{broken\n-->\n")
+        after = build_graph(self.root, "owner/repo", "feature/research", input_paths=paths)
+        self.assertEqual(before, after)
+
+    def test_mixed_summary_versions_keep_one_work_and_stable_identity(self):
+        self.registry()
+        directory = "research-reports/agent-memory/paper/one-20261108-120000/"
+        main = self.dated_report(directory + "report.md")
+        supplement = self.report(directory + "aaa-details.md")
+        graph = self.build()
+        works = [node for node in graph["nodes"] if node["kind"] == "object"]
+        self.assertEqual(len(works), 1)
+        self.assertEqual(works[0]["id"], "work:report-" + "a" * 32)
+        self.assertEqual(works[0]["label"], "报告 a")
+        self.assertEqual(len(works[0]["reportIds"]), 2)
+        new_directory = directory.replace("20261108-120000", "20261109-120000")
+        for file in (main, supplement):
+            self.write(new_directory + file.name, file.read_text(encoding="utf8"))
+        after = build_graph(self.root, "owner/repo", "feature/research", input_paths={
+            "themes.yaml", new_directory + main.name, new_directory + supplement.name})
+        self.assertEqual([node["id"] for node in after["nodes"] if node["kind"] == "object"], [works[0]["id"]])
+        self.assertEqual(after["stats"]["objects"], 1)
+
+    def test_legacy_theme_alias_is_shared_by_plan_and_both_old_report_layouts(self):
+        self.registry()
+        self.report("memory/paper/one/report.md")
+        self.report("paper/memory/two/report.md")
+        self.write("memory/plan.md", "# 计划\n\n## 成果索引\n\n[报告一](paper/one/report.md)\n[报告二](../paper/memory/two/report.md)\n")
+        graph = self.build()
+        self.assertEqual(graph["stats"]["themes"], 1)
+        self.assertEqual({report["themeId"] for report in graph["reports"]}, {"agent-memory"})
+        self.assertEqual(len(graph["themeOverview"]), 1)
+        self.assertEqual(len(graph["themeOverview"][0]["reportIds"]), 2)
+        update_readme(self.root, graph, "https://example.com/")
+        readme = (self.root / "README.md").read_text(encoding="utf8")
+        self.assertEqual(readme.count("](memory/paper/one/report.md)"), 1)
+        self.assertEqual(readme.count("](paper/memory/two/report.md)"), 1)
+
+    def test_custom_analysis_main_supplies_theme_and_title_to_legacy_supplement(self):
+        self.registry()
+        directory = "analysis-reports/agent-memory-architecture-insights-20261108-120000/"
+        main = self.dated_report(directory + "insights.md")
+        text = main.read_text(encoding="utf8")
+        summary = json.loads(parse_markdown(text)["summaries"][0])
+        summary["delivery"] = {"report": "insights.md"}
+        main.write_text("# 主分析报告\n<!-- research-summary\n" + json.dumps(summary) + "\n-->\n", encoding="utf8")
+        self.report(directory + "aaa-details.md")
+        graph = self.build()
+        self.assertEqual(graph["stats"]["themes"], 1)
+        self.assertEqual(graph["stats"]["objects"], 1)
+        work = next(node for node in graph["nodes"] if node["kind"] == "object")
+        self.assertEqual(work["id"], "work:report-" + "a" * 32)
+        self.assertEqual(work["label"], "主分析报告")
+        self.assertEqual(work["path"], directory + "insights.md")
+        self.assertEqual({report["themeId"] for report in graph["reports"]}, {"agent-memory"})
+
+    def test_conflicting_stable_ids_in_one_delivery_are_rejected(self):
+        self.registry()
+        directory = "research-reports/agent-memory/paper/one-20261108-120000/"
+        self.dated_report(directory + "report.md")
+        self.dated_report(directory + "details.md", key="b")
+        with self.assertRaisesRegex(ValueError, "Conflicting report identities"):
+            self.build()
 
     def test_shared_report_and_independent_completion(self):
         self.report()

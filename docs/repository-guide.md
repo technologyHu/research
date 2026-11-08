@@ -27,15 +27,19 @@ research 与分析洞察是两个独立入口，可直接选择；两者共用�
 | `README.md` | 仓库入口；图谱标记区由生成器维护，区外可人工编辑 |
 | `AGENTS.md` | 仓库规则，应纳入版本管理 |
 | `.agents/skills/` | 调研、分析洞察、源码理解、绘图、文章获取和报告提交技能及其依赖定义 |
-| [research-reports/](../research-reports/README.md) | 调研报告根目录，内部保持 `<theme>/<type>/<target>/report.md` |
-| [analysis-reports/](../analysis-reports/README.md) | 分析洞察报告根目录，内部使用 `<theme>/analysis/<subject>/report.md` |
-| `<report-root>/<theme>/plan.md` | 对应入口本主题的唯一当前计划，记录问题、任务、依赖、成果和下一步 |
-| `<report-root>/<theme>/<type>/<target>/.tmp/<run-id>/` | 一轮受管调研的配置、证据、源码副本和检查记录 |
+| [themes.yaml](../themes.yaml) | 两个入口与图谱共用的主题注册表，统一稳定 ID、名称、父子关系与别名 |
+| [research-reports/](../research-reports/README.md) | `<主题名>/<type>/<target>-YYYYMMDD-HHmmss/report.md`，主题层次压成一层名称 |
+| [analysis-reports/](../analysis-reports/README.md) | `<主题名>[-<专题>]-YYYYMMDD-HHmmss/report.md`，只设一层报告目录 |
+| `research-reports/<主题名>/plan.md` | 对象调研本主题唯一当前计划 |
+| `analysis-reports/<主题名>.plan.md` | 分析洞察本主题唯一当前计划，不增加目录层级 |
+| `<report-dir>/.tmp/<run-id>/` | 一轮受管调研的配置、证据、源码副本和检查记录 |
 | `docs/` | 使用说明及图谱页面、数据与预览 |
 | `scripts/`、`tests/`、`.github/workflows/` | 图谱生成、验证与发布设施 |
 | `.research-graph.json` | 图谱输入范围配置；当前排除 `.agents/**` |
 
-新建主题和对象目录通常使用英文 slug，例如 `research-reports/agent-memory/paper/memory-method/report.md`。调研报告类型为 paper、open-source、product、benchmark；survey 论文归 paper，目录使用 survey- 前缀。分析洞察独立保存到 `analysis-reports/agent-memory/analysis/<subject>/report.md`，内部类型为 analysis，贡献者思考可选。同类型比较沿用原类型，正式中文对象名称仍可按交付规范声明例外。
+先从 themes.yaml 选择已注册主题；例如 Agent → Memory → Architecture 的完整名称为 agent-memory-architecture。目录不展开主题嵌套，同一主题使用同一名称与稳定 ID，README 和图谱按主题树聚合，同主题内按最近修订时间倒序展示。
+
+报告目录末尾统一使用北京时间 YYYYMMDD-HHmmss；创建时自动生成，实际修订后更新当前目录并同步引用，不产生历史副本。报告元数据保留 report_id、created_at、updated_at，时间变化不改变身份。对象类型、survey-／compare- 前缀及正式中文对象名称例外继续沿用。
 
 以上路径是布局示例，不要求预建空主题、报告、参考资料或归档目录。已有报告与旧位置计划原地维护。报告内链接相对于当前 Markdown 解析，持久配置使用项目相对路径，不写入个人机器的盘符和用户目录。
 
@@ -90,7 +94,7 @@ research 与分析洞察是两个独立入口，可直接选择；两者共用�
 为已有报告增加对象或问题：
 
 ```text
-使用 research，更新 research-reports/agent-memory/open-source/compare-memory/report.md。
+使用 research，更新 research-reports/agent-memory/open-source/compare-memory-20261108-120000/report.md。
 新增同为开源项目的 <项目 D>，并增加“多租户隔离”这一分析维度。
 补查受影响内容，更新比较表和结论，保留未复核部分的原版本与日期。
 ```
@@ -108,7 +112,7 @@ research 与分析洞察是两个独立入口，可直接选择；两者共用�
 ```text
 使用 research，精读 <survey 论文标题或 URL> 的 <论文版本>。
 重点分析分类体系、文献覆盖、综合结论和局限，归入 paper。
-保存到 research-reports/agent-memory/paper/survey-<论文标识>/report.md。
+主题为 agent-memory，报告对象标识为 survey-<论文标识>，由工具生成带当前时间的目录。
 ```
 
 ### 分析洞察
@@ -118,7 +122,7 @@ research 与分析洞察是两个独立入口，可直接选择；两者共用�
 ```text
 使用分析洞察，围绕“记忆架构有哪些共同设计维度”制定分析计划。
 依据 research-reports/agent-memory/ 中已有成果明确问题、样本、依赖与验收条件。
-本轮只维护 analysis-reports/agent-memory/plan.md，不重复创建对象调研计划。
+本轮只维护 analysis-reports/agent-memory.plan.md，不重复创建对象调研计划。
 ```
 
 围绕主题综合已有成果：
@@ -128,7 +132,7 @@ research 与分析洞察是两个独立入口，可直接选择；两者共用�
 围绕“记忆架构有哪些共同设计维度”形成分析／洞察报告。
 对照写入、组织、检索和更新等机制，解释样本中的联系、差异与争议，
 提出有依据的核心发现和后续研究问题，说明样本范围、时间与证据限制。
-保存到 analysis-reports/agent-memory/analysis/memory-architecture-insights/report.md。
+保存到 analysis-reports/agent-memory-architecture-insights-20261108-120000/report.md。
 ```
 
 仅使用现有成果解释问题：
@@ -145,13 +149,13 @@ research 与分析洞察是两个独立入口，可直接选择；两者共用�
 使用分析洞察，基于已有调研分析“什么条件下应采用独立的长期记忆服务”。
 我的初步观点是 <实际观点与理由>，本轮选型标准是 <硬约束、偏好及优先级>。
 结合已有成果检验这些看法，说明取舍、反例、置信理由和建议改变的条件。
-保存到 analysis-reports/agent-memory/analysis/memory-service-tradeoffs/report.md。
+保存到 analysis-reports/agent-memory-service-tradeoffs-20261108-120000/report.md。
 ```
 
 为已有分析增加引用依据：
 
 ```text
-使用分析洞察，更新 analysis-reports/agent-memory/analysis/memory-architecture-insights/report.md，
+使用分析洞察，更新 analysis-reports/agent-memory-architecture-insights-20261108-120000/report.md，
 新增引用 research-reports/agent-memory/product/<产品目录>/report.md 中已核对的结论。
 只复核受这份依据影响的分析和发现，保留其他有效内容；不重新调研该产品。
 ```
@@ -287,7 +291,7 @@ python -X utf8 -B scripts/research_graph.py
 
 只清理获准的任务目录，保留报告和当前主题计划。技能运行依赖以及 `docs/`、`scripts/`、`tests/`、工作流设施不因当前没有报告就失去用途。用户已有文件、其他任务、系统缓存或源码原项目不属于默认清理范围。
 
-每个入口每个主题只维护对应根目录下的 `<theme>/plan.md`，进展、范围调整和收口直接更新该文件，不另存快照。跨入口计划互相引用、不复制同一范围；历史通过 Git 追溯。
+每个入口每个主题只维护上表所列的一份当前计划，进展、范围调整和收口直接更新该文件，不另存快照。跨入口计划互相引用、不复制同一范围；历史通过 Git 追溯。
 
 ## 常见问题
 
