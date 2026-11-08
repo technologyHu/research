@@ -5,14 +5,16 @@ description: 基于已有调研输出，围绕某一主题或问题开展综合�
 
 # 分析洞察
 
-交付围绕某一主题或问题的分析／洞察报告：从已有调研中归纳发现、解释联系和差异，说明这些认识的依据、意义与边界。类型为 `analysis`，目录为 `<theme>/analysis/<subject-slug>/report.md`；保留技能标识 research-analysis 和既有路径兼容。
+交付围绕某一主题或问题的分析／洞察报告：从已有调研中归纳发现、解释联系和差异，说明这些认识的依据、意义与边界。本技能是与 research 并列的独立入口，内部类型为 `analysis`，目录为 `analysis-reports/<theme>/analysis/<subject-slug>/report.md`；保留技能标识 research-analysis 和旧报告读取兼容。
 
 ## 进入与范围
 
-- research 路由进入时沿用目标、主题计划和执行任务，直接执行本分析路径；独立调用时先核对已有成果，再按 [任务管理](../research/references/task-management.md) 创建或恢复所需任务。两种入口均通过 [research-report](../research-report/SKILL.md) 成稿与校验，不重复创建计划或另一份报告。
+- 直接接收分析目标与已有成果，不以 research 为前置入口。收到其他技能交接时沿用已明确目标、来源和任务，不重复规划；通过共用的 [research-report](../research-report/SKILL.md) 成稿与校验。
+- 持续主题、分阶段分析或明确要求计划时，使用共用的 [计划规则](../research/references/theme-planning.md) 和 [模板](../research/references/theme-plan-template.md)，维护 `analysis-reports/<theme>/plan.md`。计划只列分析主题／问题；输入报告作为来源登记，基础补查通过链接指向 research-reports 中对应任务。只要计划时保存后结束。
+- 按共用的 [任务管理](../research/references/task-management.md) 为 `--type analysis` 创建或恢复任务；工具自动选择 analysis-reports。单主题 brief 可用 light，其余按复杂度用 full；结论更新先按 [局部更新](../research/references/report-updates.md) 登记范围。两边同名主题的计划分别维护各自工作，相互引用，不复制为两份同范围计划。
 - 分析对象是一个主题、问题或需要比较的分析对象，输入报告是依据。一个主题可以有多个分析维度；采用多份、不同类型报告不自动增加 items 或改成 comparison，也不恢复 topic 类型。
 - 按 [成果核对](../research/references/routing.md#已有成果核对与复用) 定位相关报告，明确本轮关注点、样本选择、版本／时间和覆盖边界。贡献者思考是可选输入，没有预设观点也可以开展明确标为“本次分析”的综合与推导。
-- 基础事实有缺口时按 [补查交接](../research/references/routing.md#执行交接与基础补查) 界定问题、实际对象类型、接受条件和返回任务，授权内定向补查后回到原分析。限定只用已有成果时保留缺口，不扩成全量对象调研或外部搜索。
+- 基础事实有缺口时按 [补查交接](../research/references/routing.md#执行交接与基础补查) 界定问题、实际对象类型、接受条件和返回任务，交给独立的 [research](../research/SKILL.md) 在授权内定向补查后回到原分析。限定只用已有成果时保留缺口，不扩成全量对象调研或外部搜索。
 
 ## 按目标选择分析方式
 

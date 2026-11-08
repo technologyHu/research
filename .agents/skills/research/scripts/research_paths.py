@@ -9,6 +9,9 @@ from urllib.parse import unquote, urlsplit
 MODE = "project-relative"
 TEMP = Path(".tmp") / "research"
 LOCAL_LAYOUT = "report-local"
+REPORT_ROOTS = {"paper": "research-reports", "open-source": "research-reports",
+                "product": "research-reports", "benchmark": "research-reports",
+                "analysis": "analysis-reports"}
 PATH_KEYS = {"workspace", "work_dir", "output_dir", "outline", "fields", "notes", "report", "preserve_output_dir", "manifest"}
 
 
@@ -138,6 +141,15 @@ def checked_paths(outline):
         errors.append("Unsafe output directory")
     if outline.get("path_mode") == MODE and output.is_relative_to(workspace) and any(part in {".tmp", ".git", ".agents"} for part in output.relative_to(workspace).parts):
         errors.append("Report directories cannot be inside reserved directories")
+    if outline.get("directory_layout") == "report-root" and output.is_relative_to(workspace):
+        classification = outline.get("classification", {})
+        if not isinstance(classification, dict):
+            classification = {}
+        kind = classification.get("type")
+        group = REPORT_ROOTS.get(kind) if isinstance(kind, str) else None
+        expected = (group, classification.get("theme"), kind, classification.get("target"))
+        if group is None or output.relative_to(workspace).parts != expected:
+            errors.append("Report path must match its report root, theme, type and target")
     return paths, errors
 
 

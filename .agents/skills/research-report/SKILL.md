@@ -1,11 +1,13 @@
 ---
 name: research-report
-description: 把已有调研证据组织成中文 Markdown 单对象报告或对比综述，检查来源、引用图片并整理最终交付。用于生成、更新调研报告及按约定清理本次中间产物。
+description: 为独立的 research 与 research-analysis 入口共用成稿能力，把已有证据组织成中文调研报告或分析洞察报告，检查来源、引用与最终交付，并按约定清理本次中间产物。
 ---
 
 # Research Report：成稿与交付
 
 接收 research-deep 的对象调研证据，或 research-analysis 的成果采用记录、综合过程、核心发现与可选贡献者观点，共用本流程成稿与校验。成稿发现缺口时返回原执行分支，只复核受影响范围；不把 analysis 再转成整轮对象调研，也不在成稿阶段重做来源主体背景调查。
+
+沿用调用入口与当前任务的位置：对象报告属于 research-reports，分析洞察报告属于 analysis-reports。共用成稿不创建第二份报告、不合并两边计划；报告完成后回写实际所属计划。
 
 1. 通过 [任务管理](../research/references/task-management.md) 定位计划。full 读取 fields 和结果，light 读取 notes 与 assessment；结合所选类型模板与清单成稿。更新已有报告的证据或结论时先读 [局部更新流程](../research/references/report-updates.md)，在改动前保存基线；普通文字更正直接编辑。
    组织章节时按 [自绘技术图](../research/references/writing-policy.md#自绘技术图) 在已有笔记或草稿中安排配图，证据稳定后再生成。

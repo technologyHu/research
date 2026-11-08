@@ -1,8 +1,8 @@
 """Build the repository's research index, graph data and animated README preview.
 
 Run from any directory: python scripts/research_graph.py
-Only Git-tracked <theme>/plan.md and report-level Markdown under each theme's
-type directories are inputs; old type-first paths remain readable in place. Objects represent
+Only Git-tracked plans and reports under research-reports/ and analysis-reports/
+are new inputs; old theme-first and type-first paths remain readable in place. Objects represent
 concrete research work, never candidate names extracted from report prose.
 """
 from __future__ import annotations
@@ -26,6 +26,9 @@ import yaml
 
 TYPES = {"paper": "论文", "open-source": "开源项目", "product": "产品",
          "benchmark": "评测", "analysis": "分析洞察"}
+REPORT_GROUPS = {"research-reports": ("paper", "open-source", "product", "benchmark"),
+                 "analysis-reports": ("analysis",)}
+GROUP_LABELS = {"research-reports": "调研报告", "analysis-reports": "分析洞察报告"}
 COLORS = {"theme": "#b0a0ff", "paper": "#ffbe75",
           "open-source": "#57deca", "product": "#75acff", "benchmark": "#f78dc1",
           "analysis": "#c7a3ff", "unknown": "#9aaac6"}
@@ -37,7 +40,7 @@ STATUS = {"draft": "草案", "active": "进行中", "paused": "暂停",
 MD = MarkdownIt("commonmark").enable("table")
 START, END = "<!-- research-graph:start -->", "<!-- research-graph:end -->"
 EXCLUDED = {".tmp", "references", "assets", "archive", "node_modules", ".git", ".agents"}
-SUPPORT_ROOTS = EXCLUDED | {"docs", "scripts", "tests", "plans", "reports"}
+SUPPORT_ROOTS = EXCLUDED | {"docs", "scripts", "tests", "plans", "reports"} | set(REPORT_GROUPS)
 
 
 def digest(value: str) -> str:
@@ -264,6 +267,11 @@ def build_graph(root: Path, repository: str, branch: str, *, input_paths: set[st
 
     reports = {}
     report_candidates = {}
+    for group, categories in REPORT_GROUPS.items():
+        for category in categories:
+            for path in root.glob(f"{group}/*/{category}/*/*.md"):
+                theme = path.relative_to(root).parts[1]
+                report_candidates[path] = (category, f"{group}/{theme}")
     for category in TYPES:
         for path in root.glob(f"*/{category}/*/*.md"):
             theme = path.relative_to(root).parts[0]
@@ -310,17 +318,25 @@ def build_graph(root: Path, repository: str, branch: str, *, input_paths: set[st
     plans, tasks = {}, {}
     plan_candidates = {path for path in root.glob("*/plan.md") if path.parent.name not in SUPPORT_ROOTS}
     plan_candidates.update((root / "plans").glob("*/plan.md"))
+    for group in REPORT_GROUPS:
+        plan_candidates.update((root / group).glob("*/plan.md"))
     for path in sorted(plan_candidates):
         if not accepted(path):
             continue
         _, parsed = read(path)
         meta = parsed["meta"]
         theme = text_value(meta.get("theme_id") or path.parent.name)
+        group = path.relative_to(root).parts[0]
+        if group in REPORT_GROUPS:
+            theme = f"{group}/{theme}"
         if theme in plans:
             raise ValueError(f"Duplicate theme_id: {theme}")
         rel = path.relative_to(root).as_posix()
+        label = text_value(meta.get("title")) or parsed["title"] or path.parent.name
+        if group in GROUP_LABELS:
+            label = GROUP_LABELS[group] + " · " + label
         theme_node = node(id="theme:" + theme, kind="theme", type="theme", theme=theme,
-                          label=text_value(meta.get("title")) or parsed["title"] or theme,
+                          label=label,
                           status=canonical_status(text_value(meta.get("status"))), path=rel,
                           revision=meta.get("revision"), updatedAt=text_value(meta.get("updated_at")))
         plans[theme] = (theme_node, parsed)
@@ -353,8 +369,10 @@ def build_graph(root: Path, repository: str, branch: str, *, input_paths: set[st
     for rel, (report, _) in reports.items():
         theme = report["theme"]
         if theme not in plans:
+            group, _, short_theme = theme.partition("/")
+            label = GROUP_LABELS[group] + " · " + short_theme if group in GROUP_LABELS else theme
             theme_node = node(id="theme:" + theme, kind="theme", type="theme", theme=theme,
-                              label=theme, status="unknown", path=rel, revision=None,
+                              label=label, status="unknown", path=rel, revision=None,
                               updatedAt="", inferredFromDirectory=True)
             plans[theme] = (theme_node, {"tables": [], "links": []})
         theme_node = plans[theme][0]
@@ -532,34 +550,68 @@ def update_readme(root: Path, graph: dict, site_url: str):
              f"**{counts['themes']} 个调研主题 · {counts['types']} 种类型 · {counts['objects']} 项调研工作**", "",
              f"[打开交互图谱]({site_url}) · [本地页面](docs/research-graph/index.html) · [静态预览](docs/research-graph/preview.png) · [生成与维护说明](docs/research-graph-guide.md)", "",
              f"数据分支：`{graph['branch']}`。只索引已纳入 Git 的调研内容；技能资料不进入总览。", "",
-             "新调研目录：`<theme>/<type>/<target>/`；主题计划：`<theme>/plan.md`。目录统一使用英文，中文正式产品名等对象名称可保留原名。", "",
+             "调研报告：`research-reports/<theme>/<type>/<target>/`；分析洞察报告：`analysis-reports/<theme>/analysis/<subject>/`。各入口的主题计划位于对应根目录下的 `<theme>/plan.md`。目录通常使用英文，中文正式对象名可保留原名。", "",
              "图谱按实际关联自由布局：主题与具体调研工作连接，类型通过颜色、标签和筛选体现。", "",
-             "## 主题总览", "", "| 主题 | 状态 | 计划 | 报告 | 下一步 |", "| --- | --- | --- | --- | --- |"]
+             "主题状态取自计划；报告旁标注其自身完整度。下一步取自计划记录，未记录时不自动推断。", ""]
     report_index = {r["id"]: r for r in graph["reports"]}
+    work_types = {}
+    for work in graph["nodes"]:
+        if work["kind"] == "object":
+            work_types.setdefault(work["theme"], set()).add(work["type"])
+
+    overviews = {"research": [], "analysis": []}
     for topic in graph["themeOverview"]:
-        plan = markdown_link("调研计划", topic["planPath"]) if topic["planPath"] else "尚未建立"
-        report_links = []
-        for report_id in topic["reportIds"]:
-            report = report_index[report_id]
-            association = "；工作待关联" if report.get("associationStatus") == "pending" else ""
-            report_links.append(markdown_link(report["label"], report["path"]) + f"（{table_text(report['statusLabel'])}{association}）")
-        reports = "<br>".join(report_links) or "暂无报告"
-        actions = "<br>".join(table_text(step) for step in topic["nextSteps"]) or "未记录"
-        lines.append(f"| {table_text(topic['title'])} | {table_text(topic['statusLabel'])} | {plan} | {reports} | {actions} |")
-    if not graph["themeOverview"]:
-        lines.append("| 暂无调研主题 | — | 暂无计划 | 暂无报告 | 暂无下一步安排 |")
-    lines += ["", "主题状态取自计划；报告旁标注其自身完整度。下一步取自计划记录，未记录时不自动推断。", "",
-              "## 调研工作索引", "", "| 主题 | 类型 | 具体调研工作 |", "| --- | --- | --- |"]
-    for theme in (n for n in graph["nodes"] if n["kind"] == "theme"):
-        works = [n for n in graph["nodes"] if n["kind"] == "object" and n["theme"] == theme["theme"]]
-        label = markdown_link(theme["label"], theme["path"])
-        if not works:
-            lines.append(f"| {label} | — | 暂无具体调研工作 |")
-        for work in works:
-            lines.append(f"| {label} | {TYPES.get(work['type'], '未标注')} | {markdown_link(work['label'], work['path'])} |")
-    if not counts["themes"]:
-        lines.append("| 暂无调研主题 | — | 暂无调研工作 |")
-    lines += ["", f"当前纳入总览的调研报告：{counts['reports']} 份。暂无数据时显示空状态，不添加演示节点。", "", END]
+        types = work_types.get(topic["theme"], set())
+        analysis_ids = [key for key in topic["reportIds"] if report_index[key]["type"] == "analysis"]
+        research_ids = [key for key in topic["reportIds"] if report_index[key]["type"] != "analysis"]
+        group = topic["theme"].split("/", 1)[0]
+        has_analysis = group == "analysis-reports" or analysis_ids or "analysis" in types
+        has_research = group == "research-reports" or research_ids or types - {"analysis"} or not has_analysis
+        if has_research and group != "analysis-reports":
+            overviews["research"].append({**topic, "reportIds": research_ids})
+        if has_analysis:
+            overviews["analysis"].append({**topic, "reportIds": analysis_ids})
+
+    theme_nodes = {node["theme"]: node for node in graph["nodes"] if node["kind"] == "theme"}
+    plan_index = {}
+    for category, topics in overviews.items():
+        for topic in topics:
+            if topic["planPath"]:
+                entry = plan_index.setdefault(topic["planPath"], {"topic": topic, "categories": []})
+                entry["categories"].append(category)
+    lines += ["## 调研与分析计划总览", "", "| 类别 | 主题 | 状态 | 当前计划 | 更新日期 |",
+              "| --- | --- | --- | --- | --- |"]
+    for plan_path, entry in plan_index.items():
+        topic = entry["topic"]
+        category = "／".join("调研" if value == "research" else "分析洞察" for value in entry["categories"])
+        updated = theme_nodes[topic["theme"]].get("updatedAt") or "未记录"
+        lines.append(f"| {category} | {table_text(topic['title'])} | {table_text(topic['statusLabel'])} | "
+                     f"{markdown_link('查看计划', plan_path)} | {table_text(updated)} |")
+    for category, label, empty in (("research", "调研", "暂无调研计划"),
+                                   ("analysis", "分析洞察", "暂无分析洞察计划")):
+        if not any(category in entry["categories"] for entry in plan_index.values()):
+            lines.append(f"| {label} | {empty} | — | — | — |")
+    lines.append("")
+
+    for category, title, empty, plan_label in (
+            ("research", "调研报告总览", "暂无调研主题", "调研计划"),
+            ("analysis", "分析洞察报告总览", "暂无分析洞察主题", "分析计划")):
+        lines += [f"## {title}", "", "| 主题 | 状态 | 计划 | 报告 | 下一步 |", "| --- | --- | --- | --- | --- |"]
+        for topic in overviews[category]:
+            plan = markdown_link(plan_label, topic["planPath"]) if topic["planPath"] else "尚未建立"
+            report_links = []
+            for report_id in topic["reportIds"]:
+                report = report_index[report_id]
+                association = "；工作待关联" if report.get("associationStatus") == "pending" else ""
+                report_links.append(markdown_link(report["label"], report["path"]) + f"（{table_text(report['statusLabel'])}{association}）")
+            reports = "<br>".join(report_links) or "暂无报告"
+            actions = "<br>".join(table_text(step) for step in topic["nextSteps"]) or "未记录"
+            lines.append(f"| {table_text(topic['title'])} | {table_text(topic['statusLabel'])} | {plan} | {reports} | {actions} |")
+        if not overviews[category]:
+            lines.append(f"| {empty} | — | 暂无计划 | 暂无报告 | 暂无下一步安排 |")
+        lines.append("")
+    analysis_count = sum(report["type"] == "analysis" for report in graph["reports"])
+    lines += [f"当前纳入总览：调研报告 {counts['reports'] - analysis_count} 份，分析洞察报告 {analysis_count} 份。暂无数据时显示空状态，不添加演示节点。", "", END]
     generated = "\n".join(lines)
     if old.count(START) != old.count(END) or old.count(START) > 1:
         raise ValueError("README graph markers are unbalanced or duplicated")

@@ -17,7 +17,7 @@ import validate_report
 import validate_results
 import research_update
 import research_articles as articles
-from research_paths import MODE, TEMP, LOCAL_LAYOUT, checked_paths, delivery_entries, display_paths, encode_outline, relative
+from research_paths import MODE, TEMP, LOCAL_LAYOUT, REPORT_ROOTS, checked_paths, delivery_entries, display_paths, encode_outline, relative
 
 
 def store_root(output_dir=None):
@@ -168,11 +168,16 @@ def create_task(workspace, topic, kind, depth="standard", workflow="auto", items
     else:
         output_parts = ()
     existing_report = bool(output and (output / report).is_file())
-    standard_output = len(output_parts) == 3 and output_parts[1] in validate_results.TYPES
+    standard_output = len(output_parts) == 4 and output_parts[0] == REPORT_ROOTS[category] and output_parts[2] == category
+    legacy_output = len(output_parts) == 3 and output_parts[1] in validate_results.TYPES
+    if output_parts and output_parts[0] in REPORT_ROOTS.values() and not standard_output:
+        raise ValueError("The report root and type must match, including when updating an existing report")
     if output and not standard_output and not existing_report:
-        raise ValueError("New output directories must be <theme>/<type>/<target>; existing reports may be reused in place")
-    theme_value = theme or (output_parts[0] if standard_output else "general")
+        raise ValueError("New output directories must be <report-root>/<theme>/<type>/<target> in the matching research-reports or analysis-reports root; existing reports may be reused in place")
+    theme_value = theme or (output_parts[1] if standard_output else output_parts[0] if legacy_output and existing_report else "general")
     theme_slug = theme_value if existing_report and theme is None else english_directory(theme_value, "theme")
+    if standard_output and output_parts[1] != theme_slug:
+        raise ValueError("--output must match the theme and actual object type")
     if existing_report:
         declared = native_directory(native_target_name) if native_target_name else english_directory(target, "target") if target else None
         if declared and declared != output.name:
@@ -180,19 +185,17 @@ def create_task(workspace, topic, kind, depth="standard", workflow="auto", items
         target = output.name
         directory_layout = "existing"
     else:
-        if standard_output and (output_parts[0] != theme_slug or output_parts[1] != category):
-            raise ValueError("--output must match the theme and actual object type")
-        chosen = native_target_name or target or (output_parts[2] if standard_output else None)
+        chosen = native_target_name or target or (output_parts[3] if standard_output else None)
         chosen = chosen or (parsed[0]["id"] if items and len(parsed) == 1 else topic)
         target = native_directory(chosen) if native_target_name else english_directory(chosen, "target")
         if len(parsed) > 1 and not target.startswith("compare-"):
             target = "compare-" + target
         if len(target) > 64:
             raise ValueError("target including compare- must not exceed 64 characters")
-        if standard_output and output_parts[2] != target:
+        if standard_output and output_parts[3] != target:
             raise ValueError("--output target does not match the normalized directory name")
-        output = output or workspace / theme_slug / category / target
-        directory_layout = "theme-first"
+        output = output or workspace / REPORT_ROOTS[category] / theme_slug / category / target
+        directory_layout = "report-root"
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dt%H%M%Sz").lower() + "-" + uuid.uuid4().hex[:8]
     path = store_root(output) / run_id
     no_links(path, workspace)

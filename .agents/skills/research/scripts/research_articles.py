@@ -201,7 +201,8 @@ def download_images(outline, key, urls=(), proxy="env", refresh=False, all_image
     if not selected or not set(selected) <= images.keys():
         raise ValueError("Select image URLs actually listed in this article, or use --all")
     engine, attempts = fetcher(), []
-    prefix = f"sources/articles/{key}/image-downloads/{uuid.uuid4().hex}"
+    # Keep retries task-local without repeating the article ID in a deep report path.
+    prefix = f"scratch/images/{uuid.uuid4().hex}"
     root = local(outline["work_dir"], prefix)
     for url in selected:
         previous = images[url]

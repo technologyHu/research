@@ -1,4 +1,4 @@
 interface:
   display_name: "分析洞察"
-  short_description: "基于已有调研，围绕主题或问题综合分析，提炼有依据的关联、机制与洞察"
+  short_description: "独立分析入口：基于已有调研，围绕主题或问题提炼有依据的关联、机制与洞察"
   default_prompt: "使用 $research-analysis，基于已有调研输出，围绕这个主题或问题形成分析／洞察报告，说明核心发现、分析依据、意义、边界与未解决问题。"

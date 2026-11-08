@@ -21,13 +21,15 @@
 
 | 来源 | 工作识别规则 |
 | --- | --- |
-| `<theme>/plan.md` | 第一级为英文主题；读取主题元数据及“对象与任务”章节和子标题下的工作表，每项具体工作对应一个对象节点 |
-| `<theme>/<type>/<target>/report.md` | 与计划中明确关联的工作对应；没有对应计划项时，一个独立交付目录对应一项工作，以报告标题命名 |
+| `<report-root>/<theme>/plan.md` | report-root 为 research-reports 或 analysis-reports；读取主题元数据及任务表，每项具体工作对应一个对象节点 |
+| `<report-root>/<theme>/<type>/<target>/report.md` | 与计划中明确关联的工作对应；没有对应计划项时，一个独立交付目录对应一项工作，以报告标题命名 |
 | 同一交付目录中的其他 Markdown 报告 | 需有有效的 `research-summary` 元数据；不因报告文件变多而增加工作数。若目录已有明确的计划工作关联，未登记的补充报告标为待关联，不自动作为该工作的交付；独立目录仍整体对应一项工作 |
 
 支持的类型为 `paper`、`open-source`、`product`、`benchmark`、`analysis`，其中 analysis 显示为“分析洞察”，对应基于已有调研的主题／问题分析报告。计划中的工作类型由“类型／对象”字段确定；独立报告的工作类型来自其目录。类型作为工作属性，不单独插入一层分类节点。
 
-目录统一采用英文 slug；正式产品、项目名称本身为中文时，其对象目录可保留中文正式名。普通中文主题和描述性研究标题不作为目录。新结构如 `agent-memory/paper/memory-method/report.md`，当前计划位于 `agent-memory/plan.md`。索引兼容读取旧 `plans/<theme>/plan.md` 和 `<type>/<theme>/<target>/`，不移动既有资料；新建内容使用主题优先结构。`docs`、`scripts`、`tests` 等辅助目录不作为主题来源。
+新对象调研位于 `research-reports/<theme>/<type>/<target>/`，type 为 paper、open-source、product、benchmark；新分析洞察位于 `analysis-reports/<theme>/analysis/<subject>/`。各自计划位于对应根目录下的 `<theme>/plan.md`，同名主题与同号工作 ID 按根目录隔离，图谱标题带“调研报告”或“分析洞察报告”前缀；跨目录引用仍按实际相对路径解析，不因引用自动归并工作。
+
+内部目录继续使用英文 slug，正式中文对象名称可声明例外。索引兼容读取旧 `<theme>/plan.md`、`plans/<theme>/plan.md`、`<theme>/<type>/<target>/` 及 `<type>/<theme>/<target>/`，不移动既有资料。两个根目录的 README 及 docs、scripts、tests 等辅助资料不作为研究报告。
 
 计划与报告只按明确的交付声明关联：成果索引（含其子标题）中的报告链接，或“实际报告”“实际交付”“已交付报告”等明确字段。同一段／列表项需要标明工作编号；表格中的工作定义和成果关联共用身份列白名单，如 `ID`、工作 ID、任务编号、任务／对象 ID、关联工作 ID。前置任务 ID、依赖工作 ID、参考工作 ID 等列不作为工作身份，即使排在身份列之前也不改变归属。参考／预期报告列、参考资料子节和下一步中的引用不算交付；`run_id` 仅保留追溯，不单独证明交付。一份报告可以支撑多项工作，仍只计为一份报告；一项工作可以关联多份报告。关联只用于导航，不把报告的完整度自动当作整项工作的完成状态。
 
@@ -39,7 +41,7 @@
 
 ## 查看与本地生成
 
-- [README](../README.md)：动态图预览、主题总览与具体调研工作索引。主题总览逐项汇总主题、计划状态、计划链接、全部关联报告及计划中记录的下一步；报告单独标明自身完整度。暂无数据时保留完整表头和空状态。
+- [README](../README.md)：动态图预览、调研与分析计划总览及两类报告总览。计划总览按类别列出当前计划、主题状态和更新日期，尚无报告的计划也展示；旧混合主题共用的同一计划只列一次。两类报告总览分别汇总主题、计划、报告及下一步并统计数量，旧混合主题按报告类型分列。暂无数据时各自保留表头和空状态。具体工作仍保留在图谱中，README 不再重复列工作索引。
 - [交互页面](research-graph/index.html)：可直接在浏览器打开本地 HTML，支持搜索、主题／类型筛选、拖动、缩放和相关资料跳转。
 - [静态预览](research-graph/preview.png)：便于关闭动画或离线查看。
 - [远程页面](https://technologyhu.github.io/research/)：首次推送并部署成功后可用。
@@ -71,7 +73,7 @@ README 的 `research-graph:start` 与 `research-graph:end` 之间由脚本维护
 
 1. 检出指定分支的最新内容，安装固定版本依赖和中文字体。
 2. 执行提取测试与 JavaScript 语法检查，安装固定版本 Playwright 和 Chromium。
-3. 重建图谱数据、README 索引和 GIF／PNG。
+3. 重建图谱数据、README 总览和 GIF／PNG。
 4. 对本地 HTML、HTTP、桌面和移动端执行浏览器检查，失败时停止发布。
 5. 仅在生成内容变化时，以中文提交说明回写生成文件。
 6. 为发布制品写入 `publication.json`，记录源提交、生成文件所在提交、数据指纹和 7 个静态资源的 SHA-256。

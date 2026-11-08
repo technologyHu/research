@@ -26,7 +26,7 @@ class TaskWorkflow(unittest.TestCase):
         self.root = Path(self.temp.name)
         self.workspace = self.root / "project"
         self.workspace.mkdir()
-        self.store = self.workspace / "general/paper/example-research/.tmp"
+        self.store = self.workspace / "research-reports/general/paper/example-research/.tmp"
 
     def create(self, **kwargs):
         if not kwargs.get("output") and not kwargs.get("target") and not kwargs.get("native_target_name"):
@@ -72,7 +72,7 @@ class TaskWorkflow(unittest.TestCase):
         self.assertTrue(Path(job["fields"]).is_file())
         self.assertTrue(Path(job["output_dir"]).is_dir())
         self.assertFalse((Path(job["output_dir"]) / "report.md").exists())
-        self.assertEqual([entry.name for entry in self.workspace.iterdir()], ["general"])
+        self.assertEqual([entry.name for entry in self.workspace.iterdir()], ["research-reports"])
 
     def test_auto_brief_uses_light_without_fields_or_results(self):
         job = self.create(depth="brief")

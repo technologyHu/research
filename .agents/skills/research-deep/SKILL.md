@@ -1,6 +1,6 @@
 ---
 name: research-deep
-description: 执行论文、开源项目、产品或评测的对象调研与针对性补查，先复用有效证据，再补缺口并记录结果。用于已有计划的执行与续查；analysis 判断交由 research-analysis。
+description: 执行 research 入口规划的论文、开源项目、产品或评测对象调研与针对性补查，先复用有效证据再补缺口，交付到 research-reports。分析洞察由独立入口 research-analysis 负责。
 ---
 
 # Research Deep：执行调研

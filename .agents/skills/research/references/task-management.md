@@ -18,11 +18,11 @@ python <skills_root>/research/scripts/research_task.py list --workspace .
 python <skills_root>/research/scripts/research_task.py show --work-dir <work_dir>
 ```
 
-返回 run_id 和相对于项目根的任务、计划与报告路径。所有中间资料集中在对应报告目录的 `<theme>/<type>/<target>/.tmp/<run-id>/`，包含 owner.json 标记；同名主题产生独立 run，不覆盖旧任务。完整目录模板见 [交付规范](delivery-policy.md)。list 查找当前项目各调研目录内的任务，跳过临时目录内部的源码、下载资料及其他项目任务，可用 `--topic` 筛选。多个任务匹配时明确选择 run_id／work_dir，不自动采用第一项。
+create 按类型自动选择 report-root：paper／open-source／product／benchmark 使用 research-reports，analysis 使用 analysis-reports；两个独立入口共用本工具。返回 run_id 和相对于项目根的任务、计划与报告路径。所有中间资料集中在对应报告目录的 `<report-root>/<theme>/<type>/<target>/.tmp/<run-id>/`，包含 owner.json 标记；同名主题产生独立 run，不覆盖旧任务。完整目录模板见 [交付规范](delivery-policy.md)。list 查找当前项目各调研目录内的任务，跳过临时目录内部的源码、下载资料及其他项目任务，可用 `--topic` 筛选。多个任务匹配时明确选择 run_id／work_dir，不自动采用第一项。
 
-后续命令和编辑使用返回的 outline、fields 相对路径，例如 `agent-memory/paper/example-paper/.tmp/<run-id>/outline.json`。受管任务默认 outline.json、fields.json；已有 fields.yaml／fields.yml 由 show 返回实际路径。自动发现时若同时存在多个 fields 配置就报错，不静默选择一份；手工校验可明确传 --fields，但不要为追加对象或字段另建同名配置。受管 outline 始终为 outline.json，旧手工 YAML 计划用检查脚本明确传路径，不伪造 owner。
+后续命令和编辑使用返回的 outline、fields 相对路径，例如 `research-reports/agent-memory/paper/example-paper/.tmp/<run-id>/outline.json`。受管任务默认 outline.json、fields.json；已有 fields.yaml／fields.yml 由 show 返回实际路径。自动发现时若同时存在多个 fields 配置就报错，不静默选择一份；手工校验可明确传 --fields，但不要为追加对象或字段另建同名配置。受管 outline 始终为 outline.json，旧手工 YAML 计划用检查脚本明确传路径，不伪造 owner。
 
-create 创建调研目录及其 .tmp/ 任务目录，但不创建或覆盖 report.md。按 [目录归类规则](delivery-policy.md#类型与主题归类) 输出到 `<theme>/<type>/<target>/`；`--theme agent-memory` 指定英文主题，省略时为 general。单对象 target 优先取明确给定的英文对象 id；`--target` 可另行指定英文目录名，同类型对比任务按需加 compare-。跨类型对象分别创建任务；基于已有成果的分析洞察单独使用 analysis。中文正式名称通过 `--native-target-name 扣子` 明确声明例外，内部仍可使用 `--item coze:product=扣子`。`--topic` 是中文或英文调研标题，不能因此把一般中文描述用作目录；无英文对象 id 时传 --target。`--output` 相对于 `--workspace`，新建位置必须匹配主题优先结构，已有报告可原地复用。
+create 创建调研目录及其 .tmp/ 任务目录，但不创建或覆盖 report.md。按 [目录归类规则](delivery-policy.md#类型与主题归类) 输出到 `<report-root>/<theme>/<type>/<target>/`；`--theme agent-memory` 指定英文主题，省略时为 general。单对象 target 优先取明确给定的英文对象 id；`--target` 可另行指定英文目录名，同类型对比任务按需加 compare-。跨类型对象分别创建任务；基于已有成果的分析洞察单独使用 analysis。中文正式名称通过 `--native-target-name 扣子` 明确声明例外，内部仍可使用 `--item coze:product=扣子`。`--topic` 是中文或英文调研标题，不能因此把一般中文描述用作目录；无英文对象 id 时传 --target。`--output` 相对于 `--workspace`，新建位置必须匹配“报告根目录／主题／类型／对象”结构，已有报告可原地复用。
 
 默认只有一个对象，名称取调研标题；可重复 `--item id[:type]=名称` 明确对象，两个以上自动使用 comparison。同一任务中的 items 使用同一实际类型。分析洞察例如 `--type analysis --theme agent-memory --target memory-architecture --item architecture:analysis=记忆架构维度`，输入报告记录为来源；不把论文、项目、产品混合为分析对象。create／show 返回 classification，便于核对分类，不代表证据已更新。
 

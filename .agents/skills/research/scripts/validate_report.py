@@ -312,7 +312,7 @@ def validate(root, outline_path=None, fields_path=None):
             sources = summary.get("source_urls")
             if (isinstance(items, list) and items and all(isinstance(item, dict) and item.get("type") == "analysis" for item in items)
                     and isinstance(sources, list) and all(isinstance(value, str) for value in sources)):
-                analysis_workspace = root.parents[2]
+                analysis_workspace = root.parents[3] if root.parents[2].name == "analysis-reports" and len(root.parents) >= 4 else root.parents[2]
                 adopted_sources = {canonical_source(value) for value in sources if urlsplit(value).scheme == "repo"}
         except (ValueError, TypeError, AttributeError):
             pass

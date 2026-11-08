@@ -15,22 +15,22 @@ class AnalysisWorkflow(unittest.TestCase):
 
     def analysis(self, depth="standard", field_id="judgment"):
         thematic = field_id == "insight"
-        adopted = self.workspace / "agent-memory/paper/survey-memory/report.md"
+        adopted = self.workspace / "research-reports/agent-memory/paper/survey-memory/report.md"
         adopted.parent.mkdir(parents=True, exist_ok=True)
         adopted.write_text("# 综述论文调研\n\n## 分类体系\n\n已核对的论文分类与限制。\n", encoding="utf-8")
-        source = {"id": "prior", "title": "已有论文调研", "url": "repo:agent-memory/paper/survey-memory/report.md",
+        source = {"id": "prior", "title": "已有论文调研", "url": "repo:research-reports/agent-memory/paper/survey-memory/report.md",
                   "kind": "secondary", "version": "2026-11-07", "accessed_at": "2026-11-07",
                   "sha256": hashlib.sha256(adopted.read_bytes()).hexdigest(), "locator": "分类体系"}
         sources = [source]
-        citations = "根据[已有调研](../../paper/survey-memory/report.md#分类体系)，在给定约束下作条件性判断。"
+        citations = "根据[已有调研](../../../../research-reports/agent-memory/paper/survey-memory/report.md#分类体系)，在给定约束下作条件性判断。"
         if thematic:
-            project_report = self.workspace / "agent-memory/open-source/library/report.md"
+            project_report = self.workspace / "research-reports/agent-memory/open-source/library/report.md"
             project_report.parent.mkdir(parents=True, exist_ok=True)
             project_report.write_text("# 开源实现调研\n\n## 机制\n\n内嵌部署中包含存储、检索与应用触发的更新。\n", encoding="utf-8")
-            sources.append({"id": "project", "title": "已有项目调研", "url": "repo:agent-memory/open-source/library/report.md",
+            sources.append({"id": "project", "title": "已有项目调研", "url": "repo:research-reports/agent-memory/open-source/library/report.md",
                             "kind": "secondary", "version": "fixture-v1", "accessed_at": "2026-11-07",
                             "sha256": hashlib.sha256(project_report.read_bytes()).hexdigest(), "locator": "机制"})
-            citations = "综合[论文调研](../../paper/survey-memory/report.md#分类体系)与[实现调研](../../open-source/library/report.md#机制)，解释这些样本的部署形式与生命周期机制之间的关系，保留覆盖限制。"
+            citations = "综合[论文调研](../../../../research-reports/agent-memory/paper/survey-memory/report.md#分类体系)与[实现调研](../../../../research-reports/agent-memory/open-source/library/report.md#机制)，解释这些样本的部署形式与生命周期机制之间的关系，保留覆盖限制。"
         topic = "记忆架构的分析洞察" if thematic else "记忆服务取舍"
         question = "这些样本的架构机制有哪些联系与差异？" if thematic else "什么条件下需要独立记忆服务？"
         job = task.create_task(self.workspace, topic, "analysis", theme="agent-memory",
@@ -79,6 +79,14 @@ class AnalysisWorkflow(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Adopted report changed"):
             task.verify_task(work)
 
+    def test_independent_legacy_analysis_checks_cross_root_sources_without_moving(self):
+        _, _, report, _ = self.analysis()
+        legacy = self.workspace / "agent-memory/analysis/old"
+        legacy.mkdir(parents=True)
+        (legacy / "report.md").write_text(report.read_text(encoding="utf8").replace(
+            "../../../../research-reports/", "../../../research-reports/"), encoding="utf8")
+        self.assertTrue(reports.validate(legacy)["valid"])
+
     def test_theme_insight_without_contributor_viewpoints_keeps_one_analysis_subject(self):
         for depth in ("standard", "brief"):
             with self.subTest(depth=depth):
@@ -106,10 +114,10 @@ class AnalysisWorkflow(unittest.TestCase):
         checked = reports.validate(outline["output_dir"], work / "outline.json")
         self.assertFalse(checked["valid"])
         self.assertTrue(any("missing adopted report anchor" in e for e in checked["errors"]))
-        other = self.workspace / "agent-memory/paper/other/report.md"
+        other = self.workspace / "research-reports/agent-memory/paper/other/report.md"
         other.parent.mkdir(parents=True)
         other.write_text("# 未采用的报告\n", encoding="utf-8")
-        report.write_text(original + "\n[未登记](../../paper/other/report.md)\n", encoding="utf-8")
+        report.write_text(original + "\n[未登记](../../../../research-reports/agent-memory/paper/other/report.md)\n", encoding="utf-8")
         checked = reports.validate(outline["output_dir"], work / "outline.json")
         self.assertFalse(checked["valid"])
         self.assertTrue(any("target outside output" in e for e in checked["errors"]))
@@ -128,7 +136,7 @@ class AnalysisWorkflow(unittest.TestCase):
         self.assertFalse(checked["valid"])
         self.assertTrue(any("limited to analysis" in e for e in checked["errors"]))
         for value in ("repo:../outside/report.md", "repo:agent-memory/.tmp/run/notes.md", "repo:agent-memory/plan.md",
-                      "repo:agent-memory/.TMP/run/notes.md", "repo:agent-memory/paper/PLAN.md"):
+                      "repo:agent-memory/.TMP/run/notes.md", "repo:research-reports/agent-memory/paper/PLAN.md"):
             self.assertFalse(results.valid_url(value), value)
 
     def test_removed_topic_and_mixed_sources_do_not_create_a_fallback_type(self):
@@ -143,7 +151,7 @@ class AnalysisWorkflow(unittest.TestCase):
 
     def test_survey_directory_preserves_paper_classification(self):
         job = task.create_task(self.workspace, "综述论文", "paper", theme="agent-memory", target="survey-memory")
-        self.assertEqual(Path(job["output_dir"]).relative_to(self.workspace).as_posix(), "agent-memory/paper/survey-memory")
+        self.assertEqual(Path(job["output_dir"]).relative_to(self.workspace).as_posix(), "research-reports/agent-memory/paper/survey-memory")
         self.assertEqual(job["classification"]["type"], "paper")
 
 

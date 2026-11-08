@@ -2,7 +2,7 @@
 
 本仓库用于组织 openJiuwen Harness 调研工作的计划、证据与报告，也保存执行调研的 Agent 技能和展示成果的图谱设施。组织归属不限定研究对象，每次任务仍需明确研究问题、对象、版本和交付范围。
 
-读者可以从 README 查找成果，按任务场景选择技能，并按修改范围维护报告、技能和图谱。本文以 2026-11-07 的仓库结构和配置为依据；项目规则见 [AGENTS.md](../AGENTS.md)。技能的操作步骤、参数和检查要求直接查阅对应技能文档。
+读者可以从 README 查找成果，按任务场景选择技能，并按修改范围维护报告、技能和图谱。本文以 2026-11-08 的仓库结构和配置为依据；项目规则见 [AGENTS.md](../AGENTS.md)。技能的操作步骤、参数和检查要求直接查阅对应技能文档。
 
 ## 快速开始与技能选择
 
@@ -10,13 +10,15 @@
 
 | 什么情况下使用 | 使用哪个技能 |
 | --- | --- |
-| 开始或继续调研、制定计划、增补对象或问题、生成或更新报告 | [research](../.agents/skills/research/SKILL.md) |
-| 基于已有调研输出，围绕主题或问题形成综合分析与洞察报告，贡献者思考可选 | [分析洞察](../.agents/skills/research-analysis/SKILL.md) |
+| 调研论文、开源项目、产品或评测，制定对象调研计划、增补内容或更新调研报告 | [research](../.agents/skills/research/SKILL.md) |
+| 基于已有成果制定分析计划、围绕主题或问题形成或更新分析洞察报告，贡献者思考可选 | [分析洞察](../.agents/skills/research-analysis/SKILL.md) |
 | 绘制架构图、流程图、方案对比图等技术图 | [画图](../.agents/skills/draw-diagram/SKILL.md) |
 | 理解代码库、模块职责、调用链，或核对设计与实现 | [代码理解](../.agents/skills/code-understanding/SKILL.md) |
 | 润色文字，减少 AI 腔并保留原意 | [去AI味](../.agents/skills/humanizer/SKILL.md) |
 | 获取网页文章，保存供离线阅读或调研引用 | [爬取文章](../.agents/skills/web-article-fetcher/SKILL.md) |
-| 将调研报告及必要附件提交到本地 Git 仓库，或整理报告提交 | [提交调研报告](../.agents/skills/research-commit/SKILL.md) |
+| 将调研报告或分析洞察报告及附件提交到本地 Git，或整理报告提交 | [提交调研报告](../.agents/skills/research-commit/SKILL.md) |
+
+research 与分析洞察是两个独立入口，可直接选择；两者共用部分内部能力，分别维护自己的报告与计划。
 
 ## 目录与内容边界
 
@@ -25,14 +27,15 @@
 | `README.md` | 仓库入口；图谱标记区由生成器维护，区外可人工编辑 |
 | `AGENTS.md` | 仓库规则，应纳入版本管理 |
 | `.agents/skills/` | 调研、分析洞察、源码理解、绘图、文章获取和报告提交技能及其依赖定义 |
-| `<theme>/plan.md` | 新主题的长期计划，记录问题、任务、依赖、成果和下一步 |
-| `<theme>/<type>/<target>/` | 一份调研的正式交付目录，主文件默认 `report.md` |
-| `<theme>/<type>/<target>/.tmp/<run-id>/` | 一轮受管调研的配置、证据、源码副本和检查记录 |
+| [research-reports/](../research-reports/README.md) | 调研报告根目录，内部保持 `<theme>/<type>/<target>/report.md` |
+| [analysis-reports/](../analysis-reports/README.md) | 分析洞察报告根目录，内部使用 `<theme>/analysis/<subject>/report.md` |
+| `<report-root>/<theme>/plan.md` | 对应入口本主题的唯一当前计划，记录问题、任务、依赖、成果和下一步 |
+| `<report-root>/<theme>/<type>/<target>/.tmp/<run-id>/` | 一轮受管调研的配置、证据、源码副本和检查记录 |
 | `docs/` | 使用说明及图谱页面、数据与预览 |
 | `scripts/`、`tests/`、`.github/workflows/` | 图谱生成、验证与发布设施 |
 | `.research-graph.json` | 图谱输入范围配置；当前排除 `.agents/**` |
 
-新建主题和对象目录通常使用英文 slug，例如 `agent-memory/paper/memory-method/report.md`。类型为 `paper`、`open-source`、`product`、`benchmark`、`analysis`；同类型比较归入相应类型。跨类型研究优先复用各类已有成果，仅对缺口分别补查；基于已有成果的主题／问题分析洞察归入 `analysis`，贡献者思考可按需提供。survey 论文归入 `paper`，单篇对象目录使用 `survey-<paper-id>`。正式中文产品或项目名可按交付规范声明对象目录例外。
+新建主题和对象目录通常使用英文 slug，例如 `research-reports/agent-memory/paper/memory-method/report.md`。调研报告类型为 paper、open-source、product、benchmark；survey 论文归 paper，目录使用 survey- 前缀。分析洞察独立保存到 `analysis-reports/agent-memory/analysis/<subject>/report.md`，内部类型为 analysis，贡献者思考可选。同类型比较沿用原类型，正式中文对象名称仍可按交付规范声明例外。
 
 以上路径是布局示例，不要求预建空主题、报告、参考资料或归档目录。已有报告与旧位置计划原地维护。报告内链接相对于当前 Markdown 解析，持久配置使用项目相对路径，不写入个人机器的盘符和用户目录。
 
@@ -49,7 +52,7 @@
 ```text
 使用 research，为 agent-memory 制定调研计划，目标是为 Agent 项目选择记忆方案。
 覆盖代表性论文、开源实现和产品，明确核心问题、优先级与验收条件。
-本轮只维护 agent-memory/plan.md。
+本轮只维护 research-reports/agent-memory/plan.md。
 ```
 
 深入调研一个项目并生成报告：
@@ -79,7 +82,7 @@
 继续已有计划中的任务：
 
 ```text
-使用 research，继续 agent-memory/plan.md 中的 T002。
+使用 research，继续 research-reports/agent-memory/plan.md 中的 T002。
 本轮重点补查检索流程和扩展机制，沿用已有有效资料。
 更新对应报告，并将实际进展、成果链接和剩余缺口回写当前计划。
 ```
@@ -87,7 +90,7 @@
 为已有报告增加对象或问题：
 
 ```text
-使用 research，更新 agent-memory/open-source/compare-memory/report.md。
+使用 research，更新 research-reports/agent-memory/open-source/compare-memory/report.md。
 新增同为开源项目的 <项目 D>，并增加“多租户隔离”这一分析维度。
 补查受影响内容，更新比较表和结论，保留未复核部分的原版本与日期。
 ```
@@ -105,25 +108,33 @@
 ```text
 使用 research，精读 <survey 论文标题或 URL> 的 <论文版本>。
 重点分析分类体系、文献覆盖、综合结论和局限，归入 paper。
-保存到 agent-memory/paper/survey-<论文标识>/report.md。
+保存到 research-reports/agent-memory/paper/survey-<论文标识>/report.md。
 ```
 
 ### 分析洞察
 
+只制定分析计划：
+
+```text
+使用分析洞察，围绕“记忆架构有哪些共同设计维度”制定分析计划。
+依据 research-reports/agent-memory/ 中已有成果明确问题、样本、依赖与验收条件。
+本轮只维护 analysis-reports/agent-memory/plan.md，不重复创建对象调研计划。
+```
+
 围绕主题综合已有成果：
 
 ```text
-使用分析洞察，基于 agent-memory 中已有的论文、开源项目和产品调研，
+使用分析洞察，基于 research-reports/agent-memory/ 中已有的论文、开源项目和产品调研，
 围绕“记忆架构有哪些共同设计维度”形成分析／洞察报告。
 对照写入、组织、检索和更新等机制，解释样本中的联系、差异与争议，
 提出有依据的核心发现和后续研究问题，说明样本范围、时间与证据限制。
-保存到 agent-memory/analysis/memory-architecture-insights/report.md。
+保存到 analysis-reports/agent-memory/analysis/memory-architecture-insights/report.md。
 ```
 
 仅使用现有成果解释问题：
 
 ```text
-使用分析洞察，仅依据 agent-memory 已有报告分析“持久化接口与长期记忆效果是什么关系”。
+使用分析洞察，仅依据 research-reports/agent-memory/ 已有报告分析“持久化接口与长期记忆效果是什么关系”。
 从现有结果提炼认识，说明分析依据、适用边界与尚未回答的问题。
 只使用现有资料，证据不足的部分保留缺口和条件性解释。
 ```
@@ -134,21 +145,21 @@
 使用分析洞察，基于已有调研分析“什么条件下应采用独立的长期记忆服务”。
 我的初步观点是 <实际观点与理由>，本轮选型标准是 <硬约束、偏好及优先级>。
 结合已有成果检验这些看法，说明取舍、反例、置信理由和建议改变的条件。
-保存到 agent-memory/analysis/memory-service-tradeoffs/report.md。
+保存到 analysis-reports/agent-memory/analysis/memory-service-tradeoffs/report.md。
 ```
 
 为已有分析增加引用依据：
 
 ```text
-使用分析洞察，更新 agent-memory/analysis/memory-architecture-insights/report.md，
-新增引用 agent-memory/product/<产品目录>/report.md 中已核对的结论。
+使用分析洞察，更新 analysis-reports/agent-memory/analysis/memory-architecture-insights/report.md，
+新增引用 research-reports/agent-memory/product/<产品目录>/report.md 中已核对的结论。
 只复核受这份依据影响的分析和发现，保留其他有效内容；不重新调研该产品。
 ```
 
 ### 画图
 
 ```text
-使用画图，为 agent-memory/open-source/<项目目录>/report.md 绘制记忆处理流程图。
+使用画图，为 research-reports/agent-memory/open-source/<项目目录>/report.md 绘制记忆处理流程图。
 依据报告中已核实的内容，展示写入、存储、检索、更新和淘汰的关系。
 将图放入该报告的 assets/，并在正文中引用。
 ```
@@ -164,7 +175,7 @@
 ### 去AI味
 
 ```text
-使用去AI味，润色 agent-memory/open-source/<项目目录>/report.md 的正文。
+使用去AI味，润色 research-reports/agent-memory/open-source/<项目目录>/report.md 的正文。
 让表达自然、直接，减少套话和重复，保持技术报告的客观语气。
 保留事实、数字、代码标识、引用、版本和限定条件。
 ```
@@ -180,7 +191,7 @@
 ### 提交调研报告
 
 ```text
-使用提交调研报告，提交 agent-memory/open-source/<项目目录>/ 的本轮报告修改。
+使用提交调研报告，提交 research-reports/agent-memory/open-source/<项目目录>/ 的本轮报告修改。
 包含必要的引用资料和附件，同篇本轮修订集中为一笔本地提交。
 保留其他工作区改动，不推送。
 ```
@@ -230,13 +241,13 @@ git diff --cached --stat
 
 ## 日常维护
 
-### 图谱与 README 索引
+### 图谱与 README 总览
 
 图谱从 `git ls-files` 获取已跟踪文件，包括已暂存的新文件；忽略未跟踪资料。远程 CI 使用已推送的分支内容。新增成果需先按授权纳入 Git，之后重建才能进入本地索引。
 
 主题和具体调研工作是节点，类型作为属性，报告作为工作资料。工作归属来自计划中的稳定编号与明确成果声明，报告里提到的候选名称不会自动变成节点。缺失、歧义或补充报告待关联时，应修正实际计划声明，具体识别规则见[图谱维护说明](research-graph-guide.md)。
 
-README 中 `research-graph:start` 和 `research-graph:end` 标记之间由生成器维护。人工使用说明放在标记区外；索引与图谱数据应修改输入后再生成，避免手改生成结果造成分歧。
+README 中 `research-graph:start` 和 `research-graph:end` 标记之间由生成器维护，展示计划总览和两类报告总览，不单列工作索引。具体工作节点仍由计划和报告提取，在图谱中保留。人工说明放在标记区外；总览与图谱数据应修改输入后再生成，避免手改生成结果造成分歧。
 
 以下生成命令会产生新图片，执行前须满足下一节的图像能力条件：
 
@@ -245,7 +256,7 @@ python -m pip install -r scripts/research-graph-requirements.txt
 python -X utf8 -B scripts/research_graph.py
 ```
 
-生成器默认使用当前分支，更新数据、README 索引和预览。Windows 默认使用微软雅黑，可通过 `GRAPH_FONT` 指定字体；Linux 使用中文字体依赖。`--no-preview` 仅供开发调试，正常发布需要完整产物。
+生成器默认使用当前分支，更新数据、README 总览和预览。Windows 默认使用微软雅黑，可通过 `GRAPH_FONT` 指定字体；Linux 使用中文字体依赖。`--no-preview` 仅供开发调试，正常发布需要完整产物。
 
 推送到 `openjiuwen-harness` 且命中工作流路径规则后，CI 依次测试、生成、检查浏览器行为、回写生成文件、部署 Pages 并验收真实页面。工作流也提供手动触发入口；其他分支的普通推送不会自动部署。以当前[工作流配置](../.github/workflows/research-graph.yml)为准，首次发布的历史结果见[验收记录](research-graph-first-publication.md)。
 
@@ -276,7 +287,7 @@ python -X utf8 -B scripts/research_graph.py
 
 只清理获准的任务目录，保留报告和当前主题计划。技能运行依赖以及 `docs/`、`scripts/`、`tests/`、工作流设施不因当前没有报告就失去用途。用户已有文件、其他任务、系统缓存或源码原项目不属于默认清理范围。
 
-每个主题只维护 `<theme>/plan.md`，进展、范围调整和收口直接更新该文件，不另存计划快照；历史版本通过 Git 追溯。
+每个入口每个主题只维护对应根目录下的 `<theme>/plan.md`，进展、范围调整和收口直接更新该文件，不另存快照。跨入口计划互相引用、不复制同一范围；历史通过 Git 追溯。
 
 ## 常见问题
 

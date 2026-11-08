@@ -10,6 +10,8 @@ archived_at: null
 
 # <主题名称>调研计划
 
+模板由两个独立入口共用：research 保存到 `research-reports/<theme>/plan.md`，任务限 paper／open-source／product／benchmark；research-analysis 保存到 `analysis-reports/<theme>/plan.md`，标题可改为分析洞察计划，任务仅为 analysis。按本轮入口裁剪示例，跨入口来源与依赖登记实际路径，不将基础报告列成分析 items。
+
 ## 目标与边界
 
 - 背景与用途：<为什么研究，支持什么决策或工作>

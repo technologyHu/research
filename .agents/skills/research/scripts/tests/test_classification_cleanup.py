@@ -18,9 +18,51 @@ class ClassificationAndCleanup(unittest.TestCase):
 
     def test_single_object_is_grouped_by_actual_type_theme_and_id(self):
         job = task.create_task(self.workspace, "示例项目架构", "open-source", items=["library:open-source=示例库"], theme="Agent Memory")
-        self.assertEqual(Path(job["output_dir"]).relative_to(self.workspace).as_posix(), "agent-memory/open-source/library")
+        self.assertEqual(Path(job["output_dir"]).relative_to(self.workspace).as_posix(), "research-reports/agent-memory/open-source/library")
         self.assertEqual(job["classification"], {"type": "open-source", "theme": "agent-memory", "target": "library"})
         self.assertFalse((Path(job["output_dir"]) / "report.md").exists())
+
+    def test_report_roots_separate_object_research_from_analysis(self):
+        for kind in ("paper", "open-source", "product", "benchmark", "analysis"):
+            with self.subTest(kind=kind):
+                job = task.create_task(self.workspace, "研究", kind, theme="memory", target="example")
+                expected_root = "analysis-reports" if kind == "analysis" else "research-reports"
+                self.assertEqual(Path(job["output_dir"]).relative_to(self.workspace).parts,
+                                 (expected_root, "memory", kind, "example"))
+                self.assertEqual(task.open_task(job["work_dir"])[2]["directory_layout"], "report-root")
+
+    def test_new_outputs_cannot_cross_roots_or_use_the_old_top_level(self):
+        for kind, destination in (("paper", "analysis-reports/memory/paper/example"),
+                                  ("analysis", "research-reports/memory/analysis/example"),
+                                  ("paper", "memory/paper/example")):
+            with self.subTest(destination=destination), self.assertRaises(ValueError):
+                task.create_task(self.workspace, "研究", kind, output=destination)
+
+    def test_existing_theme_first_report_remains_readable_without_moving(self):
+        legacy = self.workspace / "memory/paper/old"
+        legacy.mkdir(parents=True)
+        (legacy / "report.md").write_text("# 旧报告\n", encoding="utf8")
+        job = task.create_task(self.workspace, "续查", "paper", output=legacy)
+        self.assertEqual(Path(job["output_dir"]), legacy)
+        self.assertEqual(job["classification"]["theme"], "memory")
+
+    def test_existing_report_in_a_new_root_keeps_its_type_and_theme(self):
+        destination = self.workspace / "analysis-reports/memory/analysis/example"
+        destination.mkdir(parents=True)
+        (destination / "report.md").write_text("# 洞察\n", encoding="utf8")
+        with self.assertRaises(ValueError):
+            task.create_task(self.workspace, "续查", "paper", output=destination)
+        with self.assertRaises(ValueError):
+            task.create_task(self.workspace, "续查", "analysis", theme="other", output=destination)
+
+    def test_saved_new_layout_is_checked_again_when_configuration_changes(self):
+        job = task.create_task(self.workspace, "研究", "paper", theme="memory", target="example")
+        _, _, outline = task.open_task(job["work_dir"])
+        for classification in ({"type": "analysis", "theme": "memory", "target": "example"},
+                               {"type": [], "theme": "memory", "target": "example"}, None):
+            with self.subTest(classification=classification):
+                _, errors = task.checked_paths({**outline, "classification": classification})
+                self.assertTrue(any("Report path" in error for error in errors))
 
     def test_same_type_comparison_is_placed_and_mixed_types_are_rejected(self):
         same = self.create(items=["a=论文 A", "b=论文 B"], theme="agent-memory")
@@ -82,7 +124,7 @@ class ClassificationAndCleanup(unittest.TestCase):
         run = subprocess.run(command, cwd=self.workspace, text=True, encoding="utf-8", capture_output=True)
         self.assertEqual(run.returncode, 0, run.stdout + run.stderr)
         created = json.loads(run.stdout)
-        self.assertEqual(created["output_dir"], "agent-memory/paper/paper-a")
+        self.assertEqual(created["output_dir"], "research-reports/agent-memory/paper/paper-a")
         path, _, _ = self.write_report(task.describe_task(self.workspace / created["work_dir"]))
         task.verify_task(path)
         preview = subprocess.run(command[:5] + ["cleanup-plan", "--work-dir", created["work_dir"]], cwd=self.workspace, text=True, encoding="utf-8", capture_output=True)
@@ -97,14 +139,14 @@ class ClassificationAndCleanup(unittest.TestCase):
             task.create_task(self.workspace, "记忆机制调研", "paper", theme="agent-memory")
         self.assertEqual(list(self.workspace.iterdir()), [])
         job = task.create_task(self.workspace, "记忆机制调研", "paper", theme="agent-memory", target="memory-method")
-        self.assertEqual(Path(job["output_dir"]).relative_to(self.workspace).as_posix(), "agent-memory/paper/memory-method")
+        self.assertEqual(Path(job["output_dir"]).relative_to(self.workspace).as_posix(), "research-reports/agent-memory/paper/memory-method")
         _, _, outline = task.open_task(job["work_dir"])
         self.assertEqual(outline["topic"], "记忆机制调研")
 
     def test_chinese_official_product_name_is_an_explicit_exception(self):
         job = task.create_task(self.workspace, "中文产品能力调研", "product", theme="coding-agent",
                                items=["coze:product=扣子"], native_target_name="扣子")
-        self.assertEqual(Path(job["output_dir"]).relative_to(self.workspace).as_posix(), "coding-agent/product/扣子")
+        self.assertEqual(Path(job["output_dir"]).relative_to(self.workspace).as_posix(), "research-reports/coding-agent/product/扣子")
         _, _, outline = task.open_task(job["work_dir"])
         self.assertEqual(outline["items"][0]["id"], "coze")
         self.assertEqual(outline["directory_naming"]["native_target_name"], "扣子")
@@ -115,13 +157,13 @@ class ClassificationAndCleanup(unittest.TestCase):
         for destination in ("paper/agent-memory/project", "reports/custom", "agent-memory/paper/普通研究标题", "agent-memory/product/project"):
             with self.subTest(destination=destination), self.assertRaises(ValueError):
                 task.create_task(self.workspace, "研究", "paper", output=destination)
-        job = task.create_task(self.workspace, "研究", "paper", output="agent-memory/paper/project")
+        job = task.create_task(self.workspace, "研究", "paper", output="research-reports/agent-memory/paper/project")
         self.assertEqual(job["classification"], {"type": "paper", "theme": "agent-memory", "target": "project"})
 
     def test_english_comparison_name_is_independent_of_chinese_report_title(self):
         job = task.create_task(self.workspace, "多个记忆方法比较", "paper", theme="agent-memory",
                                items=["a=方法甲", "b=方法乙"], target="memory-methods")
-        self.assertEqual(Path(job["output_dir"]).relative_to(self.workspace).as_posix(), "agent-memory/paper/compare-memory-methods")
+        self.assertEqual(Path(job["output_dir"]).relative_to(self.workspace).as_posix(), "research-reports/agent-memory/paper/compare-memory-methods")
 
     def test_existing_chinese_named_report_can_be_reused_in_place(self):
         destination = self.workspace / "existing-theme/product/中文产品"

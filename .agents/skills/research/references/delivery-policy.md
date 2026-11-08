@@ -1,73 +1,77 @@
-# 调研产物保存与清理规范
+# 调研与分析洞察产物保存与清理规范
 
-本文件是所有 research 技能的保存与清理规则唯一来源。普通新输出路径遵循下文目录规则，用户后续明确要求的例外、文件格式或保留要求优先；类型技能只规定内容，不另设一套目录规则。
+本文件是 research 和 research-analysis 及其共用技能的保存与清理规则唯一来源。两个入口独立选择工作、维护计划并决定交付，按需共用证据、任务、成稿、绘图和提交能力。用户明确的例外与保留要求优先。
 
 ## 最终目录
 
-新调研目录必须以主题为第一级，按“主题／对象类型／对象或对比专题”保存到 `<theme>/<type>/<target>/`，不增加 reports 或 plans 作为调研资料的顶层目录。已有报告原地续查，不自动迁移；新建目录及用户指定的新输出位置同样遵循本规则。一个叶子目录对应一份明确调研，不因组织名自动生成调研对象。主报告名默认 report.md，用户明确指定时通过 outline.delivery.report 记录其他根目录 Markdown 文件名。
+项目根目录分为两类正式成果；内部继续采用“主题／类型／对象或专题”的目录和命名要求：
+
+| 成果与入口 | 正式报告 | 当前主题计划 |
+| --- | --- | --- |
+| 对象调研，research | `research-reports/<theme>/<type>/<target>/report.md` | `research-reports/<theme>/plan.md` |
+| 分析洞察，research-analysis | `analysis-reports/<theme>/analysis/<subject>/report.md` | `analysis-reports/<theme>/plan.md` |
+
+下文 `<report-root>` 按实际类型取 research-reports 或 analysis-reports。前者只创建 paper、open-source、product、benchmark 报告，后者只创建 analysis 报告。一个叶子目录对应一份独立交付，不因组织名自动生成对象；同类型比较仍是一份报告。主文件默认 report.md，自定义根目录 Markdown 文件名通过 outline.delivery.report 登记。
 
 ```text
-<theme>/<type>/<target>/
+<report-root>/<theme>/<type>/<target>/
 ├── report.md
 ├── references/
-│   ├── sources.md           # 来源链接、日期、版本、访问限制
-│   └── <article>.md         # 本次实际使用且允许保留的参考文章
+│   ├── sources.md           # 来源、日期、版本、访问限制
+│   └── <article>.md         # 实际使用且允许保留的原文
 └── assets/
     └── <image>              # 报告实际引用的图片
 ```
 
-这是通用报告目录模板，只在有内容时创建子目录，不用空文件占位。短报告可将来源索引写入 report.md；复杂报告可有被主报告链接的 Markdown 补充报告或术语表。来源文章的名称可使用可读标题，项目与对象 id 则使用稳定 slug。
+这是通用叶子目录模板。参考资料与图片按内容创建，不用空文件占位；两个报告根目录可保留说明用途的 README.md。短报告可将来源索引写入主文件；有需要时可附被主报告链接的 Markdown 补充报告或术语表。现有旧位置报告可原地更新与恢复任务，不因新规则重新核实证据；迁移必须在用户明确范围内处理报告、引用、计划和临时任务的实际路径，不能仅移动目录留下断链。
 
 ### 目录命名
 
-- 主题、对象和专题目录统一采用有含义的英文 slug：小写英文字母、数字、连字符，如 `agent-memory`、`openjiuwen`、`compare-memory-methods`。不直接把普通中文研究标题作为目录名；中文标题保留在计划和报告正文。
-- 已知产品、项目等的正式名称本身为中文时，对象目录可保留正式中文名称，如 `coding-agent/product/扣子/`，不将该例外扩大到一般中文主题或描述性标题。通过 `--native-target-name` 明确声明中文正式名称，并保留来源依据；内部 item.id 仍使用稳定英文标识。
-- survey 论文属于 paper，单篇对象目录使用 `survey-<paper-id>`，如 `agent-memory/paper/survey-agent-memory/report.md`；多篇 survey 比较使用 `compare-survey-<slug>`。已有目录原地维护，不自动迁移。
-- 英文名称中的空格和下划线由创建工具规范为连字符。目录名不含路径分隔符、系统保留名或任意标点，长度不超过 64 字符。
-- 单对象使用 `--item <english-id>=<显示名称>` 或 `--target <english-slug>`；中文标题的对比调研通过 `--target` 指定英文专题名，工具按需加 `compare-`。不得自动将通用中文标题当作目录，也不臆造名称的官方英文译名。
+- theme、target 和 subject 通常使用有含义的英文 slug：小写英文字母、数字、连字符，如 agent-memory、openjiuwen、compare-memory-methods；中文标题保留在正文。
+- 正式名称本身为中文的产品或项目可声明对象目录例外，如 `research-reports/coding-agent/product/扣子/`。使用 `--native-target-name`，保留来源依据；内部 item.id 仍用稳定英文标识，不将例外扩大到一般中文研究标题。
+- survey 论文属于 paper，单篇目录使用 `survey-<paper-id>`，如 `research-reports/agent-memory/paper/survey-agent-memory/report.md`；多篇比较使用 `compare-survey-<slug>`。
+- 英文名称的空格和下划线由创建工具规范为连字符；目录名不含路径分隔符、系统保留名或任意标点，不超过 64 字符。
+- 单对象使用 `--item <english-id>=<显示名称>` 或 `--target <english-slug>`。比较专题按需加 compare-；不自动把通用中文标题当作目录，也不臆造官方英文译名。
 
 ### 类型与主题归类
 
-- type 使用 `paper`（论文）、`open-source`（开源项目）、`product`（产品）、`benchmark`（评测）、`analysis`（分析洞察）。前四类按实际对象选择；analysis 用于依据已有调研输出形成主题／问题分析洞察，贡献者思考可选，不作为跨类型兜底。
-- theme 是领域或问题分类，例如 `agent-memory`、`agent-orchestration`、`coding-agent`。优先沿用已有主题名，避免同义目录；通过 create 的 `--theme` 传入。上下文无法确定时用 `general`，不为目录分类阻断已明确的研究任务。
-- 单对象 target 优先使用明确提供的英文对象 id；未提供对象 id 时使用英文标题的 slug，中文标题另传英文 `--target` 或声明正式中文名称例外。同类型比较仍归入该类型，target 为 `compare-<english-slug>`；跨类型对象分别复用已有成果或针对缺口补查；基于已有成果的主题分析洞察独立归入 `analysis`。分类主题不替代研究问题，`--topic` 仍是调研标题。
-- 对比报告包含多个对象的分析，不自动复制成多份单对象报告。已有独立报告可互相引用；同一对象跨主题研究时保留各自范围，避免复制同一内容。
-- 用户指定的新 `--output` 必须匹配 `<theme>/<type>/<target>` 及命名规则；明确指定已有报告时可原地维护，不为分类规则自动搬迁。调整分类目录不表示原证据已重新核实。
+- research 的 type 为 paper（论文）、open-source（开源项目）、product（产品）、benchmark（评测）；research-analysis 独立使用内部类型 analysis（分析洞察）。输入报告保留原类型，是分析依据，不是混合 analysis items。
+- theme 表示领域或问题分类，通过 `--theme` 传入，优先沿用已有名称；无法确定时用 general。两边可使用同一主题 slug，但计划与任务编号分别属于各自根目录。
+- target／subject 优先使用明确的英文对象或主题标识。同类型多对象比较使用 compare-；跨类型对象分别复用成果或补查，综合分析交给独立分析入口。
+- 用户指定的新 `--output` 必须匹配 `<report-root>/<theme>/<type>/<target>` 及类型对应根目录；旧报告位置可原地维护，新报告不能继续创建到项目根的旧主题目录。
+- 分析洞察可跨目录采用既有报告，正文使用相对链接，来源登记使用项目根相对的 repo: 路径与实际散列。不得为分析复制整份基础调研或伪造新的验证日期。
 
 ```text
 项目根目录/
-├── agent-memory/paper/<paper-id>/report.md
-├── agent-orchestration/open-source/<project-id>/report.md
-├── coding-agent/product/<product-id>/report.md
-├── agent-evaluation/benchmark/<benchmark-id>/report.md
-└── agent-memory/analysis/<subject-slug>/report.md
+├── research-reports/
+│   ├── agent-memory/paper/<paper-id>/report.md
+│   ├── agent-orchestration/open-source/<project-id>/report.md
+│   ├── coding-agent/product/<product-id>/report.md
+│   └── agent-evaluation/benchmark/<benchmark-id>/report.md
+└── analysis-reports/
+    └── agent-memory/analysis/<subject>/report.md
 ```
 
-文档、配置和命令输出使用相对路径，命令默认从项目根执行。项目文件路径相对于项目根，报告中的文章和图片链接相对于当前 Markdown 文件。脚本执行时解析路径以检查范围，不把机器盘符或用户目录写入新任务配置。
+命令默认从项目根执行，项目文件路径相对于项目根，正文链接相对于当前 Markdown；脚本解析后的机器绝对路径不写回持久配置。
 
 ## 主题计划的保存与收口
 
-主题级计划是长期项目资料，新建时放在项目根的 `<theme>/plan.md`，与该主题的各类型调研目录并列。同一主题只维护一份当前计划，跨 paper／open-source／product／benchmark／analysis 共用；与报告的 classification.theme 对齐主题标识，但 general 这类目录标签不自动代表需要一份主题计划。已有旧位置继续原地维护，不能为统一布局迁移既有资料。维护步骤见 [主题计划维护](theme-planning.md)，正文见 [计划模板](theme-plan-template.md)。
+两个入口使用同一计划模板与维护规则，但分别维护 `research-reports/<theme>/plan.md` 和 `analysis-reports/<theme>/plan.md`。research 计划只列对象调研与补查，analysis 计划只列分析主题或问题；跨入口依赖登记对应计划／报告路径、版本、所需主张与接受条件，不复制为两份同范围计划。只有实际需要计划时才创建，单次任务不因 general 分类自动生成主题计划。旧位置计划继续维护，不复制出第二份当前计划。
 
 ```text
-项目根目录/
-└── <theme>/
-    ├── plan.md                           # 唯一主题计划，持续更新并长期保留
-    ├── .tmp/<draft-id>/                  # 仅在确需计划编辑中间文件时创建
-    ├── paper/<paper-id>/
-    │   ├── report.md
-    │   ├── references/
-    │   ├── assets/
-    │   └── .tmp/<run-id>/
-    ├── open-source/<project-id>/report.md
-    ├── product/<product-id>/report.md
-    ├── benchmark/<benchmark-id>/report.md
-    └── analysis/<subject-slug>/report.md
+<report-root>/<theme>/
+├── plan.md                  # 本入口本主题唯一当前计划
+├── .tmp/<draft-id>/          # 确需计划编辑中间文件时使用
+└── <type>/<target>/
+    ├── report.md
+    ├── references/
+    ├── assets/
+    └── .tmp/<run-id>/
 ```
 
-目录按需创建，不生成空草稿目录或示例对象。主题计划不另存归档快照，不创建主题 archive/ 或日期／修订号副本。阶段收口、范围调整、主题结束和恢复都直接更新同一份 plan.md，按主题维护规则记录 revision、日期、变更原因、成果及缺口；历史版本通过已有 Git 记录追溯。计划应纳入版本管理，但创建／更新不自动执行 Git 提交、推送或发布。
+计划不另存归档快照、不创建主题 archive/ 或日期／修订号副本。阶段收口、范围调整、结束与恢复直接更新当前 plan.md，记录 revision、日期、原因、成果及缺口；历史通过 Git 追溯，保存不自动提交或推送。
 
-计划中的所有实际文件链接相对于计划文件；预期报告的项目相对路径可先用行内代码记录，文件存在后再转为链接。例如 `<theme>/plan.md` 链接同主题论文报告用 `paper/<paper-id>/report.md`。计划不得链接 .tmp 内容。
+计划内链接相对于该计划；预期路径先用行内代码，文件存在后再转为链接。同根目录下论文用 `paper/<paper-id>/report.md`；分析计划引用同主题论文用 `../../research-reports/<theme>/paper/<paper-id>/report.md`（从 `analysis-reports/<theme>/plan.md` 出发）。计划不链接 .tmp 内容。
 
 ### 收口与恢复
 
@@ -103,32 +107,27 @@
 
 ## 中间资料
 
-本次主动创建的中间文件统一放在对应调研目录的 `.tmp/<run-id>/`；即 `<theme>/<type>/<target>/.tmp/<run-id>/`。每次调研独立一个任务目录，不集中到项目根，也不散落在报告正文旁、桌面或系统临时目录。完整目录模板如下：
+本次主动创建的中间文件统一放在对应调研目录的 `.tmp/<run-id>/`；即 `<report-root>/<theme>/<type>/<target>/.tmp/<run-id>/`。每次调研独立一个任务目录，不集中到项目根，也不散落在报告正文旁、桌面或系统临时目录。完整目录模板如下：
 
 ```text
-.
-├── <theme>/
-│   └── <type>/
-│       └── <target>/
-│           ├── report.md
-│           ├── references/
-│           ├── assets/
-│           └── .tmp/
-│               └── <run-id>/
-│                   ├── owner.json
-│                   ├── outline.json
-│                   ├── articles.json # 文章获取、核对及归档清单
-│                   ├── fields.json # full 模式
-│                   ├── notes.md    # light 模式，full 按需
-│                   ├── results/
-│                   ├── sources/
-│                   ├── code/
-│                   ├── scratch/
-│                   ├── baseline/
-│                   ├── progress.json
-│                   ├── scope/       # 已关联主题时的本次范围快照
-│                   └── verified.json
-└── .gitignore              # 包含 .tmp/，忽略所有层级临时目录
+<report-root>/<theme>/<type>/<target>/
+├── report.md
+├── references/
+├── assets/
+└── .tmp/<run-id>/
+    ├── owner.json
+    ├── outline.json
+    ├── articles.json          # 获取、核对及归档清单
+    ├── fields.json            # full 模式
+    ├── notes.md               # light 必需，full 按需
+    ├── results/
+    ├── sources/
+    ├── code/
+    ├── scratch/               # 含图片下载尝试，避免重复深层路径
+    ├── baseline/
+    ├── progress.json
+    ├── scope/                 # 本轮执行范围
+    └── verified.json
 ```
 
 临时子目录同样按需创建。owner、outline 和必要的 fields／results 由工具建立，其余由执行调研的代理写到当前任务内。工作目录创建、归属验证和恢复使用 [任务管理](task-management.md)，配置见 [research-config.md](research-config.md)。不要把克隆仓库及其 `.git` 混进最终报告。系统已有缓存和用户原始资料不属于本次临时文件，不搬移或删除。原项目根临时目录和旧系统临时任务兼容读取，不自动迁移。报告检查、文件散列和更新基线都排除该报告根下的 .tmp/，不递归扫描或备份临时资料；最终报告不得链接其中的文件，以免清理后断链。
@@ -144,7 +143,7 @@
 3. 手工复查来源、版本、论证与类型检查清单。结构有效与调研完成度分开检查：partial 可以带明确缺口交付，blocked 不宣称完成也不清理工作资料。脚本不访问远程 URL，也不能证明结论正确。
 4. 最终副本检查通过并完成人工复核后，先同步关联主题计划的成果、状态和缺口，再运行 research_task.py cleanup-plan。向用户列出待删任务相对路径、文件数、占用空间、将保留的报告目录及长期主题计划，以及仍需续查的情况，取得针对该范围的明确确认。检查通过本身不代表批准删除；不以超时、无回复或一般调研授权代替确认。
 5. 确认后及时执行：先重新运行 cleanup-plan，对照已确认的 plan_id，核对实际目标仍是同一受管任务目录。内容或范围变化时先解释变化并取得新确认；没有变化时直接按原确认清理，不再重复询问。Windows 使用原生 PowerShell 删除精确任务目录，随后检查该目录已不存在、报告仍保留；如被占用或操作失败，当轮说明实际残留原因，不把“计划清理”报告成“已清理”。
-6. cleanup-plan 只做检查，不执行删除；eligible 表示满足技术检查条件，requires_confirmation 明确仍需用户确认。plan_id 绑定任务归属、报告回执及临时文件清单、大小和修改时间，不是授权凭据。实际删除限于核对过的 `<theme>/<type>/<target>/.tmp/<run-id>/`，不能递归删除其 `.tmp/` 父目录或整个调研目录，其他任务继续保留。旧布局任务仍按其已验证的精确目录处理。
+6. cleanup-plan 只做检查，不执行删除；eligible 表示满足技术检查条件，requires_confirmation 明确仍需用户确认。plan_id 绑定任务归属、报告回执及临时文件清单、大小和修改时间，不是授权凭据。实际删除限于核对过的 `<report-root>/<theme>/<type>/<target>/.tmp/<run-id>/`，不能递归删除其 `.tmp/` 父目录或整个调研目录，其他任务继续保留。旧布局任务仍按其已验证的精确目录处理。
 7. 最终目录中意外多出的本次生成文件可按已授权规范清理。已有用户文件不因“不符合目录规则”就擅自删除；明确报告冲突，保留用户指定内容。
 8. 保留用户可见的成果路径与重要资料缺口。不默认提交 Git、推送或发布。
 
