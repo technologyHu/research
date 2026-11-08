@@ -7,6 +7,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawn } from 'node:child_process';
 import { gunzipSync } from 'node:zlib';
+import { patchPlanDescription } from './patch-skill-metadata.mjs';
 
 export const skillRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const runtimeRoot = path.join(skillRoot, 'runtime');
@@ -149,6 +150,10 @@ export async function bootstrap({ forceProbe = false } = {}) {
         env: { ...process.env, ONNXRUNTIME_NODE_INSTALL: process.env.ONNXRUNTIME_NODE_INSTALL || 'skip' },
       });
       await writeFile(path.join(runtimeRoot, '.npm-install.log'), result.stdout + result.stderr);
+    }
+    // npm ci restores upstream metadata; also repair already-ready local installations.
+    if (await patchPlanDescription(path.dirname(installedPackage))) {
+      log('Applied the gitnexus-plan description compatibility fix.');
     }
     const changed = await installExtensions(manifest);
     if (changed || forceProbe || ready.fingerprint !== fingerprint) {

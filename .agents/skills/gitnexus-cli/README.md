@@ -10,6 +10,8 @@ node .agents/skills/gitnexus-cli/scripts/gitnexus.mjs doctor
 
 首次调用会用 `npm ci` 安装锁定的依赖，校验并解压仓库自带的 FTS / VECTOR 扩展，然后实际创建索引并执行全文查询和最近邻查询。后续调用复用本机缓存；损坏的扩展会从仓库副本恢复。初始化日志写入 stderr，MCP 的 stdout 保留给协议。
 
+入口在安装依赖后及复用已有环境时，都会执行 `scripts/patch-skill-metadata.mjs`：仅将上游 `gitnexus-plan` 描述中的示例路径 `docs/plans/<plan>.md` 改为 `docs/plans/plan-file.md`，满足技能格式校验，不修改正文。重新初始化后会再次应用，无需手工编辑 `runtime/node_modules`；遇到其他含尖括号的描述时报告错误，留待核对上游变更。
+
 前提是安装 Git、带 npm 的 Node.js 22.18+（22.x）或 24.11+，首次使用可访问配置的 npm registry。扩展文件本身无需联网下载，也不需要 GitHub Token、API Key、管理员权限或固定代理。可使用自己的 npm mirror / proxy 配置；仓库不保存任何个人代理地址。
 
 ## 分析与检索
@@ -43,9 +45,10 @@ node .agents/skills/gitnexus-cli/scripts/gitnexus.mjs mcp
 
 ```sh
 node .agents/skills/gitnexus-cli/scripts/gitnexus.mjs --verify-runtime
+node --test .agents/skills/gitnexus-cli/scripts/test-skill-metadata.mjs
 node .agents/skills/gitnexus-cli/scripts/test-bootstrap.mjs
 ```
 
-第二条命令建立临时 Git 仓库并真正 clone 到含空格的新路径，隔离用户 HOME，首次安装依赖，检查 FTS / VECTOR 查询，并验证篡改压缩包会被拒绝。不会扫描或更改当前项目的源码。
+第二条命令验证描述修复的范围、重复执行及未知格式的失败行为。第三条命令建立临时 Git 仓库并真正 clone 到含空格的新路径，隔离用户 HOME，首次安装依赖，检查 FTS / VECTOR 查询，验证首次安装、缓存复用和重新初始化后的技能描述，并确认篡改压缩包会被拒绝。不会扫描或更改当前项目的源码。
 
 提交时包含三个技能目录、脚本、锁文件以及 `vendor/`。不要提交 `runtime/node_modules`、就绪标记、个人缓存或分析索引。改版本时必须同时更新 npm 锁、扩展 ABI 与校验和，并重跑验证。
