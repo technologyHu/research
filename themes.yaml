@@ -44,3 +44,8 @@ themes:
     slug: personal-agent
     name: Personal Agent
     parent: null
+  - id: organization-agent
+    slug: organization-agent
+    name: 组织 Agent
+    parent: null
+    aliases: [组织agent]
