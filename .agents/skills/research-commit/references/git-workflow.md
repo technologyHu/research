@@ -19,8 +19,11 @@
 
 研究一致性 verify 与 Git 交付检查负责不同内容：前者验证本次工作资料与报告，后者验证实际提交的文件版本及其依赖是否齐全。
 
+每个候选先按 [提交前检查](pre-commit-checks.md) 核对单篇归属、清理状态、目录命名与身份，再做下面的快照检查。普通提交和 amend 都适用；轻量检查默认只读本地资料，不扩展为新调研。
+
 - **普通索引提交**：候选为当前索引的 `git write-tree`。**暂存版本隔离**：候选为上节临时索引的 tree。**工作区 `--only` 提交**：先用临时索引从当前 HEAD 起步，仅对选中文件执行 `git --literal-pathspecs add -- <files>`，再 write-tree；实际提交前保持这些文件及相关 Git attributes／过滤器配置不变。
 - 用 `git diff-tree --no-commit-id --name-status -r -z <base> <candidate-tree>` 核对完整变更范围。新提交的 base 为起始 HEAD；amend 的最终范围用原 HEAD 的父提交比较，同时与原 HEAD 比较本次新增修订。根提交按空树基线处理，不引用不存在的 `HEAD^`。发生 rename 展示时保留两个路径，不按显示文本截断。
+- 对同一 base 与 candidate-tree 执行 `git diff --check <base> <candidate-tree>`，处理差异中的空白错误和冲突标记；此命令不证明目录、归属或引用正确，仍需逐项核对清单。
 - 从候选 tree 读取文件到隔离目录，保持仓库相对布局。可用 `git ls-tree -r -z <tree>` 得到路径及对象号，再用 `git cat-file blob <object-id>` 读取内容；不能从原工作区复制文件来冒充候选版本。检查落盘路径仍在该临时目录内，不跟随外部符号链接，不执行快照内的脚本、Git 钩子、过滤器或安装流程。
 - 对默认 `report.md` 交付可运行当前可信技能目录中的 `research-common/scripts/validate_report.py <snapshot-report-dir>`，检查候选中的 Markdown 和本地链接；不传 outline 时只代表文件检查。自定义主文件、已登记额外交付或平台特殊文件需按实际交付配置补充检查，不修改候选文件或虚构 outline 来让默认检查通过。
 - 报告引用的来源文章、补充报告、附件，以及计划中的实际成果链接，都以候选 tree 中的持久文件为准。工作区有而候选没有时，按用户授权补齐对应版本或保留缺口并暂缓，不能在“只提交暂存内容”模式自动 add 未暂存资源。

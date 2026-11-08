@@ -1,3 +1,3 @@
 interface:
   display_name: "调研报告提交"
-  short_description: "独立提交调研与分析洞察报告，按篇组织提交并尽量合并同篇本地修订"
+  short_description: "提交前轻量检查清理状态、目录命名和候选版本，再按篇提交调研与分析洞察报告"
