@@ -25,7 +25,7 @@ from markdown_it import MarkdownIt
 import yaml
 
 TYPES = {"paper": "论文", "open-source": "开源项目", "product": "产品",
-         "benchmark": "评测", "analysis": "分析判断"}
+         "benchmark": "评测", "analysis": "分析洞察"}
 COLORS = {"theme": "#b0a0ff", "paper": "#ffbe75",
           "open-source": "#57deca", "product": "#75acff", "benchmark": "#f78dc1",
           "analysis": "#c7a3ff", "unknown": "#9aaac6"}

@@ -9,7 +9,7 @@ window.RESEARCH_GRAPH = {
     "open-source": "开源项目",
     "product": "产品",
     "benchmark": "评测",
-    "analysis": "分析判断"
+    "analysis": "分析洞察"
   },
   "colors": {
     "theme": "#b0a0ff",

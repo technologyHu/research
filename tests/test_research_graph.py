@@ -80,7 +80,7 @@ updated_at: 2026-11-06
         graph = self.build()
         self.assertEqual(graph["stats"], {"themes": 1, "reports": 2, "types": 2, "objects": 2})
         self.assertEqual({n["type"] for n in graph["nodes"] if n["kind"] == "object"}, {"paper", "analysis"})
-        self.assertEqual(graph["types"]["analysis"], "分析判断")
+        self.assertEqual(graph["types"]["analysis"], "分析洞察")
         self.assertNotIn("topic", graph["types"])
 
     def test_only_explicit_report_links_and_not_code_links(self):

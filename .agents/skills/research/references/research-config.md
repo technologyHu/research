@@ -145,11 +145,11 @@ input_fingerprint 只绑定问题与范围。实际依赖已登记参考文章�
 
 evidence 可填写非空 supports 与 conditions 来解释主张和支持条件。字段发生证据冲突时增加 conflicts 数组，完整结构和处理规则见 [证据规范](evidence-policy.md#来源冲突)。未解决冲突要求该字段 unknown；resolved 也保留双方记录与 rationale，报告不能只引用被采纳来源。
 
-## 分析判断引用已有报告
+## 分析洞察引用已有报告
 
-`analysis` 任务的对象是待分析的问题，输入报告作为来源，不把不同类型来源作为混合 items。任务目标、用户硬约束、偏好与贡献者假设属于输入，不直接建立为待证实的事实字段，也不为其编造 URL。影响判断的输入应落实到 goal／time_range 或相关字段描述，使现有范围指纹覆盖其含义；notes.md 保留原文、提供者及采用条件。现实性能、成本等事实声明仍按公共证据要求处理。
+`analysis` 任务的对象是待分析的主题或问题，输入报告作为来源，不把不同类型来源作为混合 items。任务目标、样本范围、可选的用户约束／偏好与贡献者假设属于输入，不直接建立为待证实的事实字段，也不为其编造 URL。影响分析结论的输入应落实到 goal／time_range 或相关字段描述，使现有范围指纹覆盖其含义；notes.md 保留原文、提供者及采用条件。现实性能、成本等事实声明仍按公共证据要求处理。
 
-full 的 fields 只列需要核查或推导的主张；最小分析可只有 judgment，以 inferred 的 reason 解释依据、条件和推导，evidence 指向真实支持的来源事实。报告章节、来源清单和贡献者观点不必各建一个字段。输入改变时按正常范围变更规则复核，不仅更新 notes；light 沿用 assessment 与 notes，无需为此增加新配置格式。
+full 的 fields 只列需要核查或推导的主张；新任务的最小分析可只有 insight，以 inferred 的 reason 解释综合过程、依据、假设和边界，evidence 指向真实支持的来源事实。judgment 继续用于取舍类及既有任务，不迁移历史字段。报告章节、来源清单和贡献者观点不必各建一个字段。输入改变时按正常范围变更规则复核，不仅更新 notes；light 沿用 assessment 与 notes，无需为此增加新配置格式。
 
 repo: 的限制仅针对项目内本地报告引用，原始论文、官方文档等外部 HTTP(S) 来源仍使用公共 sources 结构。采用项目内持久报告时，在 full 的 sources 或 light 的 assessment.sources 中记录：
 

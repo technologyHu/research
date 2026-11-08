@@ -175,7 +175,7 @@ def validate(outline_path, fields_path, results_dir=None, item_ids=None, progres
         require(isinstance(item.get("name"), str) and bool(item["name"].strip()), f"{key}: name is required")
         item_type = item.get("type", outline.get("object_type"))
         require(isinstance(item_type, str) and item_type in TYPES, f"{key}: invalid type")
-        require((outline.get("object_type") == "analysis") == (item_type == "analysis"), f"{key}: analysis tasks must use analysis questions, not source objects")
+        require((outline.get("object_type") == "analysis") == (item_type == "analysis"), f"{key}: analysis tasks must use analysis subjects or questions, not source objects")
         require(item.get("version") is None or isinstance(item.get("version"), str), f"{key}: version must be a string or null")
     require(len({item.get("type", outline.get("object_type")) for item in item_map.values() if isinstance(item.get("type", outline.get("object_type")), str)}) <= 1,
             "Different object types require separate tasks; use prior reports as analysis sources")

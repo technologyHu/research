@@ -19,7 +19,7 @@ description: 深入调研一篇或多篇论文，分析研究问题、方法、�
 
 ## Survey 论文
 
-survey 仍为 `paper`，单篇对象目录使用 `survey-<paper-id>`；多篇 survey 比较可使用 `compare-survey-<slug>`。按 [survey 阅读规范](references/survey.md) 设计问题与成稿，不要求综述具备原创算法、实验或复现代码。贡献者基于多份既有成果形成的分析判断另归 analysis。
+survey 仍为 `paper`，单篇对象目录使用 `survey-<paper-id>`；多篇 survey 比较可使用 `compare-survey-<slug>`。按 [survey 阅读规范](references/survey.md) 设计问题与成稿，不要求综述具备原创算法、实验或复现代码。基于既有调研输出形成的主题分析洞察另归 analysis，贡献者观点可选。
 
 ## 按阶段读取
 

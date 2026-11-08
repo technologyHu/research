@@ -13,34 +13,49 @@ from test_task_workflow import task, context, results, reports
 class AnalysisWorkflow(unittest.TestCase):
     setUp = fixtures.TaskWorkflow.setUp
 
-    def analysis(self, depth="standard"):
+    def analysis(self, depth="standard", field_id="judgment"):
+        thematic = field_id == "insight"
         adopted = self.workspace / "agent-memory/paper/survey-memory/report.md"
         adopted.parent.mkdir(parents=True, exist_ok=True)
         adopted.write_text("# 综述论文调研\n\n## 分类体系\n\n已核对的论文分类与限制。\n", encoding="utf-8")
         source = {"id": "prior", "title": "已有论文调研", "url": "repo:agent-memory/paper/survey-memory/report.md",
                   "kind": "secondary", "version": "2026-11-07", "accessed_at": "2026-11-07",
                   "sha256": hashlib.sha256(adopted.read_bytes()).hexdigest(), "locator": "分类体系"}
-        job = task.create_task(self.workspace, "记忆服务取舍", "analysis", theme="agent-memory",
-                               target="memory-selection", depth=depth, fields=["judgment=什么条件下需要独立记忆服务？"])
+        sources = [source]
+        citations = "根据[已有调研](../../paper/survey-memory/report.md#分类体系)，在给定约束下作条件性判断。"
+        if thematic:
+            project_report = self.workspace / "agent-memory/open-source/library/report.md"
+            project_report.parent.mkdir(parents=True, exist_ok=True)
+            project_report.write_text("# 开源实现调研\n\n## 机制\n\n内嵌部署中包含存储、检索与应用触发的更新。\n", encoding="utf-8")
+            sources.append({"id": "project", "title": "已有项目调研", "url": "repo:agent-memory/open-source/library/report.md",
+                            "kind": "secondary", "version": "fixture-v1", "accessed_at": "2026-11-07",
+                            "sha256": hashlib.sha256(project_report.read_bytes()).hexdigest(), "locator": "机制"})
+            citations = "综合[论文调研](../../paper/survey-memory/report.md#分类体系)与[实现调研](../../open-source/library/report.md#机制)，解释这些样本的部署形式与生命周期机制之间的关系，保留覆盖限制。"
+        topic = "记忆架构的分析洞察" if thematic else "记忆服务取舍"
+        question = "这些样本的架构机制有哪些联系与差异？" if thematic else "什么条件下需要独立记忆服务？"
+        job = task.create_task(self.workspace, topic, "analysis", theme="agent-memory",
+                               target="memory-architecture-insights" if thematic else "memory-selection",
+                               depth=depth, fields=[field_id + "=" + question])
         work, _, outline = task.open_task(job["work_dir"])
         if depth == "brief":
-            (work / "notes.md").write_text("已有事实、贡献者假设及有条件推导，均记录采用范围。\n", encoding="utf-8")
+            notes = "从已有成果综合样本中的架构联系与差异，没有预设的贡献者观点或选型偏好。\n" if thematic else "已有事实、贡献者假设及有条件推导，均记录采用范围。\n"
+            (work / "notes.md").write_text(notes, encoding="utf-8")
             outline["assessment"] = {"input_fingerprint": context.light_fingerprint(outline), "status": "complete",
-                                     "version": None, "core_gaps": [], "sources": [source]}
+                                     "version": None, "core_gaps": [], "sources": sources}
             task.write_json(work / "outline.json", outline)
         else:
             item = outline["items"][0]
             field = results.load_document(work / "fields.json")["fields"][0]
             data = {"schema_version": 2, "item_id": item["id"], "type": "analysis", "version": None,
-                    "sources": [source], "fields": {"judgment": {
+                    "sources": sources, "fields": {field_id: {
                         "input_fingerprint": results.input_fingerprint(outline, item, field),
-                        "status": "inferred", "value": "在给定隔离约束下，独立服务可能值得采用。",
-                        "reason": "已有调研事实与本次场景约束共同支持条件性判断。",
-                        "evidence": [{"source_id": "prior", "locator": "分类体系"}]}}}
+                        "status": "inferred", "value": "样本中的部署形式与记忆生命周期机制需要分别考察。" if thematic else "在给定隔离约束下，独立服务可能值得采用。",
+                        "reason": "将综述的分类视角与已核对的实现机制对照，提出仅适用于这些样本的解释。" if thematic else "已有调研事实与本次场景约束共同支持条件性判断。",
+                        "evidence": [{"source_id": entry["id"], "locator": entry["locator"]} for entry in sources]}}}
             task.write_json(work / "results" / f"{item['id']}.json", data)
         report = Path(outline["output_dir"]) / "report.md"
         note = context.render_report_note(context.report_context(work / "outline.json"))
-        report.write_text("# 分析判断\n\n" + note + "\n## 判断\n\n根据[已有调研](../../paper/survey-memory/report.md#分类体系)，在给定约束下作条件性判断。\n", encoding="utf-8")
+        report.write_text("# 分析洞察\n\n" + note + "\n## 核心发现\n\n" + citations + "\n", encoding="utf-8")
         return work, outline, report, adopted
 
     def test_full_and_light_analysis_cite_local_reports_without_copying_them(self):
@@ -63,6 +78,20 @@ class AnalysisWorkflow(unittest.TestCase):
         adopted.write_text(adopted.read_text(encoding="utf-8") + "新版本改变了结论。\n", encoding="utf-8")
         with self.assertRaisesRegex(ValueError, "Adopted report changed"):
             task.verify_task(work)
+
+    def test_theme_insight_without_contributor_viewpoints_keeps_one_analysis_subject(self):
+        for depth in ("standard", "brief"):
+            with self.subTest(depth=depth):
+                work, outline, report, _ = self.analysis(depth, field_id="insight")
+                self.assertTrue(task.verify_task(work)["verified"])
+                self.assertEqual(outline["mode"], "single")
+                self.assertEqual(len(outline["items"]), 1)
+                self.assertEqual(outline["classification"]["type"], "analysis")
+                self.assertTrue(reports.validate(outline["output_dir"])["valid"])
+                if depth == "standard":
+                    data = json.loads(next((work / "results").glob("*.json")).read_text(encoding="utf-8"))
+                    self.assertEqual(set(data["fields"]), {"insight"})
+                    self.assertEqual(len(data["sources"]), 2)
 
     def test_adopted_report_references_survive_project_relocation(self):
         work, _, _, _ = self.analysis()

@@ -1,4 +1,4 @@
 interface:
-  display_name: "分析判断"
-  short_description: "基于已有调研成果与贡献者思考，形成可追溯的技术分析、取舍与判断"
-  default_prompt: "使用 $research-analysis，基于已有调研与我提供的观点分析这个技术问题，明确判断标准，说明依据、推导、取舍、置信理由和结论反转条件。"
+  display_name: "分析洞察"
+  short_description: "基于已有调研，围绕主题或问题综合分析，提炼有依据的关联、机制与洞察"
+  default_prompt: "使用 $research-analysis，基于已有调研输出，围绕这个主题或问题形成分析／洞察报告，说明核心发现、分析依据、意义、边界与未解决问题。"

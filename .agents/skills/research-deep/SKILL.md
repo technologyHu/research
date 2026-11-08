@@ -5,7 +5,7 @@ description: 执行论文、开源项目、产品或评测的对象调研与针�
 
 # Research Deep：执行调研
 
-本技能执行 `paper`、`open-source`、`product`、`benchmark` 的对象调研。收到 analysis 判断任务时，沿用目标与上下文交给 [research-analysis](../research-analysis/SKILL.md)，不把它转成一轮资料搜集。来自分析的基础补查只执行已说明的问题与接受条件，结果返回原分析任务；需要时按 [执行交接](../research/references/routing.md#执行交接与基础补查) 补齐范围。
+本技能执行 `paper`、`open-source`、`product`、`benchmark` 的对象调研。收到 analysis 主题／问题分析任务时，沿用目标与上下文交给 [research-analysis](../research-analysis/SKILL.md)，不把它转成一轮资料搜集。来自分析的基础补查只执行已说明的问题与接受条件，结果返回原分析任务；需要时按 [执行交接](../research/references/routing.md#执行交接与基础补查) 补齐范围。
 
 1. 按 [任务管理](../research/references/task-management.md) list/show 定位任务，没有计划时先执行 [research](../research/SKILL.md) 的规划。多个匹配任务不要自动取第一项。
    先按 [已有成果核对](../research/references/routing.md#已有成果核对与复用) 确定本轮仍有效的证据与实际缺口，保留原来源和日期，仅补查未覆盖或已失效部分。

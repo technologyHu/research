@@ -10,11 +10,11 @@
 | open-source | 发起／维护主体、维护者、项目支持、治理与下游 | [开源项目标准](../../research-open-source/references/selection-criteria.md#计划中的背景字段) |
 | product | 运营公司、核心团队、适用的融资／母公司支持及客户关系 | [产品标准](../../research-product/references/selection-criteria.md#计划中的背景字段) |
 | benchmark | 提出／发布／治理机构、数据与资金支持、参评及判分关系 | [评测标准](../../research-benchmark/references/selection-criteria.md#计划中的背景字段) |
-| analysis | 贡献者观点的归属、已有成果依据、立场约束与决策用途 | [分析判断标准](../../research-analysis/references/selection-criteria.md#计划中的背景字段) |
+| analysis | 分析目标、已有成果依据、样本边界与可选观点归属 | [分析洞察标准](../../research-analysis/references/selection-criteria.md#计划中的背景字段) |
 
 同一任务涉及异类对象时分对象记录。是否存在公司或投资安排按实际主体判断；不能因为分析使用跨类型成果，或任务表有资金列，就将所有对象按公司或产品调查。双重身份需要分别说明，例如开源项目的维护公司融资与该项目自身的采用数据分别记录。
 
-先完成工作性质与类型路由，再按本轮问题核查相关背景。analysis 以成果依据、观点归属、假设和推导约束为重点；来源对象已有背景仍适用时沿用原依据和日期，仅在机构、资源或利益关系实质影响当前判断时补查，不对每份输入重做一轮背景调查。
+先完成工作性质与类型路由，再按本轮问题核查相关背景。analysis 以成果依据、分析与解释目标、样本边界及实际观点归属为重点；来源对象已有背景仍适用时沿用原依据和日期，仅在机构、资源或利益关系实质影响当前判断时补查，不对每份输入重做一轮背景调查。
 
 ## 可供类型规范选用的背景线索
 

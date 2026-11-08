@@ -76,7 +76,7 @@ def validate_light(outline_path, fingerprints_only=False):
         if not isinstance(kind, str) or kind not in results.TYPES:
             errors.append("Invalid light object type")
         if (outline.get("object_type") == "analysis") != (kind == "analysis"):
-            errors.append("Analysis tasks must use analysis questions, not source objects")
+            errors.append("Analysis tasks must use analysis subjects or questions, not source objects")
         if item.get("version") is not None and not isinstance(item["version"], str):
             errors.append("Light requested version must be a string or null")
     for key in ("topic", "run_id"):

@@ -28,9 +28,9 @@
 
 ### 类型与主题归类
 
-- type 使用 `paper`（论文）、`open-source`（开源项目）、`product`（产品）、`benchmark`（评测）、`analysis`（分析判断）。前四类按实际对象选择；analysis 用于依据已有成果及贡献者思考形成判断，不作为跨类型兜底。
+- type 使用 `paper`（论文）、`open-source`（开源项目）、`product`（产品）、`benchmark`（评测）、`analysis`（分析洞察）。前四类按实际对象选择；analysis 用于依据已有调研输出形成主题／问题分析洞察，贡献者思考可选，不作为跨类型兜底。
 - theme 是领域或问题分类，例如 `agent-memory`、`agent-orchestration`、`coding-agent`。优先沿用已有主题名，避免同义目录；通过 create 的 `--theme` 传入。上下文无法确定时用 `general`，不为目录分类阻断已明确的研究任务。
-- 单对象 target 优先使用明确提供的英文对象 id；未提供对象 id 时使用英文标题的 slug，中文标题另传英文 `--target` 或声明正式中文名称例外。同类型比较仍归入该类型，target 为 `compare-<english-slug>`；跨类型对象分别复用已有成果或针对缺口补查；基于已有成果的综合判断独立归入 `analysis`。分类主题不替代研究问题，`--topic` 仍是调研标题。
+- 单对象 target 优先使用明确提供的英文对象 id；未提供对象 id 时使用英文标题的 slug，中文标题另传英文 `--target` 或声明正式中文名称例外。同类型比较仍归入该类型，target 为 `compare-<english-slug>`；跨类型对象分别复用已有成果或针对缺口补查；基于已有成果的主题分析洞察独立归入 `analysis`。分类主题不替代研究问题，`--topic` 仍是调研标题。
 - 对比报告包含多个对象的分析，不自动复制成多份单对象报告。已有独立报告可互相引用；同一对象跨主题研究时保留各自范围，避免复制同一内容。
 - 用户指定的新 `--output` 必须匹配 `<theme>/<type>/<target>` 及命名规则；明确指定已有报告时可原地维护，不为分类规则自动搬迁。调整分类目录不表示原证据已重新核实。
 
@@ -40,7 +40,7 @@
 ├── agent-orchestration/open-source/<project-id>/report.md
 ├── coding-agent/product/<product-id>/report.md
 ├── agent-evaluation/benchmark/<benchmark-id>/report.md
-└── agent-memory/analysis/<question-slug>/report.md
+└── agent-memory/analysis/<subject-slug>/report.md
 ```
 
 文档、配置和命令输出使用相对路径，命令默认从项目根执行。项目文件路径相对于项目根，报告中的文章和图片链接相对于当前 Markdown 文件。脚本执行时解析路径以检查范围，不把机器盘符或用户目录写入新任务配置。
@@ -62,7 +62,7 @@
     ├── open-source/<project-id>/report.md
     ├── product/<product-id>/report.md
     ├── benchmark/<benchmark-id>/report.md
-    └── analysis/<question-slug>/report.md
+    └── analysis/<subject-slug>/report.md
 ```
 
 目录按需创建，不生成空草稿目录或示例对象。主题计划不另存归档快照，不创建主题 archive/ 或日期／修订号副本。阶段收口、范围调整、主题结束和恢复都直接更新同一份 plan.md，按主题维护规则记录 revision、日期、变更原因、成果及缺口；历史版本通过已有 Git 记录追溯。计划应纳入版本管理，但创建／更新不自动执行 Git 提交、推送或发布。

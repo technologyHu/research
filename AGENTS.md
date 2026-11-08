@@ -7,7 +7,7 @@
 - 调研任务从 [research](.agents/skills/research/SKILL.md) 进入；成稿与交付使用 [research-report](.agents/skills/research-report/SKILL.md)。单个事实查询不自动扩展为完整调研。
 - 保存与清理规则以 [delivery-policy.md](.agents/skills/research/references/delivery-policy.md) 为唯一详细来源；修改这些规则时同步维护相关技能引用，避免在本文件复制整套流程。
 - 新报告按 `<theme>/<type>/<target>/` 保存，主文件默认 `report.md`；新主题计划位于 `<theme>/plan.md`，每个主题只维护一份当前计划，不另存归档快照。已有报告和旧位置计划原地维护，不为统一结构擅自迁移。
-- 调研类型为 `paper`、`open-source`、`product`、`benchmark`、`analysis`。survey 论文归 `paper`，对象目录以 `survey-` 标识；`analysis` 基于已有调研与贡献者思考形成判断，不作为混合类型兜底。
+- 调研类型为 `paper`、`open-source`、`product`、`benchmark`、`analysis`。survey 论文归 `paper`，对象目录以 `survey-` 标识；`analysis` 主要基于已有调研输出，围绕主题或问题形成分析洞察，贡献者思考为可选输入，不作为混合类型兜底。
 - 主题和对象目录通常使用英文 slug；正式中文对象名称等例外按交付规范处理。报告内的本地链接使用相对于当前 Markdown 的路径，持久配置不写入个人机器的绝对路径。
 - 仅将实际交付的报告、引用资料、图片和已登记附加文件保存到正式目录；单次任务的中间文件放在对应报告目录的 `.tmp/<run-id>/`。区分文件校验通过、研究完整度和实际完成的验证，不将部分结果写成完整结论。
 

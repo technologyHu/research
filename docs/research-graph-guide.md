@@ -25,7 +25,7 @@
 | `<theme>/<type>/<target>/report.md` | 与计划中明确关联的工作对应；没有对应计划项时，一个独立交付目录对应一项工作，以报告标题命名 |
 | 同一交付目录中的其他 Markdown 报告 | 需有有效的 `research-summary` 元数据；不因报告文件变多而增加工作数。若目录已有明确的计划工作关联，未登记的补充报告标为待关联，不自动作为该工作的交付；独立目录仍整体对应一项工作 |
 
-支持的类型为 `paper`、`open-source`、`product`、`benchmark`、`analysis`。计划中的工作类型由“类型／对象”字段确定；独立报告的工作类型来自其目录。类型作为工作属性，不单独插入一层分类节点。
+支持的类型为 `paper`、`open-source`、`product`、`benchmark`、`analysis`，其中 analysis 显示为“分析洞察”，对应基于已有调研的主题／问题分析报告。计划中的工作类型由“类型／对象”字段确定；独立报告的工作类型来自其目录。类型作为工作属性，不单独插入一层分类节点。
 
 目录统一采用英文 slug；正式产品、项目名称本身为中文时，其对象目录可保留中文正式名。普通中文主题和描述性研究标题不作为目录。新结构如 `agent-memory/paper/memory-method/report.md`，当前计划位于 `agent-memory/plan.md`。索引兼容读取旧 `plans/<theme>/plan.md` 和 `<type>/<theme>/<target>/`，不移动既有资料；新建内容使用主题优先结构。`docs`、`scripts`、`tests` 等辅助目录不作为主题来源。
 

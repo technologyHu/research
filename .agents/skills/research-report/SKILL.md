@@ -5,7 +5,7 @@ description: 把已有调研证据组织成中文 Markdown 单对象报告或对
 
 # Research Report：成稿与交付
 
-接收 research-deep 的对象调研证据，或 research-analysis 的成果采用记录、贡献者观点与推导，共用本流程成稿与校验。成稿发现缺口时返回原执行分支，只复核受影响范围；不把 analysis 再转成整轮对象调研，也不在成稿阶段重做来源主体背景调查。
+接收 research-deep 的对象调研证据，或 research-analysis 的成果采用记录、综合过程、核心发现与可选贡献者观点，共用本流程成稿与校验。成稿发现缺口时返回原执行分支，只复核受影响范围；不把 analysis 再转成整轮对象调研，也不在成稿阶段重做来源主体背景调查。
 
 1. 通过 [任务管理](../research/references/task-management.md) 定位计划。full 读取 fields 和结果，light 读取 notes 与 assessment；结合所选类型模板与清单成稿。更新已有报告的证据或结论时先读 [局部更新流程](../research/references/report-updates.md)，在改动前保存基线；普通文字更正直接编辑。
    组织章节时按 [自绘技术图](../research/references/writing-policy.md#自绘技术图) 在已有笔记或草稿中安排配图，证据稳定后再生成。

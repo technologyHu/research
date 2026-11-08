@@ -11,7 +11,7 @@
 | 什么情况下使用 | 使用哪个技能 |
 | --- | --- |
 | 开始或继续调研、制定计划、增补对象或问题、生成或更新报告 | [research](../.agents/skills/research/SKILL.md) |
-| 依据已有调研成果与贡献者思考，对技术问题形成分析判断或方案取舍 | [分析判断](../.agents/skills/research-analysis/SKILL.md) |
+| 基于已有调研输出，围绕主题或问题形成综合分析与洞察报告，贡献者思考可选 | [分析洞察](../.agents/skills/research-analysis/SKILL.md) |
 | 绘制架构图、流程图、方案对比图等技术图 | [画图](../.agents/skills/draw-diagram/SKILL.md) |
 | 理解代码库、模块职责、调用链，或核对设计与实现 | [代码理解](../.agents/skills/code-understanding/SKILL.md) |
 | 润色文字，减少 AI 腔并保留原意 | [去AI味](../.agents/skills/humanizer/SKILL.md) |
@@ -24,7 +24,7 @@
 | --- | --- |
 | `README.md` | 仓库入口；图谱标记区由生成器维护，区外可人工编辑 |
 | `AGENTS.md` | 仓库规则，应纳入版本管理 |
-| `.agents/skills/` | 调研、分析判断、源码理解、绘图、文章获取和报告提交技能及其依赖定义 |
+| `.agents/skills/` | 调研、分析洞察、源码理解、绘图、文章获取和报告提交技能及其依赖定义 |
 | `<theme>/plan.md` | 新主题的长期计划，记录问题、任务、依赖、成果和下一步 |
 | `<theme>/<type>/<target>/` | 一份调研的正式交付目录，主文件默认 `report.md` |
 | `<theme>/<type>/<target>/.tmp/<run-id>/` | 一轮受管调研的配置、证据、源码副本和检查记录 |
@@ -32,7 +32,7 @@
 | `scripts/`、`tests/`、`.github/workflows/` | 图谱生成、验证与发布设施 |
 | `.research-graph.json` | 图谱输入范围配置；当前排除 `.agents/**` |
 
-新建主题和对象目录通常使用英文 slug，例如 `agent-memory/paper/memory-method/report.md`。类型为 `paper`、`open-source`、`product`、`benchmark`、`analysis`；同类型比较归入相应类型。跨类型研究优先复用各类已有成果，仅对缺口分别补查；基于已有成果的分析判断归入 `analysis`。survey 论文归入 `paper`，单篇对象目录使用 `survey-<paper-id>`。正式中文产品或项目名可按交付规范声明对象目录例外。
+新建主题和对象目录通常使用英文 slug，例如 `agent-memory/paper/memory-method/report.md`。类型为 `paper`、`open-source`、`product`、`benchmark`、`analysis`；同类型比较归入相应类型。跨类型研究优先复用各类已有成果，仅对缺口分别补查；基于已有成果的主题／问题分析洞察归入 `analysis`，贡献者思考可按需提供。survey 论文归入 `paper`，单篇对象目录使用 `survey-<paper-id>`。正式中文产品或项目名可按交付规范声明对象目录例外。
 
 以上路径是布局示例，不要求预建空主题、报告、参考资料或归档目录。已有报告与旧位置计划原地维护。报告内链接相对于当前 Markdown 解析，持久配置使用项目相对路径，不写入个人机器的盘符和用户目录。
 
@@ -97,7 +97,7 @@
 ```text
 使用 research，在 agent-memory 中补充闭源产品 <产品 E> 的调研。
 现有成果是开源项目比较报告，请优先复用该产品已有资料，仅补查实际缺口，
-将产品调研保持为独立成果。需要跨类型取舍时，基于这些成果形成独立分析判断。
+将产品调研保持为独立成果。需要跨类型取舍时，基于这些成果形成独立分析洞察。
 ```
 
 精读一篇 survey 论文：
@@ -108,31 +108,41 @@
 保存到 agent-memory/paper/survey-<论文标识>/report.md。
 ```
 
-### 分析判断
+### 分析洞察
+
+围绕主题综合已有成果：
 
 ```text
-使用分析判断，基于 agent-memory 中已有的论文、项目和产品调研，
-判断“什么条件下应采用独立的长期记忆服务”。
-我的初步观点是 <贡献者的实际观点与理由>，选型标准是 <硬约束、偏好及优先级>。
-请结合已有成果检验，区分事实、个人假设和本次推导，
-说明反例、取舍、置信理由，以及什么条件变化会改变建议。
-保存到 agent-memory/analysis/memory-service-tradeoffs/report.md。
+使用分析洞察，基于 agent-memory 中已有的论文、开源项目和产品调研，
+围绕“记忆架构有哪些共同设计维度”形成分析／洞察报告。
+对照写入、组织、检索和更新等机制，解释样本中的联系、差异与争议，
+提出有依据的核心发现和后续研究问题，说明样本范围、时间与证据限制。
+保存到 agent-memory/analysis/memory-architecture-insights/report.md。
 ```
 
-只根据现有成果形成判断：
+仅使用现有成果解释问题：
 
 ```text
-使用分析判断，仅依据 agent-memory 已有报告及以下观点回答“何时应采用独立记忆服务”：
-<贡献者实际提供的观点、约束与理由>。
-直接复用适用的成果，不补充外部调研；证据不足的部分给出条件性判断和缺口。
+使用分析洞察，仅依据 agent-memory 已有报告分析“持久化接口与长期记忆效果是什么关系”。
+从现有结果提炼认识，说明分析依据、适用边界与尚未回答的问题。
+只使用现有资料，证据不足的部分保留缺口和条件性解释。
+```
+
+形成应用启示或方案取舍：
+
+```text
+使用分析洞察，基于已有调研分析“什么条件下应采用独立的长期记忆服务”。
+我的初步观点是 <实际观点与理由>，本轮选型标准是 <硬约束、偏好及优先级>。
+结合已有成果检验这些看法，说明取舍、反例、置信理由和建议改变的条件。
+保存到 agent-memory/analysis/memory-service-tradeoffs/report.md。
 ```
 
 为已有分析增加引用依据：
 
 ```text
-使用分析判断，更新 agent-memory/analysis/memory-service-tradeoffs/report.md，
+使用分析洞察，更新 agent-memory/analysis/memory-architecture-insights/report.md，
 新增引用 agent-memory/product/<产品目录>/report.md 中已核对的结论。
-只复核受这份依据影响的判断，保留其他有效内容；不重新调研该产品。
+只复核受这份依据影响的分析和发现，保留其他有效内容；不重新调研该产品。
 ```
 
 ### 画图
