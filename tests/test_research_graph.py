@@ -600,6 +600,25 @@ updated_at: {updated}
         self.assertIn("| 智能体 | 已归档 |", content)
         self.assertIn("| 暂无报告 | 未记录 |", content)
 
+    def test_task_heading_preserves_work_results_and_next_steps(self):
+        self.report()
+        for heading in ("对象与任务", "调研任务", "对象与任务（含下一步）"):
+            with self.subTest(heading=heading):
+                self.write("agents/plan.md", f"""# 计划
+## 核心问题
+| ID | 主题共同研究问题 |
+| --- | --- |
+
+## {heading}
+| ID | 类型／对象 | 实际成果 | 缺口与下一步 |
+| --- | --- | --- | --- |
+| T001 | paper／甲 | [报告一](paper/one/report.md) | 补查公开源码 |
+""")
+                graph = self.build()
+                task, = (node for node in graph["nodes"] if node.get("taskId") == "T001")
+                self.assertEqual(task["reportIds"], ["report:agents/paper/one/report.md"])
+                self.assertEqual(graph["themeOverview"][0]["nextSteps"], ["补查公开源码"])
+
     def test_next_steps_support_prose_and_escape_table_delimiters(self):
         path = self.plan()
         path.write_text(path.read_text(encoding="utf-8") + "\n## 下一步\n\n先核对 A | B，再继续研究。\n\n- 补查数据来源\n", encoding="utf-8")
@@ -616,6 +635,29 @@ updated_at: {updated}
         content = (self.root / "README.md").read_text(encoding="utf-8")
         self.assertIn("| agents | 未标注 | 尚未建立 | [报告一]", content)
         self.assertNotIn("[调研计划]", content)
+
+    def test_graph_uses_tracked_report_metadata_file(self):
+        report = self.write("agents/paper/one/report.md", "# 报告一\n\n> 调研状态：部分完成\n>\n> 采用版本：v1\n")
+        metadata = report.with_suffix(".meta.json")
+        report_id = "report-" + "a" * 32
+        metadata.write_text(json.dumps({"report_id": report_id, "completion": "partial"}), encoding="utf-8")
+        paths = {path.relative_to(self.root).as_posix() for path in (report, metadata)}
+        graph = build_graph(self.root, "owner/repo", "main", input_paths=paths)
+        self.assertEqual(graph["reports"][0]["id"], "report:" + report_id)
+        self.assertEqual(graph["reports"][0]["status"], "partial")
+        with self.assertRaisesRegex(ValueError, "Missing tracked report metadata: .*report.meta.json"):
+            build_graph(self.root, "owner/repo", "main", input_paths={report.relative_to(self.root).as_posix()})
+
+    def test_local_review_has_its_own_status_without_changing_plan_task_status(self):
+        report = self.report(completion="complete")
+        text = report.read_text(encoding="utf-8").replace('"completion": "complete"', '"completion": "complete", "update": {"sections": ["## 分析"]}')
+        report.write_text(text, encoding="utf-8")
+        self.plan("T001：[实际成果](paper/one/report.md)")
+        graph = self.build()
+        self.assertEqual(graph["reports"][0]["status"], "review_complete")
+        self.assertEqual(graph["reports"][0]["statusLabel"], "局部复查完成")
+        task = next(node for node in graph["nodes"] if node.get("taskId") == "T001")
+        self.assertEqual(task["status"], "done")
 
     def test_reference_in_next_steps_is_not_a_delivered_result(self):
         self.report()

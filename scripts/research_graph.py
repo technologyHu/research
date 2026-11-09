@@ -27,7 +27,7 @@ import yaml
 
 # The same catalog is used by the portable task tools and the repository graph.
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / ".agents/skills/research-common/scripts"))
-from research_catalog import analysis_subject, read_registry, normalize_theme, split_name
+from research_catalog import LOCAL_REVIEW_LABELS, analysis_subject, has_generated_report_opening, read_registry, normalize_theme, report_metadata_path, split_name
 
 TYPES = {"paper": "论文", "open-source": "开源项目", "product": "产品",
          "benchmark": "评测", "analysis": "分析洞察"}
@@ -41,9 +41,11 @@ STATUS = {"draft": "草案", "active": "进行中", "paused": "暂停",
           "completed": "已完成", "archived": "已归档", "planned": "待开始",
           "in_progress": "进行中", "partial": "部分完成", "blocked": "阻塞",
           "done": "已完成", "deferred": "暂缓", "cancelled": "已取消",
-          "complete": "完整", "unknown": "未标注"}
+          "complete": "完整", "unknown": "未标注",
+          **{f"review_{key}": value for key, value in LOCAL_REVIEW_LABELS.items()}}
 MD = MarkdownIt("commonmark").enable("table")
 START, END = "<!-- research-graph:start -->", "<!-- research-graph:end -->"
+TASK_SECTIONS = {"对象与任务", "调研任务"}
 EXCLUDED = {".tmp", "references", "assets", "archive", "node_modules", ".git", ".agents"}
 SUPPORT_ROOTS = EXCLUDED | {"docs", "scripts", "tests", "plans", "reports"} | set(REPORT_GROUPS)
 
@@ -150,7 +152,7 @@ def next_steps(parsed: dict) -> list[str]:
     """Summarize the plan's explicit next actions without inventing follow-up work."""
     steps = []
     for table in parsed["tables"]:
-        if not in_section(table, "下一步"):
+        if TASK_SECTIONS.isdisjoint(table["sections"]) and not in_section(table, "下一步"):
             continue
         for index, row in enumerate(table["rows"]):
             action = table_value(table["headers"], row, "下一步", "恢复条件", "后续安排")
@@ -284,6 +286,18 @@ def build_graph(root: Path, repository: str, branch: str, *, input_paths: set[st
         source_text[rel] = text
         return text, parse_markdown(text)
 
+    def read_report(path):
+        text = path.read_text(encoding="utf-8-sig")
+        parsed = parse_markdown(text)
+        metadata = report_metadata_path(path)
+        if accepted(metadata):
+            content = metadata.read_text(encoding="utf-8-sig")
+            source_text[metadata.relative_to(root).as_posix()] = content
+            parsed["summaries"].append(content)
+        elif not parsed["summaries"] and has_generated_report_opening(text):
+            raise ValueError(f"Missing tracked report metadata: {metadata.relative_to(root).as_posix()}")
+        return text, parsed
+
     reports, primary_reports, implicit_themes = {}, {}, set()
     report_candidates = {}
     for group, categories in REPORT_GROUPS.items():
@@ -297,7 +311,7 @@ def build_graph(root: Path, repository: str, branch: str, *, input_paths: set[st
         base, timestamp = split_name(path.parent.name)
         if timestamp is None or path.name == "plan.md":
             continue
-        parsed = parse_markdown(path.read_text(encoding="utf-8-sig"))
+        _, parsed = read_report(path)
         summary = json.loads(parsed["summaries"][0]) if len(parsed["summaries"]) == 1 else {}
         if not isinstance(summary, dict):
             raise ValueError("Invalid research-summary in " + str(path))
@@ -328,8 +342,7 @@ def build_graph(root: Path, repository: str, branch: str, *, input_paths: set[st
         for path, theme in sorted((path, theme) for path, (kind, theme) in report_candidates.items() if kind == report_type):
             if not accepted(path):
                 continue
-            text = path.read_text(encoding="utf-8-sig")
-            parsed = parse_markdown(text)
+            text, parsed = read_report(path)
             summaries = parsed["summaries"]
             if path.name != "report.md" and not summaries:
                 continue
@@ -369,9 +382,12 @@ def build_graph(root: Path, repository: str, branch: str, *, input_paths: set[st
             if not completion:
                 marker = re.search(r"^>\s*调研状态[：:]\s*(.+)$", text, re.M)
                 completion = marker.group(1).strip() if marker else "unknown"
+            status = canonical_status(completion)
+            if isinstance(summary.get("update"), dict) and status in LOCAL_REVIEW_LABELS:
+                status = f"review_{status}"
             report = node(id=stable_id, kind="report", type=report_type,
                           label=parsed["title"] or path.stem, path=rel, theme=theme,
-                          status=canonical_status(completion), runId=summary.get("run_id", ""),
+                          status=status, runId=summary.get("run_id", ""),
                           updatedAt=text_value(metadata.get("updated_at")) or directory_time or "",
                           createdAt=text_value(metadata.get("created_at")),
                           reportKey=report_key or "", themeId=short_theme,
@@ -426,7 +442,9 @@ def build_graph(root: Path, repository: str, branch: str, *, input_paths: set[st
                           revision=meta.get("revision"), updatedAt=text_value(meta.get("updated_at")))
         plans[theme] = (theme_node, parsed)
         for table in parsed["tables"]:
-            if not in_section(table, "对象与任务"):
+            section = next((title for title in table["sections"]
+                            if title in TASK_SECTIONS or "对象与任务" in title), None)
+            if section is None:
                 continue
             for row in table["rows"]:
                 identifiers = work_ids(table["headers"], row)
@@ -448,7 +466,7 @@ def build_graph(root: Path, repository: str, branch: str, *, input_paths: set[st
                             runId=table_value(table["headers"], row, "run_id"),
                             updatedAt=theme_node["updatedAt"])
                 tasks[identity] = (task, table_value(table["headers"], row, "前置", "依赖"))
-                edge(theme_node["id"], identity, "contains", rel + " · 对象与任务")
+                edge(theme_node["id"], identity, "contains", rel + " · " + section)
 
     # Report directories remain browsable even when no persistent theme plan exists.
     for rel, (report, _) in reports.items():

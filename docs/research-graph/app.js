@@ -172,15 +172,20 @@
     detail.append(list);
     if (n.kind === "object") for (const id of n.reportIds) {
       const report = reportById.get(id);
-      if (report) detail.append(link(report.label + " ↗", report.url, "detail-links"));
+      if (report) detail.append(link(reportLinkLabel(report), report.url, "detail-links"));
     }
     if (n.kind === "object" && (n.pendingReportIds || []).length) {
       detail.append(element("p", "edge-note", "同目录补充报告待关联，尚未作为本项工作的交付成果："));
       for (const id of n.pendingReportIds) {
         const report = reportById.get(id);
-        if (report) detail.append(link("待关联：" + report.label + " ↗", report.url, "detail-links"));
+        if (report) detail.append(link("待关联：" + reportLinkLabel(report), report.url, "detail-links"));
       }
     }
+  }
+
+  function reportLinkLabel(report) {
+    const status = report.statusLabel ? `（${report.statusLabel}）` : "";
+    return `${report.label}${status} ↗`;
   }
 
   function point(n) {

@@ -59,11 +59,15 @@ def exercise(page, url, expected):
     page.locator(f'button[data-node-id={json.dumps(work["id"], ensure_ascii=False)}]').click()
     require(page.locator("#detail h2").inner_text() == work["label"], "selecting work shows details")
     require(page.locator("#detail .open-link").get_attribute("href") == work["url"], "detail opens correct branch source")
+    for report_id in work.get("reportIds", []):
+        report = next(r for r in expected["reports"] if r["id"] == report_id)
+        report_link = page.get_by_role("link", name=f"{report['label']}（{report['statusLabel']}） ↗", exact=True)
+        require(report_link.get_attribute("href") == report["url"], "details show each report's status and source link")
     if work.get("pendingReportIds"):
         require("尚未作为本项工作的交付成果" in page.locator("#detail").inner_text(), "supplemental reports must be labeled pending")
         for report_id in work["pendingReportIds"]:
             report = next(r for r in expected["reports"] if r["id"] == report_id)
-            pending_link = page.get_by_role("link", name="待关联：" + report["label"] + " ↗", exact=True)
+            pending_link = page.get_by_role("link", name=f"待关联：{report['label']}（{report['statusLabel']}） ↗", exact=True)
             require(pending_link.get_attribute("href") == report["url"], "pending links still open the correct report")
     if page.locator("#detail .detail-links li").count():
         page.locator("#detail .detail-links button").first.click()
@@ -139,7 +143,7 @@ def main():
                 plan_path.write_text(plan_path.read_text(encoding="utf-8") + '\n## 成果索引\n\nT001：[主报告](product/tool/report.md)\n', encoding="utf-8")
                 report_root = fixture_root / "evaluation/product/tool"
                 report_root.mkdir(parents=True)
-                (report_root / "report.md").write_text('# 主报告\n\n<!-- research-summary\n{"completion":"complete"}\n-->\n', encoding="utf-8")
+                (report_root / "report.md").write_text('# 主报告\n\n<!-- research-summary\n{"completion":"complete","update":{"sections":["## 分析"]}}\n-->\n', encoding="utf-8")
                 (report_root / "details.md").write_text('# 补充报告\n\n<!-- research-summary\n{"completion":"partial"}\n-->\n', encoding="utf-8")
                 (fixture_root / "themes.yaml").write_text(json.dumps({"schema_version": 1, "themes": [
                     {"id": "agent", "slug": "agent", "name": "Agent", "parent": None},
