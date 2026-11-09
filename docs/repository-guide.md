@@ -60,7 +60,8 @@ research、分析洞察和 research-commit 是三个独立入口，彼此不引�
 
 ```text
 使用 research，为 agent-memory 制定调研计划，目标是为 Agent 项目选择记忆方案。
-覆盖代表性论文、开源实现和产品，明确核心问题、优先级与验收条件。
+覆盖代表性论文、开源实现和产品。先按类型评估证据再确定优先级，并写明任务验收条件。
+把候选主题共同问题发给我确认后再入表。新计划正文使用「核心问题」和「对象与任务」两张表。
 本轮只维护 research-reports/agent-memory/plan.md。
 ```
 
@@ -260,7 +261,7 @@ analysis-reports/agent__memory__architecture.plan.md。
 
 技能维护直接修改 `.agents/skills/` 中对应技能及支持文件；新增或修改流程时同步核对入口、相对链接、脚本参数和相关测试。公共规则集中在 research-common，其他技能按需引用，避免复制出不同版本。子技能返回结果给调用方，不回调三个顶层入口。
 
-修改技能关系后运行 `python -B -m unittest discover -s tests -p test_skill_dependencies.py -v`，检查链接、正文、元数据、脚本路径及本地导入形成的直接和间接依赖。`test_research_compat.py` 检查仅安装共用子技能时的实际流程及旧入口兼容。技能独立性工作流按 `scripts/research-skill-requirements.txt` 安装测试依赖，执行这两项检查、公共任务回归及 Git 流程测试。
+修改技能关系后运行 `python -B -m unittest discover -s tests -p test_skill_dependencies.py -v`，检查链接、正文、元数据、脚本路径及本地导入形成的直接和间接依赖。`test_research_compat.py` 检查仅安装共用子技能时的实际流程及旧入口兼容。技能独立性工作流使用 [共用调研依赖](../.agents/skills/research-common/requirements.txt)、[文章抓取依赖](../.agents/skills/web-article-fetcher/requirements.txt) 和 [仓库技能测试依赖](../tests/skill-dependencies-requirements.txt)，执行这两项检查、公共任务回归及 Git 流程测试。抓取回归另在只安装文章抓取依赖的作业中运行。需要 HTTP 403 浏览器回退时使用 [抓取技能的浏览器清单](../.agents/skills/web-article-fetcher/requirements-browser.txt) 并准备 Chromium。图谱生成和浏览器测试依赖由 `scripts/` 下的图谱清单维护。
 
 公共工具的正式实现位于 `.agents/skills/research-common/scripts/`，内部调用与新文档统一使用该路径；旧 `.agents/skills/research/scripts/` 仅保留兼容转发，不承载独立实现。新旧命令均接受原有参数，已有任务与报告无需迁移。
 
@@ -339,7 +340,7 @@ python -X utf8 -B scripts/research_graph.py
 | 现象 | 检查与处理 |
 | --- | --- |
 | 报告已存在，图谱中没有 | 核对是否已跟踪、路径与元数据是否受支持、排除配置、是否已重建；远程还需推送和成功发布 |
-| 显示“工作待关联” | 在计划成果索引中按稳定工作 ID 明确声明实际报告，预期路径或普通参考链接不算交付 |
+| 显示“工作待关联” | 在对应任务行的「实际成果」列填入报告链接。旧计划可在成果索引中按稳定工作 ID 登记。 |
 | 调研未完成或需要补查 | 使用 research，说明已有计划或报告路径，以及本轮需要继续、补查或调整的范围 |
 | 新机器上的技能不可用 | 查阅对应技能的环境要求与本地运行说明，不复制维护者绝对路径或擅自升级全局工具 |
 | 图谱已部署，但发布验收失败 | 查看工作流制品中的版本、哈希与浏览器结果，按实际失败环节处理，不将部署状态写成验收通过 |

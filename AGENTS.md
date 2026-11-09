@@ -4,6 +4,10 @@
 
 ## 调研入口与资料布局
 
+- 主题登记写入 `themes.yaml`。计划只登记有具体调研目标的任务、明确纳入的既有报告，以及用户明确指定加入计划的对象。仅登记主题时不建计划或新增任务行。符合条件的正式对象调研先复用对应计划，缺失时自动创建。见 [计划纳入条件](.agents/skills/research-common/references/theme-planning.md#计划纳入条件)。
+- 计划的核心问题是该主题下调研共同关注的问题，新增或实质改写前须由用户确认。暂无已确认问题时留空，单个对象或本轮任务的问题记在执行范围中。见 [核心问题的确认](.agents/skills/research-common/references/theme-planning.md#核心问题的确认)。
+- 计划正文使用「核心问题」和「对象与任务」两张表，任务表集中记录验收、成果、缺口及下一步。沿用 [共用计划模板](.agents/skills/research-common/references/theme-plan-template.md)。
+
 - 对象调研从 [research](.agents/skills/research/SKILL.md) 进入，基于已有成果的主题／问题分析从独立的 [research-analysis](.agents/skills/research-analysis/SKILL.md) 进入；两者可共用 [research-report](.agents/skills/research-report/SKILL.md) 成稿与交付。单个事实查询不自动扩展为完整研究。
 - 对象调研、分析洞察和报告提交是三个独立入口，不互相引用、调用或通过子技能回调。用户或外层任务按已授权目标分别选择入口；共用规则由 [research-common](.agents/skills/research-common/SKILL.md) 提供，成稿、绘图、对象证据等子技能可以共用，只返回当前阶段的结果。
 - 保存与清理规则以 [delivery-policy.md](.agents/skills/research-common/references/delivery-policy.md) 为唯一详细来源；修改这些规则时同步维护相关技能引用，避免在本文件复制整套流程。
@@ -14,6 +18,8 @@
 - 仅将实际交付的报告、引用资料、图片和已登记附加文件保存到正式目录；单次任务的中间文件放在对应报告目录的 `.tmp/<run-id>/`。区分文件校验通过、研究完整度和实际完成的验证，不将部分结果写成完整结论。
 
 ## 图片使用与生成
+
+调研与分析报告按解释需要做到图文并茂，不设配图数量或为了装饰凑图。已有有助于了解或理解、来源明确且适用的图、产品／软件前端界面和演示 GIF 可直接插入报告；需要新绘且满足下述能力条件时，优先用可在 Markdown 中渲染的代码图，需要精确布局、原貌证据或其他视觉表达时仍可使用原图、生成静态图或调用图片生成。具体选型与验收见 [图表与代码](.agents/skills/research-common/references/writing-policy.md#图表与代码)。
 
 当前执行模型必须能够实际接收并理解图片，才可生成、重绘、修改、渲染或导出新图片。无此能力或无法确认时：
 
