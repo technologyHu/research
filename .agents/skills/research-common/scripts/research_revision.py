@@ -13,15 +13,16 @@ from urllib.parse import quote, unquote, urlsplit
 import research_catalog as catalog
 
 
-def write_atomic(target, content):
+def write_atomic(target, content, staging_dir=None):
     """Stage beside the target so interrupted writes never truncate its contents."""
-    descriptor, name = tempfile.mkstemp(prefix=".research-revision-", dir=target.parent)
+    descriptor, name = tempfile.mkstemp(prefix=".research-revision-", dir=staging_dir or target.parent)
     os.close(descriptor)
     temporary = Path(name)
     try:
         if temporary.write_bytes(content) != len(content):
             raise OSError("Incomplete report revision write")
-        os.chmod(temporary, stat.S_IMODE(target.stat().st_mode))
+        if target.exists():
+            os.chmod(temporary, stat.S_IMODE(target.stat().st_mode))
         os.replace(temporary, target)
     finally:
         temporary.unlink(missing_ok=True)
@@ -213,17 +214,13 @@ def _stamp_report(work_dir, at=None):
         context = task.report_context(new_work / "outline.json")
         target = new / report_name
         content = target.read_text(encoding="utf-8-sig")
-        note = task.render_report_note(context)
-        from research_update import NOTE_PREFIXES
-        pattern = r"<!--\s*research-summary\s*\n.*?-->\r?\n((?:>[^\n]*(?:\n|$))*)"
-        if re.search(pattern, content, re.S):
-            def refreshed(match):
-                manual = "".join(line for line in match[1].splitlines(keepends=True) if not line.startswith(NOTE_PREFIXES))
-                return note + manual
-            content = re.sub(pattern, refreshed, content, count=1, flags=re.S)
-        else:
-            content = note + "\n" + content
+        from research_context import report_metadata_bytes
+        from research_update import with_report_note
+        content = with_report_note(content, task.render_report_note(context))
+        metadata = catalog.report_metadata_path(target)
+        task.no_links(metadata, workspace)
         write_atomic(target, content.encode("utf-8"))
+        write_atomic(metadata, report_metadata_bytes(context))
     except Exception:
         for file, target in reversed(written):
             if target.read_bytes() != originals[file]:
@@ -233,5 +230,5 @@ def _stamp_report(work_dir, at=None):
         raise
     return {"stamped": True, "report_id": outline["report_id"], "created_at": outline["created_at"],
             "updated_at": moment, "work_dir": str(new_work), "output_dir": str(new),
-            "updated_references": [relative(new / file.relative_to(old) if file.is_relative_to(old) else file, workspace) for file in updates],
+            "updated_references": [relative(new / file.relative_to(old) if file.is_relative_to(old) else file, workspace) for file in updates] + [relative(metadata, workspace)],
             "note": "Verify this task again; dependent reports keep their old evidence hashes and require review. Rebuild the graph after tracking deliverables."}

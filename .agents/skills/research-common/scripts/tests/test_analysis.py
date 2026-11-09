@@ -56,6 +56,7 @@ class AnalysisWorkflow(unittest.TestCase):
         report = Path(outline["output_dir"]) / "report.md"
         note = context.render_report_note(context.report_context(work / "outline.json"))
         report.write_text("# 分析洞察\n\n" + note + "\n## 核心发现\n\n" + citations + "\n", encoding="utf-8")
+        task.sync_report_note(work)
         return work, outline, report, adopted
 
     def test_full_and_light_analysis_cite_local_reports_without_copying_them(self):
@@ -85,6 +86,7 @@ class AnalysisWorkflow(unittest.TestCase):
         legacy.mkdir(parents=True)
         (legacy / "report.md").write_text(report.read_text(encoding="utf8").replace(
             "../../research-reports/", "../../../research-reports/"), encoding="utf8")
+        (legacy / "report.meta.json").write_bytes(task.catalog.report_metadata_path(report).read_bytes())
         self.assertTrue(reports.validate(legacy)["valid"])
 
     def test_theme_insight_without_contributor_viewpoints_keeps_one_analysis_subject(self):

@@ -42,9 +42,9 @@ class ReportLocalTasks(unittest.TestCase):
         (path / "code/unrelated.py").write_text("temporary only", encoding="utf-8")
         self.assertTrue(reports.validate(report.parent)["valid"])
         verified = task.verify_task(path)
-        self.assertEqual(set(verified["files"]), {"report.md"})
+        self.assertEqual(set(verified["files"]), {"report.md", "report.meta.json"})
         delivered = {entry.relative_to(report.parent).as_posix() for entry in delivery_entries(report.parent) if entry.is_file()}
-        self.assertEqual(delivered, {"report.md"})
+        self.assertEqual(delivered, {"report.md", "report.meta.json"})
         self.assertTrue(task.cleanup_plan(path)["requires_confirmation"])
 
     def test_baseline_does_not_recursively_capture_current_or_sibling_tasks(self):
@@ -52,7 +52,7 @@ class ReportLocalTasks(unittest.TestCase):
         child = Path(task.derive_task(parent)["work_dir"])
         task.begin_update(child, ["## 分析"])
         manifest = json.loads((child / "baseline/files.json").read_text(encoding="utf-8"))
-        self.assertEqual(set(manifest), {"report.md"})
+        self.assertEqual(set(manifest), {"report.md", "report.meta.json"})
         task.apply_update(child, {"## 分析": "## 分析\n\n[原始资料](https://example.org/original)支持新分析。"})
         self.assertTrue(task.verify_task(child)["verified"])
         self.assertTrue(parent.is_dir())

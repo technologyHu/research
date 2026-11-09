@@ -20,6 +20,7 @@
 ```text
 <report-dir>/
 ├── report.md
+├── report.meta.json          # 图谱和校验所用的报告元数据
 ├── references/
 │   ├── sources.md           # 来源、日期、版本、限制
 │   └── <article>.md         # 实际采用且允许保留的原文
@@ -42,7 +43,7 @@
 
 ### 修订、引用与稳定标识
 
-新任务在 outline 和成稿的 research-summary 中保存 report_id、theme_id、classification.target、created_at、updated_at；report_id 与主题 ID 不随时间、标题或目录改名变化。created_at 保留最初记录，updated_at 表示这份报告最近修订，不代替论文版本、原始来源访问日期或研究核实日期。
+新任务在 outline 和报告同目录的 `.meta.json` 中保存 `report_id`、`theme_id`、`classification.target`、`created_at`、`updated_at`。主文件 `report.md` 的元数据文件名为 `report.meta.json`，随报告保存和提交。旧报告内嵌的 `research-summary` 仍可读取。报告 ID 与主题 ID 不随时间、标题或目录改名变化。`created_at` 保留最初时间，`updated_at` 表示最近修订时间。
 
 新建或真实修订完成后，使用 [任务工具的 stamp-report](task-management.md#报告修订时间与目录更新)，再按工具返回的新 work_dir 执行最终校验。单纯阅读、检查或复用证据不更新时间；不复制旧时间目录形成快照。规范主题、类型、target 和时间后缀均相同的并行任务共享同一交付标识，不能以再次调用 create 代替修订现有报告；同一对象的不同专题使用各自的交付标识。继续已有成果须显式传 --output 或恢复原 work_dir。
 
@@ -63,7 +64,7 @@ stamp-report 核对源、目标、链接属性和重名冲突后，在项目内�
 
 ## 主题计划的保存与收口
 
-两个入口共用计划模板和维护规则。对象调研的当前计划保存在 `research-reports/<主题名>/plan.md`；分析任务的当前计划保存在 `analysis-reports/<主题名>.plan.md`。计划 front matter 使用稳定 theme_id，不给计划文件追加报告时间戳。只有实际需要时创建，旧位置继续维护，同一入口同一主题只保留一份当前计划。
+两个入口共用计划模板和维护规则。对象调研的当前计划保存在 `research-reports/<主题名>/plan.md`，分析任务的当前计划保存在 `analysis-reports/<主题名>.plan.md`。计划 front matter 使用稳定 theme_id。符合 [纳入条件](theme-planning.md#计划纳入条件) 的正式对象调研先复用对应计划，缺失时自动创建，包含单对象、brief 和已有报告补查。已有计划原地维护，同一入口同一主题只保留一份当前计划。
 
 新分析计划的主题层级同样用双下划线连接，例如 `analysis-reports/agent__memory__architecture.plan.md`。已有 `agent-memory-architecture.plan.md` 等旧计划继续复用，不因命名变化创建第二份当前计划。
 
@@ -91,13 +92,17 @@ stamp-report 核对源、目标、链接属性和重名冲突后，在项目内�
 - 被主报告或其 Markdown 补充报告实际嵌入的本地图片，使用相对路径。
 - 默认图片格式为 PNG、JPEG、WebP、GIF、SVG、AVIF、BMP、TIFF；格式仍需与用户阅读器相容。
 
+产品界面、软件前端截图和实际采用的演示 GIF 同属上述图片交付，保存在 `assets/` 并从正文嵌入；GIF 保留原动画，不只保存首帧。未采用的演示、下载尝试和播放检查资料留在本次临时目录。视频等其他格式仍按附加交付规则登记精确文件；引用原始演示链接不要求下载整段视频，也不默认转成 GIF。选取和播放验收见 [界面与演示素材](writing-policy.md#界面截图与演示素材)。
+
 参考文章中的装饰图、作者头像、推广图及未被报告引用的图片不复制进最终目录。参考文章如仍需显示这些图片，可保留原始网络链接或省去图片，不留下本地断链。只给图片放一个下载链接不算正文使用，应实际嵌入。
 
 ### 自绘图的保存
 
 仅在满足 [图像能力条件](writing-policy.md#图表与代码)、允许生成或重绘时执行下述流程；否则按现有图片归档规则保留实际引用的原图，不派生新的图片格式或重建生成源。
 
-通过 draw-diagram 配图时，先确定报告 `assets/` 中的最终文件名，草稿直接以 `assets/<filename>` 引用，不链接临时文件；图片须在交付前实际落盘。生成和检查仍在当前任务的 `<work_dir>/scratch/diagrams/` 内进行，默认得到静态 SVG 与 PNG，随后把正文采用的成图复制到预定位置，不为归档重复更名或改写链接，不另建项目根的 `diagrams/`。
+Mermaid 等由 Markdown 阅读器渲染的内联代码图，代码与图注直接保存在报告中，不额外要求 SVG／PNG、独立源文件或 `extra_files`。语法检查、渲染预览及截图只放在当前任务的 `<work_dir>/scratch/diagrams/`，不因检查过就归入正式附件。格式选择与必要性统一遵循 [图表与代码](writing-policy.md#图表与代码)。
+
+需要静态图片时，先确定报告 `assets/` 中的最终文件名，草稿直接以 `assets/<filename>` 引用，不链接临时文件；图片须在交付前实际落盘。生成和检查仍在当前任务的 `<work_dir>/scratch/diagrams/` 内进行，只把正文采用或用户明确要求的格式复制到预定位置，不为内联图追加静态导出，也不为单一嵌入格式凑齐 SVG＋PNG。不为归档重复更名或改写链接，不另建项目根的 `diagrams/`。
 
 沿用绘图入口的同名和后端标识约定；同图通常选用一种格式嵌入。复制后在最终报告中确认链接、字体、背景及显示尺寸仍正确。更新图时先定位已保留的生成源；源已清理时，依据现存成图与已核实证据重建并说明，不假定原始输入仍可用。更新后同步生成源、最终成图与必要的正文引用，完成绘图复核后再运行报告 verify。
 
@@ -137,7 +142,7 @@ stamp-report 核对源、目标、链接属性和重名冲突后，在项目内�
 ## 最终检查与清理
 
 1. 先完成文章和图片落盘，再更新报告中相对路径与目录清单；图片来源／署名放在图注或来源索引。
-2. 先按 [写作规范](writing-policy.md#报告语言润色) 完成润色和对照复核，完成归档及链接同步后，用 research_task.py report-note 生成当前状态说明，再运行 research_task.py verify。它调用 [validate_report.py](../../research-common/scripts/validate_report.py)，同时检查本次完成度、版本、核心缺口、证据引用和文件规范；通过后仅在临时目录记录校验回执。不带 outline 的文件检查不能替代任务 verify。
+2. 先按 [写作规范](writing-policy.md#报告语言润色) 完成润色和对照复核，完成归档及链接同步后，用 research_task.py sync-report-note 同步已有报告的当前状态说明（初稿用 report-note），按修订规则 stamp-report 后使用返回的新 work_dir 运行 research_task.py verify。它调用 [validate_report.py](../../research-common/scripts/validate_report.py)，同时检查本次完成度、版本、核心缺口、证据引用和文件规范；通过后仅在临时目录记录校验回执。不带 outline 的文件检查不能替代任务 verify。
 3. 手工复查来源、版本、论证与类型检查清单。结构有效与调研完成度分开检查：partial 可以带明确缺口交付，blocked 不宣称完成也不清理工作资料。脚本不访问远程 URL，也不能证明结论正确。
 4. 最终副本检查通过并完成人工复核后，先同步关联主题计划的成果、状态和缺口，再运行 research_task.py cleanup-plan。向用户列出待删任务相对路径、文件数、占用空间、将保留的报告目录及长期主题计划，以及仍需续查的情况，取得针对该范围的明确确认。检查通过本身不代表批准删除；不以超时、无回复或一般调研授权代替确认。
 5. 确认后及时执行：先重新运行 cleanup-plan，对照已确认的 plan_id，核对实际目标仍是同一受管任务目录。内容或范围变化时先解释变化并取得新确认；没有变化时直接按原确认清理，不再重复询问。Windows 使用原生 PowerShell 删除精确任务目录，随后检查该目录已不存在、报告仍保留；如被占用或操作失败，当轮说明实际残留原因，不把“计划清理”报告成“已清理”。

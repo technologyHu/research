@@ -49,6 +49,8 @@ python .agents/skills/research-common/scripts/research_task.py download-article-
 
 可重复 --image-url，或用 --all 选择该文章列出的所有图片；--refresh 只刷新所选图片。图片失败明确返回 failures，已有有效图保留并记录失败尝试。成功下载的图仍需人工查看，实际引用后才归档到 assets/。不修改临时正文中的链接，归档阶段再选择图片并改写最终链接。
 
+界面截图和文章列出的演示 GIF 也可按需选取。GIF 下载后应核对真实格式与原动画，保留帧时序和循环，不以首帧截图代替；在笔记中记录实际播放或关键帧核对范围。是否采用按 [界面与演示素材](writing-policy.md#界面截图与演示素材) 判断，品牌动效不因扩展名是 GIF 就自动成为产品演示。文章外的官方演示先登记其原始来源，再按实际获取方式与交付规则保存；获取失败不改用封面或生成动画冒充原演示。
+
 兼容的 fetch-articles --images all／selected 也可对已缓存文章补图，无须正文 --refresh；新流程优先使用独立图片命令。未列在所选文章中的图片 URL 会报错，不静默下载到其他文章。
 
 正文刷新先保存候选副本，再比较去除访问日期和图片缓存路径差异后的内容。内容未变时保留原正文快照、核对和归档记录，仅登记 last_fetch_attempt 的最新检查时间；确实变化时生成待核对的新版本，previous_versions 保留旧快照和记录，旧归档文件不自动覆盖。刷新失败保留旧有效正文、核对和归档，显式记录 refresh_gap；报告仍可基于旧版本给出带刷新缺口的部分结果，不能声称已经取得最新内容。再次按篇刷新成功后消除该缺口。所有版本都留在本任务临时目录，等待确认后统一清理。
@@ -58,6 +60,10 @@ python .agents/skills/research-common/scripts/research_task.py download-article-
 默认沿用环境代理，确需直连时传 --proxy direct。已有 Playwright 可通过 --browser 允许普通浏览器读取回退；登录页、验证页不能冒充正文。不自动创建项目根 venv 或安装浏览器。先复用现有环境，确需临时环境时放在本任务 scratch/ 下，并按当前任务授权处理依赖。
 
 ## 人工核对正文
+
+先对照研究问题确认正文边界与覆盖：标题及主要章节应与来源页面一致，所需内容不能只剩案例卡片、导航、脚本或局部摘要。遇到此类提取错误时，定位正确的正文／main 区域或使用可访问的原始 Markdown／浏览器正文重新获取；保留旧候选与原因，不接受错误提取。访问验证仍按抓取技能交给用户，不把正文选择器修正用于绕过验证。
+
+先稳定来源正文及链接，再核对并建立字段证据指纹、撰写章节和归档。后续真正修正文体或链接解析会产生新候选，应重新核对受影响结论；仅补图不重抓正文。使用检查器返回的实际文章指纹，不在一次性脚本中猜测或硬编码散列。
 
 HTTP 成功不等于已读、正文完整或结论正确。阅读 article.md，核对标题、正文边界、原始来源及缺失部分，再标记：
 
@@ -73,7 +79,7 @@ python .agents/skills/research-common/scripts/research_task.py review-article --
 python .agents/skills/research-common/scripts/research_task.py import-article --work-dir <work_dir> --url https://example.org/article --file <work_dir>/scratch/extracted.md --title "文章标题" --method browser
 ```
 
-method 可选 browser／pdf／provided，仅说明实际获取方式，不代表已验证。保留原文，不能用搜索摘要、译文、总结或生成内容冒充文章全文；图片链接需可解析，不把临时文件路径带进最终原文。
+method 可选 http／browser／pdf／provided，仅说明实际获取方式，不代表已验证。手动从 HTTP HTML 提取正文用 http，浏览器实际读取用 browser，用户提供的资料用 provided。导入工具按 final-url（省略时用原 URL）解析正文中的常见 Markdown 相对链接并登记图片，代码块和行内代码保持原样；导入后仍核对正文及图片，不把链接处理当作内容核验。保留原文，不能用搜索摘要、译文、总结或生成内容冒充文章全文；不把临时文件路径带进最终原文。
 
 导入与网页抓取共用版本提交逻辑：先校验 URL、方式、标题、现有清单和输入文件，再写独立候选版本，最后原子替换清单。参数错误不改旧正文；保存或清单提交失败也不覆盖现用正文及其记录。失败留下的候选副本仍只位于本任务临时目录。相同正文复用原核对及归档，变化正文保留历史并触发结论复核。
 
@@ -99,6 +105,6 @@ python .agents/skills/research-common/scripts/research_task.py archive-article -
 
 已有同名归档内容不同会停止，确实需要更新时用 --replace；局部更新还须把该精确文件列入 begin-update 的 --allow-file。不要覆盖其他用户资料。确实不能保留全文时可用 --exception 记录具体归档限制，并在报告可见处披露同一原因，保留原始链接；这不免除文章获取与正文核对要求。
 
-归档状态改变后，重新生成 report-note 再 verify。verify 检查已用文章是否获取并接受、可见引用、归档文件与散列、图片、临时目录依赖及已声明例外；不自动证明正文完整或论证真实。derive 保留已取得的正文、核对记录与原访问日期，不默认重新访问网页。
+归档状态改变后，对已有报告执行 `sync-report-note`，再按交付流程校验。verify 检查文章核对状态、可见引用、归档文件与散列、图片、临时目录依赖及已声明例外。正文完整性与论证仍由代理复核。derive 保留已取得的正文、核对记录与原访问日期。
 
 确认后清理的规则仍以 [交付规范](delivery-policy.md) 为准：先交付检查、展示精确范围，取得确认后及时清理当前任务；原文归档和实际引用图片保留。

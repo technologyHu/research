@@ -2,6 +2,8 @@
 
 项目根目录的 [themes.yaml](../../../../themes.yaml) 是 对象调研、分析任务和图谱共用的主题词表。主题名与子主题名不在各技能内分别维护；目录格式及时间规则以 [交付规范](delivery-policy.md) 为准。
 
+用户仅登记主题或子主题时，只维护主题词表。计划任务按 [计划纳入条件](theme-planning.md#计划纳入条件) 另行登记。
+
 每项包含稳定 id、英文 slug、中文或英文显示名 name、父主题 parent，以及可选 aliases。id 在改显示名时保留；parent 引用父主题 ID。父链的 slug 从大到小压平：规范主题名及调研报告目录用单连字符连接，分析洞察的主题目录名及新计划文件名用双下划线连接；每级 slug 内的单词仍用单连字符。显示时按父链名称组成面包屑。
 
 ```yaml
@@ -27,7 +29,7 @@ python .agents/skills/research-common/scripts/research_task.py themes --workspac
 python .agents/skills/research-common/scripts/research_task.py add-theme --workspace . --id agent-memory-lifecycle --slug lifecycle --name 生命周期 --parent agent-memory --alias 记忆生命周期
 ```
 
-首次在没有注册表的新工作区使用时可运行 init-themes --workspace .，只建立 general 条目；已有文件不会被覆盖。注册工具保留条目数据，以 JSON 兼容的 YAML 写回；读取普通 YAML 需要 PyYAML，不自动安装环境依赖。新增条目与计划、报告一起按授权纳入版本管理，命令不会自行暂存或提交。
+首次在没有注册表的新工作区使用时可运行 init-themes --workspace .，建立 general 条目。注册工具保留条目数据，以 JSON 兼容的 YAML 写回。读取普通 YAML 需要 PyYAML。主题登记可独立交付，登记结果用 `themes --workspace .` 核对。Git 跟踪与提交按本轮实际授权处理。
 
 新报告只能引用已注册主题。旧报告的未登记主题可兼容读取，不能将其静默映射为另一个主题；需要统一时先登记、核对范围和引用。修改 name 只影响展示；修改 slug 或 parent 会影响完整目录名，需要明确迁移范围、修订报告路径并更新引用，不能只改注册表后宣称目录已同步。
 

@@ -4,7 +4,10 @@ import hashlib
 import json
 from pathlib import Path, PurePosixPath
 import re
+from research_catalog import report_metadata_path, report_summary
 from research_paths import delivery_entries
+
+INTRO = "@intro"
 
 NOTE_PREFIXES = (
     "> 调研状态：", "> 采用版本：", "> 核心缺口：", "> 无实质结果的对象：",
@@ -13,6 +16,8 @@ NOTE_PREFIXES = (
     "> 本次采用版本：", "> 本次核心缺口：", "> 本次无实质结果的对象：",
     "> 非核心缺口：", "> 本次非核心缺口：", "> 证据沿用：",
     "> 参考文章缺口：", "> 本次参考文章缺口：",
+    "> 本次更新：", "> 主要待确认事项：", "> 其他待确认事项：", "> 未能核对的参考资料：",
+    "> 调研人：", "> 调研时间：", "> 最近修订时间：",
 )
 
 
@@ -46,6 +51,15 @@ def headings(content):
 def selected_spans(content, names):
     entries, chosen = headings(content), []
     for name in names:
+        if name == INTRO:
+            title = next((entry for entry in entries if entry["level"] == 1), None)
+            end = next((entry["start"] for entry in entries if entry["level"] >= 2), len(content))
+            if title is None or title["start"] >= end:
+                raise ValueError("The report introduction needs a title before its first section")
+            title_end = content.find("\n", title["start"], end)
+            start = end if title_end < 0 else title_end + 1
+            chosen.append({"heading": INTRO, "level": 2, "start": start, "end": end})
+            continue
         matches = [entry for entry in entries if entry["heading"] == name]
         if len(matches) != 1:
             raise ValueError(f"Section heading must occur exactly once: {name}")
@@ -58,13 +72,71 @@ def selected_spans(content, names):
     return chosen
 
 
-def strip_note(content):
-    # Only the root preamble is managed. Quoted statuses inside sections remain protected.
+def note_span(preamble):
+    """Locate the opening note in either the current or legacy format."""
+    title = next((entry for entry in headings(preamble) if entry["level"] == 1), None)
+    offsets = [0]
+    if title:
+        offsets.append(preamble.find("\n", title["start"]) + 1)
+    marker = re.compile(r"\s*(<!--\s*research-summary\s*\n.*?)-->[ \t]*(?:\r?\n|$)", re.S)
+    opening = re.compile(r"\s*(?=> 调研状态：)")
+    for offset in offsets:
+        match = marker.match(preamble, offset)
+        if match:
+            end = match.end()
+            for line in preamble[end:].splitlines(keepends=True):
+                if not line.startswith(NOTE_PREFIXES):
+                    break
+                end += len(line)
+            return match.start(1), end
+        match = opening.match(preamble, offset)
+        if match:
+            start = end = match.end()
+            for line in preamble[start:].splitlines(keepends=True):
+                if line.startswith(NOTE_PREFIXES):
+                    end += len(line)
+                elif line.rstrip("\r\n") == ">" and preamble.startswith(NOTE_PREFIXES, end + len(line)):
+                    end += len(line)
+                else:
+                    break
+            return start, end
+    return None
+
+
+def split_preamble(content):
     boundary = next((entry["start"] for entry in headings(content) if entry["level"] >= 2), len(content))
-    prefix, rest = content[:boundary], content[boundary:]
-    prefix = re.sub(r"<!--\s*research-summary\s*\n.*?-->\n?", "", prefix, flags=re.S)
-    prefix = "\n".join(line for line in prefix.split("\n") if not line.startswith(NOTE_PREFIXES))
+    return content[:boundary], content[boundary:]
+
+
+def strip_note(content):
+    prefix, rest = split_preamble(content)
+    span = note_span(prefix)
+    if span:
+        prefix = prefix[:span[0]] + prefix[span[1]:]
     return prefix, rest
+
+
+def with_report_note(content, note):
+    """Refresh the managed block without rewriting the surrounding report."""
+    prefix, rest = split_preamble(content)
+    span = note_span(prefix)
+    newline = "\r\n" if "\r\n" in content else "\n"
+    if span:
+        return content[:span[0]] + note.replace("\n", newline) + content[span[1]:]
+    if re.search(r"^<!--\s*research-summary\b", prefix, re.M):
+        raise ValueError("Move the existing research summary below the report title before synchronizing it")
+    title = next((entry for entry in headings(prefix) if entry["level"] == 1), None)
+    if title:
+        split = prefix.find("\n", title["start"])
+        split = len(prefix) if split < 0 else split
+        return content[:split].rstrip("\r") + newline * 2 + note.replace("\n", newline) + newline + content[split:].lstrip("\r\n")
+    return note.replace("\n", newline) + newline + prefix + rest
+
+
+def validate_intro(value):
+    if (not isinstance(value, str) or not value.strip() or headings(value) or note_span(value)
+            or re.search(r"^[^\n]+\n {0,3}(?:=+|-+)\s*$", value, re.M)):
+        raise ValueError("The replacement introduction must contain prose without a title or generated note")
 
 
 def skeleton(content, names):
@@ -117,20 +189,29 @@ def capture(work_dir, report, sections, added=None, allow_files=None, baseline_d
         match = re.search(r"^> " + re.escape(label) + r"：(.+)$", preamble, re.M)
         return match[1] if match else None
 
-    version = baseline_version or labelled("本次采用版本") or labelled("采用版本") or labelled("调研版本") or "原报告未标注"
-    inherited = labelled("未复核部分原版本")
-    if inherited:
+    summary = report_summary(report) if report_metadata_path(report).is_file() else {}
+    item_versions = "、".join(f"{item['name']}（{item['version'] or '版本待确认'}）" for item in summary.get("items", []))
+    version = baseline_version or item_versions or labelled("本次采用版本") or labelled("采用版本") or labelled("调研版本") or "原报告未标注"
+    previous_update = summary.get("update", {})
+    inherited = previous_update.get("baseline_version") or labelled("未复核部分原版本")
+    if inherited and inherited != version:
         version += "；更早未复核记录：" + inherited
-    reviewed = baseline_date or labelled("调研日期") or labelled("资料日期") or labelled("未复核部分原日期") or "原报告未单独标注；原文日期说明保留"
+    reviewed = (baseline_date or labelled("调研日期") or labelled("资料日期")
+                or previous_update.get("baseline_date") or labelled("未复核部分原日期")
+                or "原报告未单独标注；原文日期说明保留")
     gaps = labelled("本次核心缺口") or labelled("核心缺口") or "原报告未单独标注"
+    if summary:
+        gaps = "、".join(f"{gap['question']}：{gap['reason']}" for gap in summary.get("core_gaps", []) + summary.get("non_core_gaps", [])) or "无"
+        if summary.get("article_gaps"):
+            gaps += f"（另有 {len(summary['article_gaps'])} 项参考资料未核对）"
     other_gaps = labelled("本次非核心缺口") or labelled("非核心缺口")
     if other_gaps:
         gaps += "；非核心缺口：" + other_gaps
     article_gaps = labelled("本次参考文章缺口") or labelled("参考文章缺口")
     if article_gaps:
         gaps += "；参考文章缺口：" + article_gaps
-    inherited_gaps = labelled("未复核部分原缺口")
-    if inherited_gaps:
+    inherited_gaps = previous_update.get("baseline_gaps") or labelled("未复核部分原缺口")
+    if inherited_gaps and inherited_gaps not in {"无", gaps}:
         gaps += "；更早记录：" + inherited_gaps
     plan = {"baseline_sha256": sha(report), "sections": sections, "added_sections": added, "allow_files": allowed, "baseline_version": version, "baseline_date": reviewed, "baseline_gaps": gaps}
     folder.mkdir()
@@ -186,7 +267,7 @@ def check_update(outline, report_content=None, require_added=True):
     files = json.loads((Path(outline["work_dir"]) / "baseline/files.json").read_text(encoding="utf-8"))
     for relative, expected in files.items():
         safe_relative(relative)
-        if relative == report.name or relative in plan["allow_files"]:
+        if relative in {report.name, report_metadata_path(report).name} or relative in plan["allow_files"]:
             continue
         path = root / relative
         if not path.is_file() or path.is_symlink() or not path.resolve().is_relative_to(root.resolve()) or sha(path) != expected:
@@ -208,6 +289,11 @@ def compose_update(outline, replacements, note):
     content = text(report)
     existing = {entry["heading"] for entry in headings(content)}
     for name, value in replacements.items():
+        if name == INTRO:
+            validate_intro(value)
+            span = selected_spans(content, [INTRO])[0]
+            content = content[:span["start"]] + "\n" + value.strip("\n") + "\n\n" + content[span["end"]:]
+            continue
         if not isinstance(value, str) or not value.strip().startswith(name + "\n"):
             raise ValueError(f"Replacement must begin with the original heading: {name}")
         value = value.strip("\n") + "\n\n"
@@ -219,15 +305,7 @@ def compose_update(outline, replacements, note):
             content = content[:span["start"]] + value + content[span["end"]:]
         else:
             content = content.rstrip("\n") + "\n\n" + value
-    prefix, rest = strip_note(content)
-    title = next((entry for entry in headings(prefix) if entry["level"] == 1), None)
-    if title:
-        split = prefix.find("\n", title["start"])
-        split = len(prefix) if split < 0 else split
-        prefix = prefix[:split].rstrip() + "\n\n" + note.rstrip() + "\n\n" + prefix[split:].lstrip("\n")
-    else:
-        prefix = note.rstrip() + "\n\n" + prefix
-    content = prefix.rstrip("\n") + "\n\n" + rest.lstrip("\n")
+    content = with_report_note(content, note)
     errors = check_update(outline, content)
     if errors:
         raise ValueError("; ".join(errors))

@@ -84,6 +84,7 @@ class ArticleDependencies(unittest.TestCase):
         self.assertEqual(self.check(path)["completion"], "complete")
         note = context.render_report_note(context.report_context(path / "outline.json"))
         report.write_text(f"# 报告\n\n{note}\n## 分析\n\n16 个工作单元，见[原文]({saved['path']})。边界见[依据](https://example.org/original)。\n", encoding="utf-8")
+        task.sync_report_note(path)
         self.assertTrue(task.verify_task(path)["verified"])
 
     def test_second_change_invalidates_a_previous_explicit_binding(self):

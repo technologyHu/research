@@ -31,9 +31,9 @@ description: 将网络文章保存为本地 Markdown，按文章标题建独立�
 python .agents/skills/web-article-fetcher/scripts/fetch_article.py --url "<文章 URL>" --output-dir "<目标父目录>" --images all --proxy "<direct 或 env，按上节选择>"
 ```
 
-在其他工作目录执行时，使用本技能内 `scripts/fetch_article.py` 的绝对路径；相对输出目录按执行时的工作目录解析。优先复用已有 Python 环境，依赖为 requests、beautifulsoup4、markdownify；缺失时在当前任务的 scratch/ 内建立临时环境，不在项目根生成 venv 或下载缓存。
+在其他工作目录执行时，使用本技能内 `scripts/fetch_article.py` 的绝对路径，相对输出目录按执行时的工作目录解析。优先复用已有 Python 环境。HTTP 抓取和快照导入使用 [requirements.txt](requirements.txt)，启用 `--browser` 时选用 [requirements-browser.txt](requirements-browser.txt)，并准备对应的 Chromium。需要安装时在当前任务的 scratch/ 内建立临时环境。
 
-脚本先提取标题和正文，再选择文章子目录，保存正文、图片和来源记录，随后自动执行下方四项归档检查，不需要额外参数。微信优先从 `#js_content` 提取，排除阅读入口、作者头像和点赞等界面内容。自动检查完成后仍需阅读正文，核对首尾和内容边界。
+脚本先提取标题和正文，再选择文章子目录，保存正文、图片和来源记录，随后自动执行下方四项归档检查，不需要额外参数。微信优先从 `#js_content` 提取，排除阅读入口、作者头像和点赞等界面内容。通用产品页的 main 中若有页面标题及嵌套案例卡片，优先保留 main 正文，避免只取到一张卡片；单篇文章仍保留 article 边界，结果记录实际选择质量。自动检查完成后仍需阅读正文，核对首尾、所需章节与内容边界；提取不足时改用正确正文或原始文档入口，不接受卡片或摘要作为全文。
 
 ## 输出约定
 
@@ -73,7 +73,7 @@ python .agents/skills/web-article-fetcher/scripts/fetch_article.py --url "<文�
 - `--images all|remote|selected`：独立保存默认 all；remote 保留远程图片，selected 通过重复 `--image-url URL` 指定下载项。
 - `--directory-name`：仅在用户明确指定某篇文章的子目录名时使用，命名与冲突规则见上方标题目录；默认不传。
 - `--proxy env|direct`：脚本默认值为 env；本项目调用时必须按上方约定显式传入，中国网站 direct，其他网站 env。
-- `--browser`：允许已有 Playwright 在 HTTP 403 时回退普通浏览器读取；不自动安装浏览器，不绕过登录或验证码。该参数会新建浏览器会话，不能用于接续用户已完成验证的标签页；微信人工验证按上方专用流程处理。
+- `--browser` 允许在 HTTP 403 时用已准备好的 Playwright 与 Chromium 回退普通浏览器读取。该参数会新建浏览器会话。接续微信人工验证使用上方的同一标签页快照流程，访问验证仍交给用户。
 - `--browser-snapshot PATH`：导入从同一已验证微信标签页提取的 JSON，包含来源 URL、当前 URL、浏览器／标签页标识、标题、`#js_content` HTML 和图片出现顺序。完整格式和续抓命令见上方微信流程；必须沿用原始 `--url`，不能与 `--browser` 同用。脚本读取快照归档，只对所选图片发起下载请求。
 - 退出码 0 表示提取到文章区域、自动检查通过且无图片下载失败；2 表示整页退化提取、检查不通过或图片下载不完整，需要核对；3 表示等待用户手动验证；1 表示抓取或写入失败。失败或等待验证时 `validation.status` 为 not_run，不会将旧归档的检查结果当作本次成功结果。
 

@@ -26,6 +26,52 @@ PAGE = ('<h1>测试/文章?</h1><div id="js_content"><p>开头：' + '完整中�
         '<a href="/good.png">网页链接</a></div><p>微信界面控件</p>')
 
 
+class ContentBoundaryTests(unittest.TestCase):
+    def test_product_main_is_not_replaced_by_nested_testimonial(self):
+        page = ('<nav>页面导航</nav><main><h1>产品</h1><h2>How it works</h2><p>'
+                + '线程任务与周期任务的实际产品说明。' * 8
+                + '</p><img src="/demo.png"><article>' + '客户推荐卡片。' * 12
+                + '</article></main><footer>页尾控件</footer>')
+        parsed = fetcher.parse_html(page, URL)
+        self.assertEqual(parsed['quality'], 'main-selector')
+        self.assertIn('How it works', parsed['body'])
+        self.assertIn('周期任务', parsed['body'])
+        self.assertEqual(parsed['image_urls'], ['https://example.org/demo.png'])
+        self.assertNotIn('页面导航', parsed['body'])
+        self.assertNotIn('页尾控件', parsed['body'])
+
+    def test_regular_article_and_site_specific_body_keep_their_boundaries(self):
+        article = '<article><h1>文章</h1><p>' + '文章正文。' * 30 + '</p></article>'
+        page = '<main>' + article + '<aside>关联推荐不属于原文</aside></main>'
+        parsed = fetcher.parse_html(page, URL)
+        self.assertEqual(parsed['quality'], 'article-selector')
+        self.assertNotIn('关联推荐', parsed['body'])
+        page = '<main><h1>站点标题</h1>' + article + '<div id="article_content">' + '正确正文。' * 30 + '</div></main>'
+        parsed = fetcher.parse_html(page, URL)
+        self.assertIn('正确正文', parsed['body'])
+        self.assertNotIn('文章正文', parsed['body'])
+
+    def test_relative_links_are_resolved_without_rewriting_code(self):
+        original = ('[文档](../docs "说明") ![界面](</demo.png>) [阶段](#stage) [`API`](../api)\n'
+                    '[ref]: /reference "标题"\n[^1]: 这是脚注正文，不是链接定义。\n'
+                    '<a href="next">正文</a> <img src="/front.png">\n'
+                    '`[示例](../unchanged)` ``![图](../code.png)``\n'
+                    '```md\n[示例](../unchanged)\n```\n'
+                    '~~~md\n![示例](../unchanged.png)\n~~~\n'
+                    '    [缩进代码](../unchanged)\n')
+        actual = fetcher.normalize_markdown_links(original, 'https://example.org/product/tag')
+        self.assertIn('[文档](https://example.org/docs "说明")', actual)
+        self.assertIn('![界面](<https://example.org/demo.png>)', actual)
+        self.assertIn('[阶段](https://example.org/product/tag#stage)', actual)
+        self.assertIn('[`API`](https://example.org/api)', actual)
+        self.assertIn('[ref]: https://example.org/reference "标题"', actual)
+        self.assertIn('[^1]: 这是脚注正文，不是链接定义。', actual)
+        self.assertIn('<a href="https://example.org/product/next">', actual)
+        self.assertIn('<img src="https://example.org/front.png">', actual)
+        self.assertEqual(actual[actual.index('`[示例]'):], original[original.index('`[示例]'):])
+        self.assertEqual(fetcher.normalize_markdown_links(actual, 'https://example.org/product/tag'), actual)
+
+
 class ArchiveValidationTests(unittest.TestCase):
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory(prefix="article-validation-")

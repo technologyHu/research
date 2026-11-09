@@ -39,27 +39,124 @@ class UpdateAndConflictChecks(unittest.TestCase):
         checked = task.verify_task(path)
         text = report.read_text(encoding="utf-8")
         self.assertTrue(checked["verified"])
-        self.assertIn("> 调研状态：本次局部更新完整", text)
+        self.assertIn("> 调研状态：局部复查完成", text)
+        self.assertNotIn("> 调研状态：完整", text)
+        self.assertNotIn("> 本次更新：", text)
         self.assertIn("原章节使用 v1，资料日期 2025-01-02。", text)
-        self.assertIn("> 未复核部分原缺口：核心适用边界是什么？：附录未公开", text)
-        self.assertIn("> 未复核部分原版本：示例调研（v1）", text)
-        self.assertIn("> 本次采用版本：示例调研（v2）", text)
-        self.assertIn("> 未复核部分原日期：2025-01-02", text)
+        self.assertNotIn("未复核部分原缺口", text)
+        self.assertNotIn("<!-- research-summary", text)
+        self.assertIn("> 采用版本：示例调研（v2）", text)
+        summary = task.catalog.report_summary(report)
+        self.assertIn("核心适用边界是什么？：附录未公开", summary["update"]["baseline_gaps"])
+        self.assertEqual(summary["update"]["baseline_version"], "示例调研（v1）")
+        self.assertEqual(summary["update"]["baseline_date"], "2025-01-02")
         self.assertIn("> 调研日期：2025-01-02", text)
         self.assertEqual(updates.check_update(outline), [])
         self.assertTrue(task.cleanup_plan(path)["eligible"])
+
+    def test_sync_note_is_idempotent_and_preserves_update_boundaries(self):
+        path, outline, report = self.prepare_update()
+        task.apply_update(path, {"## 分析": "## 分析\n\n[本次依据](https://example.org/original)\n\n> 调研状态：章节内引用的旧状态\n"})
+        before = report.read_text(encoding="utf-8")
+        report.write_text(before.replace("> 调研状态：局部复查完成", "> 调研状态：过期摘要", 1), encoding="utf-8")
+        command = [sys.executable, "-X", "utf8", "-B", str(Path(task.__file__).resolve()), "sync-report-note", "--work-dir", str(path)]
+        completed = subprocess.run(command, cwd=self.workspace, text=True, encoding="utf-8", capture_output=True)
+        self.assertEqual(completed.returncode, 0, completed.stdout + completed.stderr)
+        result = json.loads(completed.stdout)
+        after = report.read_text(encoding="utf-8")
+        self.assertTrue(result["updated"])
+        self.assertEqual(after, before)
+        self.assertIn("> 调研状态：章节内引用的旧状态", after)
+        self.assertFalse(task.sync_report_note(path)["updated"])
+        report.write_text(after.replace("原章节使用 v1", "范围外改动"), encoding="utf-8")
+        modified = report.read_bytes()
+        with self.assertRaises(ValueError):
+            task.sync_report_note(path)
+        self.assertEqual(report.read_bytes(), modified)
 
     def test_light_update_rechecks_only_the_requested_scope(self):
         path, _, report = self.prepare_update(light=True)
         task.apply_update(path, {"## 分析": "## 分析\n\n简短复查：[依据](https://example.org/original)。"})
         self.assertTrue(task.verify_task(path)["verified"])
-        self.assertIn("本次局部更新完整", report.read_text(encoding="utf-8"))
+        self.assertIn("> 调研状态：局部复查完成", report.read_text(encoding="utf-8"))
+
+    def test_sync_note_preserves_preamble_quotes_and_report_encoding(self):
+        path, _, report = self.write_report(self.create())
+        intro = "示例引用\n\n> 调研状态：外部原文\n\n```text\n> 核心缺口：代码示例\n```\n\n"
+        expected = report.read_text(encoding="utf-8").replace("## 分析", intro + "## 分析", 1)
+        stale = expected.replace("> 调研状态：完整", "> 调研状态：过期摘要", 1)
+        report.write_bytes(stale.replace("\n", "\r\n").encode("utf-8-sig"))
+        self.assertTrue(task.sync_report_note(path)["updated"])
+        self.assertEqual(report.read_bytes(), expected.replace("\n", "\r\n").encode("utf-8-sig"))
+        self.assertFalse(task.sync_report_note(path)["updated"])
+
+    def test_sync_migrates_legacy_opening_to_one_visible_note(self):
+        path, outline = self.populate(self.create(), partial=True)
+        report = Path(outline["output_dir"]) / "report.md"
+        summary = context.report_context(path / "outline.json")
+        body = "\n## 分析\n\n[依据](https://example.org/original)。\n"
+        legacy = "<!-- research-summary\n" + json.dumps(summary) + "\n-->\n"
+        report.write_text("# 报告\n\n" + legacy + "\n".join(context.legacy_visible_note(summary)) + "\n" + body, encoding="utf-8")
+        self.assertTrue(task.verify_task(path)["verified"])
+        self.assertTrue(task.sync_report_note(path)["updated"])
+        text = report.read_text(encoding="utf-8")
+        self.assertNotIn("<!-- research-summary", text)
+        self.assertEqual(text.count("> 调研状态："), 1)
+        self.assertTrue(text.endswith(body))
+        self.assertEqual(task.catalog.report_summary(report), {**summary, "opening_version": context.OPENING_VERSION})
+        self.assertTrue(task.verify_task(path)["verified"])
+
+    def test_previous_compact_opening_verifies_and_can_upgrade(self):
+        path, outline = self.populate(self.create(researcher="调研员甲"), partial=True)
+        report = Path(outline["output_dir"]) / "report.md"
+        summary = context.report_context(path / "outline.json")
+        task.catalog.report_metadata_path(report).write_text(json.dumps(summary), encoding="utf-8")
+        report.write_text("# 报告\n\n" + context.render_report_note(summary, 1)
+                          + "\n## 分析\n\n[依据](https://example.org/original)。\n", encoding="utf-8")
+        self.assertTrue(task.verify_task(path)["verified"])
+        self.assertTrue(task.sync_report_note(path)["updated"])
+        text = report.read_text(encoding="utf-8")
+        self.assertIn("> 调研人：调研员甲", text)
+        self.assertIn("> 调研时间：2026-11-08 12:00:00（北京时间）", text)
+        self.assertIn("> 主要待确认事项：核心适用边界是什么", text)
+        self.assertTrue(task.verify_task(path)["verified"])
 
     def test_new_section_can_be_added_without_rewriting_old_sections(self):
         path, _, report = self.prepare_update(added=["## 新版本影响"])
         task.apply_update(path, {"## 新版本影响": "## 新版本影响\n\n[来源](https://example.org/original)解释变化。"})
         self.assertTrue(task.verify_task(path)["verified"])
         self.assertIn("原章节使用 v1", report.read_text(encoding="utf-8"))
+
+    def test_v2_local_review_can_verify_and_upgrade(self):
+        path, _, report = self.prepare_update()
+        task.apply_update(path, {"## 分析": "## 分析\n\n[复查依据](https://example.org/original)。"})
+        current = report.read_text(encoding="utf-8")
+        summary = context.report_context(path / "outline.json")
+        old_note = context.render_report_note(summary, 2)
+        self.assertIn("> 调研状态：完整", old_note)
+        report.write_text(updates.with_report_note(current, old_note), encoding="utf-8")
+        task.catalog.report_metadata_path(report).write_text(json.dumps({**summary, "opening_version": 2}), encoding="utf-8")
+        self.assertTrue(task.verify_task(path)["verified"])
+        self.assertTrue(task.sync_report_note(path)["updated"])
+        self.assertEqual(report.read_text(encoding="utf-8"), current)
+        self.assertTrue(task.verify_task(path)["verified"])
+
+    def test_intro_only_update_protects_title_and_body(self):
+        _, _, report = self.write_report(self.create())
+        original = report.read_text(encoding="utf-8").replace("## 分析", "资料在 11 月 8 日查阅。\n\n## 分析", 1)
+        report.write_text(original, encoding="utf-8")
+        job = self.create(output=report.parent)
+        task.begin_update(job["work_dir"], sections=[updates.INTRO])
+        path, outline = self.populate(job)
+        task.apply_update(path, {updates.INTRO: "资料分别在 11 月 8 日和 9 日查阅。"})
+        text = report.read_text(encoding="utf-8")
+        self.assertTrue(task.verify_task(path)["verified"])
+        self.assertEqual(updates.split_preamble(text)[1], updates.split_preamble(original)[1])
+        self.assertIn("资料分别在 11 月 8 日和 9 日查阅。", text)
+        self.assertIn("> 调研状态：局部复查完成", text)
+        self.assertNotIn(updates.INTRO, text)
+        self.assertTrue(updates.check_update(outline, text.replace("# 示例调研报告", "# 改过的标题")))
+        self.assertTrue(updates.check_update(outline, text.replace("解释主要机制", "改写机制")))
 
     def test_outside_scope_edit_and_replacement_are_rejected_without_overwrite(self):
         path, _, report = self.prepare_update()
@@ -111,13 +208,17 @@ class UpdateAndConflictChecks(unittest.TestCase):
     def test_second_update_retains_earlier_unreviewed_limits(self):
         path, _, report = self.prepare_update()
         task.apply_update(path, {"## 分析": "## 分析\n\n[首次复查](https://example.org/original)"})
+        report.write_text(report.read_text(encoding="utf-8").replace("> 调研日期：2025-01-02\n", ""), encoding="utf-8")
         second = self.create(output=report.parent)
         task.begin_update(second["work_dir"], ["## 分析"])
         path2, _ = self.populate(second)
         task.apply_update(path2, {"## 分析": "## 分析\n\n[再次复查](https://example.org/original)"})
         self.assertTrue(task.verify_task(path2)["verified"])
         text = report.read_text(encoding="utf-8")
-        self.assertIn("更早记录：核心适用边界是什么？：附录未公开", text)
+        self.assertNotIn("更早记录", text)
+        update = task.catalog.report_summary(report)["update"]
+        self.assertIn("更早记录：核心适用边界是什么？：附录未公开", update["baseline_gaps"])
+        self.assertEqual(update["baseline_date"], "2025-01-02")
 
     def test_research_scope_changes_make_old_fingerprints_stale(self):
         path, outline, _ = self.prepare_update(light=True)
@@ -154,13 +255,15 @@ class UpdateAndConflictChecks(unittest.TestCase):
         if opposing:
             body += "[新资料](https://example.org/release-v2)。两者版本有差异，分别列出适用边界。\n"
         report.write_text(body, encoding="utf-8")
+        task.sync_report_note(path)
         return report
 
     def test_version_difference_keeps_both_sources_and_visible_resolution(self):
         path, outline, _, _ = self.conflict_task()
         report = self.emit_conflict_report(path, outline)
         self.assertTrue(task.verify_task(path)["verified"])
-        self.assertIn("版本差异", report.read_text(encoding="utf-8"))
+        self.assertIn("两者版本有差异", report.read_text(encoding="utf-8"))
+        self.assertNotIn("> 证据冲突：", report.read_text(encoding="utf-8"))
 
     def test_unresolved_core_conflict_is_partial_and_cannot_be_declared_settled(self):
         path, outline, record_path, data = self.conflict_task("unresolved")

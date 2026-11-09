@@ -188,6 +188,9 @@ def validate(outline_path, fields_path, results_dir=None, item_ids=None, progres
         require(key not in field_map, f"Duplicate field id: {key}")
         field_map[key] = field
         require(isinstance(field.get("description"), str) and bool(field["description"].strip()), f"{key}: description is required")
+        if "display_question" in field:
+            display_question = field["display_question"]
+            require(isinstance(display_question, str) and bool(display_question.strip()), f"{key}: display_question must be nonempty text")
         require(type(field.get("core", True)) is bool, f"{key}: core must be a boolean")
         for scope, allowed in (("applies_to", TYPES), ("item_ids", set(item_map))):
             if scope in field:

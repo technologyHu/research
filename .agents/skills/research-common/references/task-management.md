@@ -8,7 +8,7 @@ Windows 调用 Python 可加 `-X utf8 -B`，读写文档使用 UTF-8。用 subpr
 
 项目根目录须有 themes.yaml；用 themes --workspace . 查看规范 ID、父子层次、完整主题名和别名。新工作区先 init-themes，再 add-theme 登记实际主题，见 [注册表说明](theme-registry.md)。create 的 --theme 接受已登记 ID 或别名，持久保存规范 ID，不能传路径或临时发明同义名称。
 
-长期主题计划先按 [主题计划维护](theme-planning.md) 定位；单次任务的 outline／fields 继续留在本节创建的临时目录。只维护主题计划时直接编辑长期 Markdown，不必执行 create。现有命令不会自动同步或归档主题计划，也没有主题归档命令；由当前代理按规范维护。
+先按 [计划纳入条件](theme-planning.md#计划纳入条件) 确认有具体任务、明确纳入的报告或用户指定加入计划的对象。主题分类登记只维护 `themes.yaml`。符合条件的正式对象调研先定位当前计划，没有则由代理自动创建，包含单对象、brief 与已有报告补查。单次任务的 outline／fields 留在本节创建的临时目录。只维护主题计划时直接编辑 Markdown。create 命令只负责执行任务，计划准备与回写由代理负责。
 
 从主题计划进入执行、回写成果及清理前同步，使用 [流程交接表](theme-planning.md#流程接入与交接)。创建／维护主题计划本身不调用本节 list/show 代替查找计划，也不以缺少旧 .tmp 为由中断纯计划编辑。
 
@@ -115,15 +115,17 @@ python <skills_root>/research-common/scripts/research_task.py derive --work-dir 
 
 使用返回的新任务路径，先 begin-update 登记比较表、结论和新增章节等实际受影响范围，再按增加对象／维度技能扩展计划。仅查询新增对象或受影响问题；未改变的问题与版本复用旧结果，来源 accessed_at 保持实际旧日期。若用户目标转为“当前版本／最新状态”，重新确定时间范围并复核受影响旧判断，不能凭派生动作宣称来源已更新。
 
-派生结果按相同问题计算证据指纹，旧版包含 update 的指纹会在校验有效后做等价格式转换并记录数量，不改变结论、理由或来源日期。报告说明列出仍沿用的来源原访问日期；新增内容不能冒充旧证据，修改来源访问日期必须确实重新读取。旧任务已被清理时不能从散列恢复资料，应从报告与来源重建证据。
+派生结果按相同问题计算证据指纹，旧版包含 update 的指纹会在校验有效后做等价格式转换并记录数量，不改变结论、理由或来源日期。沿用来源及原访问日期写入报告的 `.meta.json`，正文按实际采用的资料引用。只有重新读取后才更新访问日期。旧任务已被清理时，从报告与来源重建所需证据。
 
 ## 从证据到报告
+
+报告落盘后或证据状态变化时，用 `research_task.py sync-report-note --work-dir <work_dir>` 同步简短开头和同目录的 `.meta.json`。工具保留正文和人工备注，局部更新仍核对原基线和范围，并拒绝覆盖并发改动。没有变化时跳过写入。新报告尚未落盘时可用 `report-note` 预览。
 
 ```text
 python <skills_root>/research-common/scripts/research_task.py report-note --work-dir <work_dir>
 ```
 
-仅在本次证据可以交付完整或部分报告时输出状态说明。将输出原样放在主报告标题下：包含隐藏摘要及可见的完成度、版本、核心缺口、存在的非核心缺口和无实质结果对象。缺口注明对应对象、问题与理由；非核心 unknown 不会因状态为完整就消失，not_applicable 不自动视为未知。隐藏摘要不算正文引用来源；仍需在正文和来源索引给出原始链接。
+仅在本次证据可以交付完整或部分报告时输出说明。开头写状态、版本、调研人、调研或最近修订时间（北京时间）及具体待确认事项。字段问题过长时，可在 `fields.json` 用 `display_question` 提供意思相同的简短写法。修订范围、缺口详情、沿用来源及原访问日期保存在 `.meta.json`，正文说明影响结论的限制并引用来源。
 
 按类型模板撰写草稿后，按 [润色快照与对照](writing-policy.md#保存快照并对照) 保存副本，执行 humanizer 并检查 diff。局部更新只处理 scratch/sections.json，通过后才 apply-update；随后完成归档、链接及 report-note 同步，再检查：
 
@@ -134,6 +136,12 @@ python <skills_root>/research-common/scripts/research_task.py verify --work-dir 
 成稿后先按 [报告语言润色](writing-policy.md#报告语言润色) 执行 humanizer 并对照证据复核，新格式报告按 [修订时间更新](#报告修订时间与目录更新) 执行 stamp-report，再使用返回的新 work_dir 运行 verify。verify 同时检查结果有效性、报告与本次结果的一致性、来源引用、图片、本地链接和交付文件；通过后把报告文件散列及研究摘要记录在当前任务的 verified.json。它不修改报告，也不验证论证的语义、润色是否完成或自动访问远程 URL。完整／部分报告都能通过，但可见状态必须准确；之后改动正文须重新 verify。
 
 不带 --outline 的 validate_report.py 仍可做独立的文件检查，但不会检查研究一致性，不能替代任务最终 verify。
+
+## 调研人署名
+
+用 `--researcher` 记录用户指定的署名。没有指定时，可沿用已确认的用户署名，或按当前分支关联的 Git 远程平台确认账户名。当前分支没有跟踪远程时，可用明确的 `origin` 或唯一的远程。多个远程且无法判断时请用户指定。远程是 GitHub 就使用该主机上已验证的 GitHub 登录名，远程是 GitCode 就使用已验证的 GitCode 登录名。例如，GitHub 可以用 `gh api --hostname github.com user --jq .login` 查询当前登录账户。仓库路径中的所有者和 `git user.name` 不能证明平台账号归属。Codex、Claude Code 等应用名不得用作署名。
+
+没有可确认的同平台账户名或既有署名时，引导用户填写希望显示的名字。等待回复期间可继续调研，暂未记录时显示「未记录」。报告和计划使用同一署名。
 
 ## 用户明确要求的附加交付
 

@@ -138,7 +138,8 @@ class ArticleRefresh(unittest.TestCase):
         self.assertTrue((path / old["local_path"]).is_file())
         self.assertEqual(after["articles"][wanted[1]["id"]], before["articles"][wanted[1]["id"]])
         report = self.write_report(path, outline, body)
-        self.assertIn("刷新失败", report.read_text(encoding="utf-8"))
+        self.assertIn("未能核对的参考资料：" + wanted[0]["url"], report.read_text(encoding="utf-8"))
+        self.assertIn("刷新失败", task.catalog.report_summary(report)["article_gaps"][0]["reason"])
         self.assertEqual(task.verify_task(path)["completion"], "partial")
         self.assertFalse(articles.acquire(outline, refresh=True, article_ids=[wanted[0]["id"]])["gaps"])
 

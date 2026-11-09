@@ -1,12 +1,14 @@
 """Shared, read-only research assessment, delivery configuration and report notes."""
 
-from datetime import date
+from datetime import date, datetime
 import hashlib
 import json
 from pathlib import Path, PurePosixPath
 import re
+import unicodedata
 
 import validate_results as results
+from research_catalog import LOCAL_REVIEW_LABELS, LOCAL_TIME, report_metadata_path
 from research_evidence import LABELS as CONFLICT_LABELS, summaries
 from research_update import update_summary
 from research_paths import checked_paths, encode_outline, check_repo_source
@@ -14,6 +16,18 @@ import research_articles as articles
 import research_dependencies as dependencies
 
 LABELS = {"complete": "完整", "partial": "部分完成", "blocked": "阻塞"}
+OPENING_VERSION = 3
+APPLICATION_NAMES = {"codex", "openaicodex", "claudecode", "chatgpt", "githubcopilot", "geminicli", "cursor"}
+
+
+def researcher_name(value):
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError("researcher must be a nonempty name")
+    name = value.strip()
+    key = re.sub(r"[\W_]+", "", unicodedata.normalize("NFKC", name).casefold())
+    if key in APPLICATION_NAMES:
+        raise ValueError("Use the user's verified GitHub/GitCode username or the name they provide, rather than an application name")
+    return name
 
 
 def digest(value):
@@ -27,7 +41,7 @@ def delivery_config(outline):
     report = raw.get("report", "report.md")
     if not isinstance(report, str) or not report or any(char in report for char in "/\\:*?\0") or Path(report).suffix.lower() != ".md":
         raise ValueError("delivery.report must be a root-level Markdown filename")
-    extras, seen = [], {report.casefold()}
+    extras, seen = [], {report.casefold(), report_metadata_path(report).name.casefold()}
     if not isinstance(raw.get("extra_files", []), list):
         raise ValueError("delivery.extra_files must be a list")
     for entry in raw.get("extra_files", []):
@@ -191,7 +205,10 @@ def report_context(outline_path, fields_path=None):
             versions.append({"id": key, "name": item["name"], "type": data["type"], "version": data.get("version"), "completion": checked["item_completion"][key]["status"]})
             for field_id in checked["item_completion"][key]["unknown_fields"]:
                 target = gaps if fields[field_id].get("core", True) else other_gaps
-                target.append({"item_id": key, "question": fields[field_id]["description"], "reason": data["fields"][field_id]["reason"]})
+                gap = {"item_id": key, "question": fields[field_id]["description"], "reason": data["fields"][field_id]["reason"]}
+                if "display_question" in fields[field_id]:
+                    gap["display_question"] = fields[field_id]["display_question"]
+                target.append(gap)
             kind = item.get("type", outline["object_type"])
             selected = results.applicable_fields(fields, key, kind, {x["id"]: x for x in outline["items"]})
             source_map = {source["id"]: source["url"] for source in data["sources"]}
@@ -218,6 +235,11 @@ def report_context(outline_path, fields_path=None):
         for key in ("directory_layout", "classification", "report_id", "created_at", "updated_at",
                     "theme_id", "theme_slug", "theme_path", "theme_name"):
             context[key] = outline[key]
+    if "researcher" in outline:
+        researcher = outline["researcher"]
+        if not isinstance(researcher, str) or not researcher.strip():
+            raise ValueError("researcher must be a nonempty name")
+        context["researcher"] = researcher.strip()
     if update is not None:
         context["update"] = update
     if other_gaps:
@@ -245,7 +267,7 @@ def safe_text(value):
     return re.sub(r"([\\`*_\[\]<>])", r"\\\1", value)
 
 
-def visible_note(context):
+def legacy_visible_note(context):
     versions = "；".join(f"{safe_text(item['name'])}（{safe_text(item['version'] or '未指定／未核实')}）" for item in context["items"])
     gaps = "；".join(f"{safe_text(gap['question'])}：{safe_text(gap['reason'])}" for gap in context["core_gaps"]) or "无"
     blocked = "；".join(safe_text(item["name"]) for item in context["items"] if item["completion"] == "blocked") or "无"
@@ -272,9 +294,79 @@ def visible_note(context):
     return lines
 
 
-def render_report_note(context):
-    encoded = json.dumps(context, ensure_ascii=False, sort_keys=True).replace("<", "\\u003c").replace(">", "\\u003e")
-    lines = [f"<!-- research-summary\n{encoded}\n-->", *visible_note(context)]
+def version_note(context):
+    items = context["items"]
+    versions = []
+    for item in items[:3]:
+        version = (item["version"] or "版本待确认").replace("Public Beta", "公测版").replace("；", "，")
+        versions.append(f"{safe_text(item['name'])}（{safe_text(version)}）")
+    if len(items) > 3:
+        versions.append(f"等 {len(items)} 个对象，详见正文")
+    return "> 采用版本：" + "、".join(versions)
+
+
+def compact_note_v1(context):
+    completion = context["completion"]
+    status = LABELS[completion]
+    if "update" in context:
+        status = "本次局部更新已完成" if completion == "complete" else f"本次局部更新{status}"
+    lines = [f"> 调研状态：{status}", version_note(context)]
+    if "update" in context:
+        update = context["update"]
+        sections = update["sections"] + update["added_sections"]
+        labels = [safe_text(section.lstrip("# ")) for section in sections[:3]]
+        scope = "、".join(labels) if len(sections) <= 3 else f"{len(sections)} 节，详见正文"
+        lines.append(f"> 本次更新：{scope}")
+    gaps = context["core_gaps"]
+    if gaps:
+        questions = [safe_text(gap["question"]) for gap in gaps[:3]]
+        detail = "、".join(questions) if len(gaps) <= 3 else f"{len(gaps)} 项，详见正文"
+        lines.append(f"> 主要待确认事项：{detail}")
+    if context.get("non_core_gaps"):
+        lines.append(f"> 其他待确认事项：{len(context['non_core_gaps'])} 项，详见正文。")
+    if context.get("article_gaps"):
+        lines.append(f"> 未能核对的参考资料：{len(context['article_gaps'])} 项，详见正文。")
+    return lines
+
+
+def visible_note(context, version=OPENING_VERSION):
+    labels = LOCAL_REVIEW_LABELS if version >= 3 and "update" in context else LABELS
+    lines = [f"> 调研状态：{labels[context['completion']]}", version_note(context)]
+    lines.append(f"> 调研人：{safe_text(context.get('researcher', '未记录'))}")
+    created = context.get("created_at")
+    updated = context.get("updated_at") or created
+    if updated:
+        moment = datetime.fromisoformat(updated).astimezone(LOCAL_TIME).strftime("%Y-%m-%d %H:%M:%S")
+        label = "最近修订时间" if updated != created else "调研时间"
+        lines.append(f"> {label}：{moment}（北京时间）")
+    else:
+        lines.append("> 调研时间：未记录")
+    names = {item["id"]: item["name"] for item in context["items"]}
+    for key, label in (("core_gaps", "主要待确认事项"), ("non_core_gaps", "其他待确认事项")):
+        details = []
+        for gap in context.get(key, []):
+            question = gap.get("display_question") or gap["question"]
+            if question in {"核心问题", "补充问题"}:
+                question = gap["reason"]
+            prefix = f"{names[gap['item_id']]}：" if len(names) > 1 else ""
+            details.append(safe_text(prefix + question).rstrip("。？?"))
+        if details:
+            lines.append(f"> {label}：" + "。".join(dict.fromkeys(details)) + "。")
+    if context.get("article_gaps"):
+        missing = [safe_text(gap.get("title") or gap["url"]) for gap in context["article_gaps"]]
+        lines.append("> 未能核对的参考资料：" + "、".join(dict.fromkeys(missing)))
+    return lines
+
+
+def render_report_note(context, version=OPENING_VERSION):
+    lines = compact_note_v1(context) if version == 1 else visible_note(context, version)
     if context["delivery"]["extra_files"]:
         lines.append("> 附加交付：" + "；".join(f"[{safe_text(entry['path'])}](<{entry['path']}>)" for entry in context["delivery"]["extra_files"]))
-    return "\n".join(lines) + "\n"
+    return "\n>\n".join(lines) + "\n"
+
+
+def report_metadata_bytes(context):
+    if "researcher" in context:
+        researcher_name(context["researcher"])
+    metadata = {**context, "opening_version": OPENING_VERSION}
+    return (json.dumps(metadata, ensure_ascii=False, sort_keys=True, indent=2) + "\n").encode("utf-8")

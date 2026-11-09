@@ -7,6 +7,8 @@ description: 为主题计划或已有调研追加对象，按同类型、跨类�
 
 先读 [路由规则](../research-common/references/routing.md) 并核对已有成果，明确新增内容的性质，再决定修改哪个任务。仅维护主题计划时按 [主题计划维护](../research-common/references/theme-planning.md) 去重、登记任务／来源和验收、记录修订后结束，不要求 outline、fields 或 .tmp 存在。
 
+用户只要求登记主题或子主题时，更新 `themes.yaml` 并校验后结束。计划追加按 [纳入条件](../research-common/references/theme-planning.md#计划纳入条件) 接收具体任务、既有报告或用户明确指定加入计划的对象。追加计划对象时先登记实际类型，并按 [类型评估规则](../research-common/references/theme-planning.md#权威性影响力与优先级) 核对可用证据再排序。资料不足时，在任务表标明评估待核实、优先级待定。主题问题关联取自现有已确认条目，无对应项时留空。
+
 ## 先分流追加内容
 
 | 新增内容 | 处理方式 |
@@ -24,7 +26,7 @@ description: 为主题计划或已有调研追加对象，按同类型、跨类�
 2. 需要修改已交付报告时，旧 full 证据仍有效可先 derive，再按 [局部更新流程](../research-common/references/report-updates.md) 登记范围。light 只在增加对象、需要逐字段续查或处理实质冲突时 promote；分析仅增加依据且仍符合单对象 brief 时可保留 light。
 3. 对真正新增的对象／分析主题生成稳定 id，补充实际类型、版本和问题，保持单次任务的 items 类型一致。检查 fields 的 applies_to／item_ids，仅将新增对象和语义改变涉及的字段标 pending／stale；其余仍有效结果和原访问日期保留。分析来源按 [配置约定](../research-common/references/research-config.md#分析洞察引用已有报告) 登记，修改采用范围后重新核对依赖判断，不能只更新散列接受变化。
 4. 实质范围变化时更新所选 outline 的 revision，并按 [范围对照](../research-common/references/theme-planning.md#本次执行范围快照与回写前对照) 同步本次口径。只改长期待办时不改原执行快照。按 [依赖规则](../research-common/references/theme-planning.md#依赖的满足失效与复核) 记录前置成果、接受条件及受影响下游，保留原关系和接受记录。
-5. 关联主题计划时回写新增对象／问题／来源、实际成果、类型评估和补查任务。对象背景按实际类型与问题需要核查；analysis 优先检查成果依据、解释目标、样本范围及实际观点归属，不对每份来源重做机构或资金调查。
+5. 关联主题计划时回写新增对象、来源、实际成果、类型评估和补查任务。任务可关联适用的已确认主题问题。拟新增主题核心问题时按 [确认流程](../research-common/references/theme-planning.md#核心问题的确认) 处理。对象背景按实际类型与问题需要核查，analysis 优先检查成果依据、解释目标、样本范围及实际观点归属。
 6. 用户要求继续交付时，对象证据的实际缺口可由 [research-deep](../research-deep/SKILL.md) 补查；分析来源采用、判断更新及其受影响范围返回调用方执行。证据齐备时可使用 [research-report](../research-report/SKILL.md) 成稿与校验，不调用顶层入口。只改计划或登记来源时汇报实际修改与剩余缺口后结束。
 
 最终保存与清理遵循 [交付规范](../research-common/references/delivery-policy.md)，不为分类或追加搬迁已有资料。

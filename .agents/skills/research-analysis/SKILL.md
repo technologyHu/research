@@ -9,10 +9,12 @@ description: 基于已有调研输出，围绕某一主题或问题开展综合�
 
 ## 进入与范围
 
+用户只要求登记主题或子主题时，按 [主题注册表](../research-common/references/theme-registry.md) 更新 `themes.yaml`，校验后即可交付。分析计划按共用的 [纳入条件](../research-common/references/theme-planning.md#计划纳入条件) 维护。仅有主题名称时，先明确具体分析目标或要维护的已有报告。
+
 - 先读取项目根的 themes.yaml，按 [统一主题词表](../research-common/references/theme-registry.md) 选择稳定主题 ID，新主题先登记。主题可有多级，主题各级、主题与专题之间都用 `__` 连接，例如 agent__memory__architecture__mechanisms__tradeoffs；每级 slug 内的单词仍用 `-`。analysis-reports 中只创建一层带时间后缀的报告目录，分类记录保留规范主题 ID。专题标识与主题相同时不重复拼接；旧名称原地维护，修订不自动转换。
 
 - 直接接收分析目标与已有成果，沿用已明确目标、来源和任务，不重复规划；通过 [research-report](../research-report/SKILL.md) 成稿与校验。
-- 持续主题、分阶段分析或明确要求计划时，使用共用的 [计划规则](../research-common/references/theme-planning.md) 和 [模板](../research-common/references/theme-plan-template.md)，维护 `analysis-reports/<主题名>.plan.md`，新计划主题名按层级用 `__` 连接；先复用旧位置计划，不重复创建。计划只列分析主题／问题；输入报告作为来源登记，基础补查通过链接指向 research-reports 中对应任务。只要计划时保存后结束。
+- 持续主题、分阶段分析或明确要求计划时，按共用的 [计划规则](../research-common/references/theme-planning.md) 和 [两表模板](../research-common/references/theme-plan-template.md) 维护 `analysis-reports/<主题名>.plan.md`，新计划主题名按层级用 `__` 连接，已有计划原地复用。核心问题表填写用户已确认的共同问题。分析专题及本轮问题写入任务行，按 analysis 口径评估后排序。输入报告作为依据，基础补查链接到 research-reports 的对应任务。只要计划时保存后结束。
 - 按共用的 [任务管理](../research-common/references/task-management.md) 为 `--type analysis` 创建或恢复任务；工具自动选择 analysis-reports。专题 target 可用 `__` 分隔多个命名片段，片段内用 `-` 连接单词，数量不固定；旧名称原样维护，详见 [目录命名](../research-common/references/delivery-policy.md#目录命名)。单主题 brief 可用 light，其余按复杂度用 full；结论更新先按 [局部更新](../research-common/references/report-updates.md) 登记范围。两边同名主题的计划分别维护各自工作，相互引用，不复制为两份同范围计划。
 - 分析对象是一个主题、问题或需要比较的分析对象，输入报告是依据。一个主题可以有多个分析维度；采用多份、不同类型报告不自动增加 items 或改成 comparison，也不恢复 topic 类型。
 - 按 [成果核对](../research-common/references/routing.md#已有成果核对与复用) 定位相关报告，明确本轮关注点、样本选择、版本／时间和覆盖边界。贡献者思考是可选输入，没有预设观点也可以开展明确标为“本次分析”的综合与推导。

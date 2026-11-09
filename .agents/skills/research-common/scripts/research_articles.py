@@ -179,6 +179,8 @@ def commit_candidate(outline, data, key, result):
     elif valid_previous and result.get("status") in {"fetched", "needs_review"} and body_fingerprint(outline, previous) == body_fingerprint(outline, result):
         previous["last_fetch_attempt"] = {**attempt, "status": "unchanged"}
         previous.pop("refresh_gap", None)
+        known = {image["url"] for image in previous.get("images", [])}
+        previous.setdefault("images", []).extend(image for image in result.get("images", []) if image["url"] not in known)
     else:
         result.update(review_status="pending", archive=None)
         result["requires_result_review"] = bool(previous.get("requires_result_review") or obtained_before)
@@ -275,7 +277,7 @@ def acquire(outline, image_policy="remote", image_urls=(), proxy="env", browser=
 
 def import_body(outline, url, file, title, method="provided", final_url=None):
     resolved_url = canonical(final_url or url)
-    if method not in {"browser", "pdf", "provided"} or not isinstance(title, str) or not title.strip():
+    if method not in {"http", "browser", "pdf", "provided"} or not isinstance(title, str) or not title.strip():
         raise ValueError("Import needs a title and a supported acquisition method")
     wanted = next((item for item in requirements(outline) if item["url"] == canonical(url)), None)
     if wanted is None:
@@ -289,13 +291,22 @@ def import_body(outline, url, file, title, method="provided", final_url=None):
     body = source.read_text(encoding="utf-8-sig").strip()
     if len(body) < 40 or not title.strip():
         raise ValueError("Import needs a substantive body and title")
+    engine = fetcher()
+    body = engine.normalize_markdown_links(body, resolved_url)
+    images = []
+    for image_url in dict.fromkeys(engine.image_targets(body)):
+        if urlsplit(image_url).scheme not in {"http", "https"}:
+            continue
+        canonical(image_url)  # Validate without dropping a fragment used by the image link.
+        images.append({"id": "image-" + hashlib.sha256(image_url.encode("utf-8")).hexdigest()[:16],
+                       "url": image_url, "status": "remote", "path": None})
     now = datetime.now(timezone.utc)
     destination = local(work, "sources/articles/" + wanted["id"] + "/versions/" + uuid.uuid4().hex + "/article.md")
     destination.parent.mkdir(parents=True, exist_ok=True)
     destination.write_text(f"# {title}\n\nSource: {wanted['url']}\n\nAccessed (UTC): {now.date().isoformat()}\n\n{body}\n", encoding="utf-8")
     candidate = {"url": wanted["url"], "final_url": resolved_url, "title": title,
         "status": "fetched", "review_status": "pending", "method": method, "accessed_at": now.date().isoformat(), "fetched_at": now.isoformat(),
-        "local_path": destination.relative_to(work).as_posix(), "content_sha256": sha(destination), "images": [], "archive": None}
+        "local_path": destination.relative_to(work).as_posix(), "content_sha256": sha(destination), "images": images, "archive": None}
     commit_candidate(outline, data, wanted["id"], candidate)
     return wanted
 

@@ -68,7 +68,7 @@ extracted = {
 
 ## 4. 用快照入口继续归档
 
-下方 CLI 用于独立保存。research 受管任务保持当前 work_dir：调用 load_browser_snapshot() 校验快照，取得 parsed["title"] 和 parsed["body"] 后，将保留远程图片链接的 Markdown 写入任务 scratch/，经 research_task.py import-article --method browser 导入并 review-article；补图使用 download-article-images --proxy direct，实际引用后再由 archive-article 归档。不要直接覆盖受管版本、articles.json 或正式报告目录。旧受管接口遇到验证以 failed 状态记录缺口，并保留 requires_user_action、user_message 和 next_action；仍应交接同一浏览器页面给用户。
+下方 CLI 用于独立保存。受管调研任务使用当前 work_dir。调用 load_browser_snapshot() 校验快照，取得 parsed["title"] 和 parsed["body"] 后，将保留远程图片链接的 Markdown 写入任务 scratch/，经 research_task.py import-article --method browser 导入并 review-article。补图使用 download-article-images --proxy direct，实际引用后由 archive-article 归档。受管版本、articles.json 和正式报告目录由任务工具维护。旧受管接口遇到验证以 failed 状态记录缺口，保留 requires_user_action、user_message 和 next_action，并把同一浏览器页面交接给用户。
 
 将上一步的对象保存为 UTF-8 JSON，例如任务 `scratch/verified-page.json`，从项目根执行：
 

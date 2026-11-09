@@ -42,6 +42,15 @@ class TaskWorkflow(unittest.TestCase):
                 kwargs["target"] = "example-research"
         return task.create_task(self.workspace, "示例调研", "paper", **kwargs)
 
+    def test_researcher_rejects_application_names(self):
+        for application in ("Codex", "Claude Code", "CLAUDE-CODE"):
+            with self.subTest(application=application), self.assertRaisesRegex(ValueError, "application name"):
+                self.create(researcher=application)
+        job = self.create(researcher=" researcher-1 ")
+        self.assertEqual(job["researcher"], "researcher-1")
+        with self.assertRaisesRegex(ValueError, "application name"):
+            context.report_metadata_bytes({"researcher": "OpenAI Codex"})
+
     def populate(self, job, partial=False):
         path, _, outline = task.open_task(job["work_dir"])
         outline["items"][0]["version"] = "v1"
@@ -72,6 +81,7 @@ class TaskWorkflow(unittest.TestCase):
         expected = context.report_context(path / "outline.json")
         report = output / expected["delivery"]["report"]
         report.write_text("# 示例调研报告\n\n" + context.render_report_note(expected) + "\n## 分析\n\n根据[原始资料](https://example.org/original)，解释主要机制和适用条件。\n", encoding="utf-8")
+        task.sync_report_note(path)
         return path, outline, report
 
     def test_create_isolated_full_task(self):
@@ -166,7 +176,7 @@ class TaskWorkflow(unittest.TestCase):
     def test_version_and_gap_summary_cannot_be_silently_removed(self):
         path, outline, report = self.write_report(self.create(), partial=True)
         text = report.read_text(encoding="utf-8")
-        report.write_text("\n".join(line for line in text.splitlines() if not line.startswith(("> 采用版本：", "> 核心缺口："))), encoding="utf-8")
+        report.write_text("\n".join(line for line in text.splitlines() if not line.startswith(("> 采用版本：", "> 主要待确认事项："))), encoding="utf-8")
         self.assertFalse(reports.validate(outline["output_dir"], outline_path=path / "outline.json")["valid"])
 
     def test_metadata_does_not_count_as_a_visible_source_citation(self):
@@ -175,6 +185,17 @@ class TaskWorkflow(unittest.TestCase):
         checked = reports.validate(outline["output_dir"], outline_path=path / "outline.json")
         self.assertFalse(checked["valid"])
         self.assertTrue(any("not cited" in error for error in checked["errors"]))
+
+    def test_standalone_report_checks_paired_metadata_for_each_markdown_file(self):
+        _, _, report = self.write_report(self.create())
+        with report.open("a", encoding="utf-8") as stream:
+            stream.write("\n[补充报告](details.md)\n\n```markdown\n<!-- research-summary\n{}\n-->\n```\n")
+        detail = report.with_name("details.md")
+        detail.write_text("# 补充报告\n\n> 调研状态：完整\n>\n> 采用版本：v1\n", encoding="utf-8")
+        check = reports.validate(report.parent)
+        self.assertIn("Missing valid report metadata: details.meta.json", check["errors"])
+        task.catalog.report_metadata_path(detail).write_text('{"completion":"complete"}', encoding="utf-8")
+        self.assertTrue(reports.validate(report.parent)["valid"])
 
     def test_changed_evidence_invalidates_report_note(self):
         path, outline, _ = self.write_report(self.create())
@@ -185,7 +206,7 @@ class TaskWorkflow(unittest.TestCase):
         task.write_json(record_path, data)
         checked = reports.validate(outline["output_dir"], outline_path=path / "outline.json")
         self.assertFalse(checked["valid"])
-        self.assertTrue(any("summary is stale" in message for message in checked["errors"]))
+        self.assertTrue(any("metadata is stale" in message for message in checked["errors"]))
 
     def test_explicit_extra_files_and_custom_report_name(self):
         job = self.create(report="分析.md", extras=[{"path": "exports/report.pdf", "reason": "用户明确要求 PDF"}])

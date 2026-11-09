@@ -34,6 +34,7 @@ class DeliveryIdentity(unittest.TestCase):
         destination = cleaned / report.relative_to(self.workspace)
         destination.parent.mkdir(parents=True)
         shutil.copyfile(report, destination)
+        shutil.copyfile(task.catalog.report_metadata_path(report), task.catalog.report_metadata_path(destination))
         self.assertFalse((destination.parent / ".tmp").exists())
         return job, cleaned, destination
 
@@ -84,6 +85,13 @@ class DeliveryIdentity(unittest.TestCase):
         self.assertNotEqual(first["work_dir"], second["work_dir"])
         self.assertNotEqual(first["report_id"], separate["report_id"])
         self.assertFalse((self.workspace / ".tmp/.report-write.lock").exists())
+
+    def test_matching_draft_can_resume_before_metadata_is_written(self):
+        first = self.analysis()
+        report = Path(first["output_dir"]) / "report.md"
+        report.write_text("# 草稿\n\n> 调研状态：完整\n>\n> 采用版本：v1\n", encoding="utf-8")
+        resumed = self.analysis()
+        self.assertEqual(resumed["report_id"], first["report_id"])
 
     def test_every_sibling_identity_is_checked_instead_of_accepting_the_first_one(self):
         first, second = self.analysis(), self.analysis()
@@ -152,7 +160,9 @@ class DeliveryIdentity(unittest.TestCase):
     def test_stale_supplementary_summary_does_not_change_the_main_report_identity(self):
         first = self.analysis()
         work, _, report = self.write_report(first)
-        report.with_name("details.md").write_bytes(report.read_bytes())
+        details = report.with_name("details.md")
+        details.write_bytes(report.read_bytes())
+        shutil.copyfile(task.catalog.report_metadata_path(report), task.catalog.report_metadata_path(details))
         revised = research_revision.stamp_report(work, "2026-11-09T13:14:15+08:00")
         supplemental = Path(revised["output_dir"]) / "details.md"
         self.assertEqual(task.catalog.report_summary(supplemental)["updated_at"], first["updated_at"])

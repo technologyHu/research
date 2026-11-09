@@ -79,6 +79,7 @@ class ArticleWorkflow(unittest.TestCase):
     def write_report(self, path, outline, body):
         report = Path(outline["output_dir"]) / "report.md"
         report.write_text("# 调研报告\n\n" + context.render_report_note(context.report_context(path / "outline.json")) + "\n## 分析\n\n根据[既有证据](https://example.org/original)分析。\n" + body + "\n", encoding="utf-8")
+        task.sync_report_note(path)
         return report
 
     def test_required_articles_are_deduplicated_fetched_and_need_body_review(self):
@@ -114,7 +115,7 @@ class ArticleWorkflow(unittest.TestCase):
         self.assertEqual(record["status"], "failed")
         self.assertIsNone(record["local_path"])
         report = self.write_report(path, outline, "指定文章未获得正文，相关判断不作结论。")
-        self.assertIn("参考文章缺口", report.read_text(encoding="utf-8"))
+        self.assertIn("未能核对的参考资料：" + record["url"], report.read_text(encoding="utf-8"))
         self.assertEqual(task.verify_task(path)["completion"], "partial")
 
     def test_body_fallback_requires_explicit_review_and_rejection_keeps_gap(self):
@@ -211,6 +212,63 @@ class ArticleWorkflow(unittest.TestCase):
         self.assertFalse(articles.assessment(outline)["gaps"])
         with self.assertRaises(ValueError):
             articles.import_body(outline, self.base + "/articles/one", self.workspace / "outside.md", "外部文件")
+
+    def test_imported_images_can_be_downloaded_and_archived_without_refetching_body(self):
+        path, outline = self.setup_articles()
+        extracted = path / "scratch/extracted.md"
+        extracted.parent.mkdir()
+        url = self.base + "/good.png"
+        extracted.write_text("# 原文\n\n" + "实际提取的原始正文。" * 20 + f"\n\n![界面]({url})\n\n![重复]({url})", encoding="utf-8")
+        key = articles.import_body(outline, self.base + "/articles/one", extracted, "原文", "browser")["id"]
+        record = articles.load_manifest(outline)["articles"][key]
+        self.assertEqual(len(record["images"]), 1)
+        # Older imports did not register images. Reimport must repair only that metadata.
+        data = articles.load_manifest(outline)
+        data["articles"][key]["images"] = []
+        articles.save_manifest(outline, data)
+        articles.review(outline, key, "accept", "已核对正文及界面原图来源")
+        articles.import_body(outline, self.base + "/articles/one", extracted, "原文", "browser")
+        repaired = articles.load_manifest(outline)["articles"][key]
+        self.assertEqual(repaired["local_path"], record["local_path"])
+        self.assertEqual(repaired["review_status"], "accepted")
+        self.assertEqual(len(repaired["images"]), 1)
+        downloaded = articles.download_images(outline, key, [url], proxy="direct")
+        self.assertFalse(downloaded["failures"])
+        image = articles.load_manifest(outline)["articles"][key]["images"][0]
+        self.write_report(path, outline, "[原文](" + self.base + "/articles/one)")
+        saved = articles.archive(outline, key, ["report.md#分析"], [image["id"]])
+        self.assertEqual((Path(outline["output_dir"]) / saved["images"][0]["path"]).read_bytes(), PNG)
+        articles.import_body(outline, self.base + "/articles/one", extracted, "原文", "browser")
+        retained = articles.load_manifest(outline)["articles"][key]
+        self.assertEqual(retained["images"][0]["status"], "downloaded")
+        self.assertEqual(retained["archive"], saved)
+
+    def test_import_resolves_relative_links_against_final_url_and_retains_cached_assets(self):
+        path, outline = self.setup_articles()
+        extracted = path / "scratch/extracted.md"
+        extracted.parent.mkdir()
+        body = "# 原文\n\n" + "实际提取的原始正文。" * 20
+        body += '\n\n[详情](../details) ![界面](../good.png#preview)\n`![代码](../not-an-asset.png)`\n'
+        extracted.write_text(body, encoding="utf-8")
+        key = articles.import_body(outline, self.base + "/articles/one", extracted, "原文", "http", self.base + "/redirected/page")["id"]
+        record = articles.load_manifest(outline)["articles"][key]
+        saved = (path / record["local_path"]).read_text(encoding="utf-8")
+        self.assertIn(f"[详情]({self.base}/details)", saved)
+        self.assertIn(f"![界面]({self.base}/good.png#preview)", saved)
+        self.assertIn('`![代码](../not-an-asset.png)`', saved)
+        self.assertEqual(record["method"], "http")
+        image_url = self.base + "/good.png#preview"
+        self.assertEqual([image["url"] for image in record["images"]], [image_url])
+        articles.review(outline, key, "accept", "已对照原页面核对正文与原图")
+        self.assertFalse(articles.download_images(outline, key, [image_url], proxy="direct")["failures"])
+        old = articles.load_manifest(outline)["articles"][key]
+        extracted.write_text(articles.fetcher().normalize_markdown_links(body, old["final_url"]), encoding="utf-8")
+        articles.import_body(outline, self.base + "/articles/one", extracted, "原文", "http", old["final_url"])
+        current = articles.load_manifest(outline)["articles"][key]
+        self.assertEqual(current["local_path"], old["local_path"])
+        self.assertEqual(current["accessed_at"], old["accessed_at"])
+        self.assertEqual(current["review_status"], "accepted")
+        self.assertEqual(current["images"], old["images"])
 
     def test_article_that_failed_acquisition_cannot_support_a_confirmed_claim(self):
         path, outline = self.setup_articles(("/blocked",))

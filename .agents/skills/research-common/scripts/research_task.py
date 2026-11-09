@@ -13,7 +13,7 @@ import sys
 import tempfile
 import uuid
 
-from research_context import delivery_config, light_fingerprint, render_report_note, report_context
+from research_context import delivery_config, light_fingerprint, render_report_note, report_context, report_metadata_bytes, researcher_name
 import validate_report
 import validate_results
 import research_update
@@ -212,7 +212,7 @@ def claimed_metadata(output, workspace, outline, implicit):
     return metadata
 
 
-def create_task(workspace, topic, kind, depth="standard", workflow="auto", items=None, fields=None, output=None, goal=None, extras=None, report="report.md", theme=None, references=None, target=None, native_target_name=None):
+def create_task(workspace, topic, kind, depth="standard", workflow="auto", items=None, fields=None, output=None, goal=None, extras=None, report="report.md", theme=None, references=None, target=None, native_target_name=None, *, researcher=None):
     workspace = Path(workspace).resolve()
     if not workspace.is_dir() or not topic.strip() or kind not in validate_results.TYPES or depth not in {"brief", "standard", "detailed"}:
         raise ValueError("An existing workspace, topic, type and valid depth are required")
@@ -242,6 +242,7 @@ def create_task(workspace, topic, kind, depth="standard", workflow="auto", items
     parts = output.relative_to(workspace).parts if output else ()
     existing_report = bool(output and (output / report).is_file())
     previous = catalog.report_summary(output / report) if existing_report else {}
+    researcher = previous.get("researcher") if researcher is None else researcher
     dated_existing = bool(previous.get("report_id") and previous.get("directory_layout") == "dated-flat")
     research_shape = len(parts) == 4 and parts[0] == "research-reports" and parts[2] == category and category != "analysis"
     analysis_shape = len(parts) == 2 and parts[0] == "analysis-reports" and category == "analysis"
@@ -322,6 +323,8 @@ def create_task(workspace, topic, kind, depth="standard", workflow="auto", items
     if directory_layout == "dated-flat":
         outline.update(metadata, theme_id=theme_id, theme_slug=theme_slug,
                        theme_path=entry["path"], theme_name=entry["label"])
+    if researcher is not None:
+        outline["researcher"] = researcher_name(researcher)
     if native_target_name:
         outline["directory_naming"] = {"native_target_name": native_target_name, "exception": "official Chinese name"}
     delivery_config(outline)
@@ -358,7 +361,7 @@ def describe_task(work_dir):
     result["verification_receipt_present"] = (path / "verified.json").is_file()
     if "classification" in outline:
         result["classification"] = outline["classification"]
-    for key in ("report_id", "created_at", "updated_at", "theme_id", "theme_slug"):
+    for key in ("report_id", "created_at", "updated_at", "theme_id", "theme_slug", "researcher"):
         if key in outline:
             result[key] = outline[key]
     if outline.get("reference_articles"):
@@ -520,22 +523,70 @@ def apply_update(work_dir, replacements):
     report = Path(outline["output_dir"]) / delivery_config(outline)["report"]
     no_links(report, Path(outline["output_dir"]))
     previous = research_update.sha(report)
-    report, content = research_update.compose_update(outline, replacements, render_report_note(report_context(path / "outline.json")))
-    temporary = None
-    try:
-        scratch = path / "scratch" if outline.get("path_mode") == MODE else report.parent
-        scratch.mkdir(exist_ok=True)
-        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", newline="\n", prefix=".research-update-", dir=scratch, delete=False) as stream:
-            temporary = Path(stream.name)
-            stream.write(content)
+    context = report_context(path / "outline.json")
+    report, content = research_update.compose_update(outline, replacements, render_report_note(context))
+    replace_report(path, outline, report, content, previous, context)
+    return {"updated": True, "report": str(report), "scope": outline["update"]["sections"] + outline["update"]["added_sections"], "note": "Run verify after reviewing the updated prose and citations."}
+
+
+def replace_report(path, outline, report, content, previous, context):
+    """Write the checked Markdown and its metadata without losing a concurrent edit."""
+    from research_revision import write_atomic
+    root = Path(outline["output_dir"])
+    metadata = catalog.report_metadata_path(report)
+    encoded = report_metadata_bytes(context)
+    with delivery_lock(root, Path(outline["workspace"])):
+        no_links(report, root)
+        no_links(metadata, root)
         if research_update.sha(report) != previous:
             raise ValueError("Report changed while composing the update; inspect concurrent edits before retrying")
-        no_links(report, Path(outline["output_dir"]))
-        temporary.replace(report)
-    finally:
-        if temporary is not None and temporary.exists():
-            temporary.unlink()
-    return {"updated": True, "report": str(report), "scope": outline["update"]["sections"] + outline["update"]["added_sections"], "note": "Run verify after reviewing the updated prose and citations."}
+        original = report.read_bytes()
+        changed = content.encode("utf-8") != original
+        metadata_changed = not metadata.exists() or metadata.read_bytes() != encoded
+        if not changed and not metadata_changed:
+            return False
+        temporary = None
+        scratch = report.parent
+        if outline.get("path_mode") == MODE:
+            scratch = path / "scratch" if changed else path
+        scratch.mkdir(exist_ok=True)
+        try:
+            if changed:
+                with tempfile.NamedTemporaryFile(mode="wb", prefix=".research-update-", dir=scratch, delete=False) as stream:
+                    temporary = Path(stream.name)
+                    stream.write(content.encode("utf-8"))
+                if research_update.sha(report) != previous:
+                    raise ValueError("Report changed while composing the update; inspect concurrent edits before retrying")
+                temporary.replace(report)
+                temporary = None
+            if metadata_changed:
+                write_atomic(metadata, encoded, staging_dir=scratch)
+        except Exception:
+            if changed and temporary is None and report.read_bytes() != original:
+                write_atomic(report, original, staging_dir=scratch)
+            raise
+        finally:
+            if temporary is not None:
+                temporary.unlink(missing_ok=True)
+        return changed or metadata_changed
+
+
+def sync_report_note(work_dir):
+    path, _, outline = open_task(work_dir)
+    root = Path(outline["output_dir"])
+    report = root / delivery_config(outline)["report"]
+    no_links(report, root)
+    previous = research_update.sha(report)
+    raw = report.read_bytes()
+    original = raw.decode("utf-8-sig")
+    context = report_context(path / "outline.json")
+    content = research_update.with_report_note(original, render_report_note(context))
+    errors = research_update.check_update(outline, content)
+    if errors:
+        raise ValueError("; ".join(errors))
+    bom = "\ufeff" if raw.startswith(b"\xef\xbb\xbf") else ""
+    changed = replace_report(path, outline, report, bom + content, previous, context)
+    return {"updated": changed, "report": str(report), "note": "The opening and its metadata were synchronized; run verify before delivery."}
 
 
 def verify_task(work_dir):
@@ -583,6 +634,7 @@ def main():
     create.add_argument("--item", action="append", dest="items")
     create.add_argument("--field", action="append", dest="fields")
     create.add_argument("--goal")
+    create.add_argument("--researcher", help="User's verified GitHub/GitCode username or preferred signature")
     create.add_argument("--theme", help="Classification theme such as agent-memory; defaults to general")
     create.add_argument("--target", help="Report subject/scope, independent of item ID: join any number of slug segments with __ (64 characters total); legacy - and -- names remain supported; single-object research defaults to the explicit item ID; comparisons add compare- when needed")
     create.add_argument("--native-target-name", help="Official Chinese product/project name, retained as an explicit directory naming exception")
@@ -593,7 +645,7 @@ def main():
     listing = commands.add_parser("list")
     listing.add_argument("--workspace", required=True, type=Path)
     listing.add_argument("--topic")
-    for name in ("stamp-report", "show", "promote", "derive", "report-note", "verify", "cleanup-plan", "begin-update", "apply-update", "add-article", "fetch-articles", "download-article-images", "import-article", "review-article", "archive-article"):
+    for name in ("stamp-report", "show", "promote", "derive", "report-note", "sync-report-note", "verify", "cleanup-plan", "begin-update", "apply-update", "add-article", "fetch-articles", "download-article-images", "import-article", "review-article", "archive-article"):
         cmd = commands.add_parser(name)
         cmd.add_argument("--work-dir", required=True, type=Path)
         if name == "promote":
@@ -627,7 +679,7 @@ def main():
             cmd.add_argument("--url", required=True)
             cmd.add_argument("--file", required=True, type=Path)
             cmd.add_argument("--title", required=True)
-            cmd.add_argument("--method", choices=("browser", "pdf", "provided"), default="provided")
+            cmd.add_argument("--method", choices=("http", "browser", "pdf", "provided"), default="provided")
             cmd.add_argument("--final-url")
         if name in {"review-article", "archive-article"}:
             cmd.add_argument("--id", required=True)
@@ -669,7 +721,7 @@ def main():
                 if not sep:
                     raise ValueError("--extra uses path=reason")
                 extras.append({"path": path, "reason": reason})
-            result = create_task(args.workspace, args.topic, args.kind, args.depth, args.workflow, args.items, args.fields, args.output, args.goal, extras, args.report, args.theme, args.references, args.target, args.native_target_name)
+            result = create_task(args.workspace, args.topic, args.kind, args.depth, args.workflow, args.items, args.fields, args.output, args.goal, extras, args.report, args.theme, args.references, args.target, args.native_target_name, researcher=args.researcher)
         elif args.command == "list":
             result = list_tasks(args.workspace, args.topic)
         elif args.command == "show":
@@ -699,8 +751,13 @@ def main():
             result["manifest"] = str(path / "articles.json")
         elif args.command == "report-note":
             path, _, _ = open_task(args.work_dir)
-            print(render_report_note(report_context(path / "outline.json")))
+            context = report_context(path / "outline.json")
+            if "researcher" in context:
+                researcher_name(context["researcher"])
+            print(render_report_note(context))
             return 0
+        elif args.command == "sync-report-note":
+            result = sync_report_note(args.work_dir)
         elif args.command == "verify":
             result = verify_task(args.work_dir)
         else:

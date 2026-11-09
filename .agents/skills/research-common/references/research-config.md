@@ -72,6 +72,25 @@ fields:
 
 `core` 为可选布尔值，默认 true，表示该问题是否属于用户研究目标的核心。附加资料可在规划时设为 false；不能为了让检查通过而事后降低核心性。它只影响完成度，不改变同一问题的证据是否仍可复用。
 
+## 主题计划关联
+
+符合 [计划纳入条件](theme-planning.md#计划纳入条件) 的正式对象调研先复用或自动创建计划。有计划关联的新执行任务在 outline 中记录以下信息。旧任务恢复时补齐实际核对过的关系。
+
+```yaml
+theme_plan:
+  path: research-reports/agent-memory/plan.md
+  revision: 1
+  task_ids: [T001]
+  question_fields:
+    Q001: [method, limitations]
+```
+
+path 相对于项目根，指向当前真实计划。revision 为开始执行时实际读取的修订。task_ids 必须已在计划中定义。question_fields 只映射用户已确认且与本次相关的主题核心问题，full 映射到实际字段，light 用 `Q001: [brief]` 表示整份笔记。无此关联时可写 `question_fields: {}` 或省略。本轮问题仍写入任务范围与字段。记录由代理核对后填写，create 只负责建立执行任务。字段 ID 在 fields 中存在，计划 ID、对象 ID 与 run_id 分别使用。
+
+结构化关联只提供定位信息；本次目标、版本、验收与依赖原文仍保存到 scope/。报告 verify 不读取主题 Markdown 或证明计划验收，代理在开始、恢复、成稿和正式回写前按 [范围对照](theme-planning.md#本次执行范围快照与回写前对照) 核实。计划修订或排序变化本身不使未受影响的证据过期。成果与缺口回填当前计划，临时目录清理后保留持久摘要。
+
+恢复或派生任务时，用当前计划核对 `question_fields`。已移除或尚未经确认的问题 ID 不作为本次关联，旧快照中的映射保留作历史记录。依据实际研究范围是否变化决定证据复核范围。
+
 ## 字段输入指纹
 
 开始分析前运行：
@@ -179,7 +198,7 @@ repo: 的限制仅针对项目内本地报告引用，原始论文、官方文�
 
 校验器会核对实际文件与 sha256；来源变化后先复核采用的主张及相关推导，再更新版本、散列与结果，不通过只改散列跳过复核。正文仅放行已用于证据的已有报告相对链接，并检查章节锚点；该例外不扩大普通报告、计划或图片的输出边界。不复制来源报告为本篇附件，不将报告转述当作原始证据。
 
-任务清理后，标准 analysis 目录中的独立文件检查可依据报告保存的 research-summary 来源清单核对这些相对链接，仍返回 consistency_checked=false；它不能恢复逐字段证据、核对原散列或证明研究一致性。再次更新判断时按实际需要重建或恢复证据。
+任务清理后，独立文件检查可依据报告 `.meta.json` 的来源清单核对这些相对链接，也兼容旧报告的 `research-summary`。该检查仍返回 `consistency_checked=false`。再次更新判断时按实际需要重建或恢复证据。
 
 ## 增量更新
 
@@ -210,7 +229,7 @@ progress.json 按对象 id、字段 id 保存状态：
 
 confirmed 和有证据、有理由的 inferred 计为实质回答。not_applicable 可以解释范围，但全部字段均不适用不能算完成调研。unknown 保留为合法结构记录，不用编造内容换取通过。此完成度衡量问题覆盖，不自动评判学术质量或来源是否真的支持结论。
 
-report-note 汇总所有适用 unknown：核心项进入 core_gaps，非核心项进入 non_core_gaps，并在报告可见说明中保留对象、问题和理由。非核心缺口单独存在时可为 complete；遗漏其可见说明同样不能通过报告一致性检查。not_applicable 不混入未知项。
+所有适用的 `unknown` 都保存在报告元数据中，核心项进入 `core_gaps`，非核心项进入 `non_core_gaps`，注明对象、问题和理由。开头只简要提醒读者，正文解释实际影响。仅有非核心缺口时可为 `complete`。`not_applicable` 单独处理。
 
 `report_ready` 仅在结构有效且完成度为 complete／partial 时为 true。`--item` 只检查本批次，输出 `scope: selected`；最终成稿必须去掉该选项检查全部计划对象。
 
@@ -230,7 +249,7 @@ delivery:
 
 report 必须是输出根目录中的 Markdown 文件名。extra_files 是精确相对路径和用户要求的理由，不接受通配符、绝对路径或目录逃逸。未登记的额外文件仍会报错，登记的文件必须实际存在。
 
-用 research_task.py report-note 生成本次报告的状态说明，放在标题下。它包含可见的完成度、采用版本、核心缺口，以及隐藏的研究摘要。摘要绑定当前计划和证据；结果或范围改变后，旧摘要无法通过一致性检查。正文与来源索引仍需真正引用证据，隐藏摘要中的 URL 不算引用。
+用 `report-note` 预览状态说明，用 `sync-report-note` 同步标题下的简短说明和同目录的 `.meta.json`。元数据对应本次计划和证据，结果或范围变化后需重新同步。正文与来源索引仍需引用证据。
 
 最终使用 research_task.py verify 同时检查研究一致性与交付文件。只有在任务外做独立文件检查时才不传 outline，此时输出 consistency_checked 为 false。
 

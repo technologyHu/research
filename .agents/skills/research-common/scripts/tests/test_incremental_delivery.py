@@ -22,11 +22,12 @@ class IncrementalDeliveryChecks(unittest.TestCase):
         report.parent.mkdir(parents=True, exist_ok=True)
         report.write_text("# 对比报告\n\n" + context.render_report_note(context.report_context(path / "outline.json")) +
                           "\n> 调研日期：2025-01-02\n\n## 比较\n\nA、B 的原有比较。[依据](https://example.org/original)\n\n## 原有分析\n\n仅适用于旧版本，资料日期 2025-01-02。\n", encoding="utf-8")
+        task.sync_report_note(path)
         return report
 
     def add_non_core_unknown(self, path):
         fields = results.load_document(path / "fields.json")
-        field = {"id": "extra", "description": "附加部署指标是什么？", "core": False}
+        field = {"id": "extra", "description": "附加部署指标是什么？", "display_question": "部署后如何衡量效果", "core": False}
         fields["fields"].append(field)
         task.write_json(path / "fields.json", fields)
         outline = results.load_document(path / "outline.json")
@@ -46,7 +47,8 @@ class IncrementalDeliveryChecks(unittest.TestCase):
         self.assertEqual(expected["non_core_gaps"][0]["reason"], "缺少部署测量数据")
         report = self.write_current_report(path, outline)
         self.assertTrue(task.verify_task(path)["verified"])
-        report.write_text("\n".join(line for line in report.read_text(encoding="utf-8").splitlines() if not line.startswith("> 非核心缺口：")), encoding="utf-8")
+        self.assertIn("> 其他待确认事项：部署后如何衡量效果", report.read_text(encoding="utf-8"))
+        report.write_text("\n".join(line for line in report.read_text(encoding="utf-8").splitlines() if not line.startswith("> 其他待确认事项：")), encoding="utf-8")
         self.assertFalse(reports.validate(report.parent, path / "outline.json")["valid"])
 
     def test_core_and_non_core_unknowns_remain_distinct(self):
@@ -67,7 +69,7 @@ class IncrementalDeliveryChecks(unittest.TestCase):
         self.assertEqual(expected["completion"], "complete")
         report = self.write_current_report(path, outline)
         self.assertTrue(task.verify_task(path)["verified"])
-        report.write_text(report.read_text(encoding="utf-8").replace("示例调研／补充问题：没有边缘环境测试数据", "无"), encoding="utf-8")
+        report.write_text(report.read_text(encoding="utf-8").replace("其他待确认事项：没有边缘环境测试数据", "其他待确认事项：无"), encoding="utf-8")
         self.assertFalse(reports.validate(report.parent, path / "outline.json")["valid"])
         outline["assessment"]["non_core_gaps"] = "not a list"
         task.write_json(path / "outline.json", outline)
@@ -82,7 +84,8 @@ class IncrementalDeliveryChecks(unittest.TestCase):
         child, _ = self.populate(job)
         task.apply_update(child, {"## 比较": "## 比较\n\n[新分析](https://example.org/original)"})
         self.assertTrue(task.verify_task(child)["verified"])
-        self.assertIn("非核心缺口：示例调研／附加部署指标是什么？：缺少部署测量数据", report.read_text(encoding="utf-8"))
+        self.assertNotIn("缺少部署测量数据", report.read_text(encoding="utf-8"))
+        self.assertIn("缺少部署测量数据", task.catalog.report_summary(report)["update"]["baseline_gaps"])
 
     def test_show_returns_the_existing_fields_path_and_rejects_ambiguity(self):
         job = self.create()
@@ -162,7 +165,8 @@ class IncrementalDeliveryChecks(unittest.TestCase):
         self.assertEqual(parent_files, {p.relative_to(path).as_posix(): p.read_bytes() for p in path.rglob("*") if p.is_file()})
         new_section = updates.selected_spans(updates.text(report), ["## 原有分析"])[0]
         self.assertEqual(old_prose.strip(), updates.text(report)[new_section["start"]:new_section["end"]].strip())
-        self.assertIn("原访问日期 2025-01-02", updates.text(report))
+        self.assertNotIn("原访问日期 2025-01-02", updates.text(report))
+        self.assertTrue(any(source["accessed_at"] == "2025-01-02" for source in task.catalog.report_summary(report)["derived_from"]["sources"]))
         self.assertTrue(task.cleanup_plan(child)["eligible"])
 
     def test_derive_rejects_stale_evidence_and_light_notes(self):

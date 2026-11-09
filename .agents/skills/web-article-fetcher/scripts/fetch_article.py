@@ -288,10 +288,8 @@ def extract_content(soup: BeautifulSoup) -> tuple:
         ("div", {"id": "article_content"}),           # CSDN
         ("div", {"class": "article_content"}),        # CSDN
         ("div", {"class": "Post-RichTextContainer"}), # 知乎专栏
-        ("article", {}),                              # Generic
         ("div", {"class": "Post-Main"}),              # 知乎旧版
         ("div", {"class": "main-content"}),           # 通用
-        ("div", {"class": lambda c: c and "article" in str(c).lower() if c else False}),
     ]
 
     for tag, attrs in selectors:
@@ -301,6 +299,22 @@ def extract_content(soup: BeautifulSoup) -> tuple:
             if _is_raw_markdown(text):
                 return result, True
             return result, False
+
+    # Product pages may use <article> for a small testimonial inside <main>.
+    # A page heading outside those cards identifies the enclosing main content.
+    main = soup.find("main")
+    if main and len(main.get_text(strip=True)) > 40:
+        heading = main.find("h1")
+        if heading and heading.find_parent("article") is None:
+            return main, _is_raw_markdown(main.get_text())
+    article = soup.find("article")
+    if article and len(article.get_text(strip=True)) > 40:
+        return article, _is_raw_markdown(article.get_text())
+    if main and len(main.get_text(strip=True)) > 40:
+        return main, _is_raw_markdown(main.get_text())
+    result = soup.find("div", class_=lambda c: c and "article" in str(c).lower() if c else False)
+    if result and len(result.get_text(strip=True)) > 40:
+        return result, _is_raw_markdown(result.get_text())
 
     # Fallback for Nuxt/Vue SSR sites (showapi.com etc):
     # These render article content as raw markdown text inside bare divs
@@ -487,6 +501,48 @@ def validate_archive(article_dir):
     return finish()
 
 
+def normalize_markdown_links(markdown, base_url):
+    """Resolve common inline/reference/HTML targets without changing code examples."""
+    target = r'<[^>\n]+>|(?:[^\s()\\]|\\.|\([^\n()]*\))+'
+    links = re.compile(
+        r'(?P<code>(?P<ticks>`+)(?!`).*?(?P=ticks)(?!`))'
+        r'|(?P<prefix>!?\[[^\]\n]*\]\(\s*|^ {0,3}\[(?!\^)[^\]\n]+\]:\s*)'
+        rf'(?P<target>{target})'
+        r'|(?P<tag><(?:a|img)\b[^>]*?[ \t]+(?:href|src)\s*=\s*)'
+        r'(?P<quote>["\x27])(?P<html>[^"\x27]+)(?P=quote)',
+        re.I,
+    )
+
+    def absolute(value):
+        resolved = urljoin(base_url, value)
+        return resolved if urlsplit(resolved).scheme in {"http", "https", "mailto"} else value
+
+    def replace(match):
+        if match["code"] is not None:
+            return match[0]
+        if match["tag"] is not None:
+            return match["tag"] + match["quote"] + absolute(match["html"]) + match["quote"]
+        value = match["target"]
+        resolved = "<" + absolute(value[1:-1]) + ">" if value.startswith("<") else absolute(value)
+        return match["prefix"] + resolved
+
+    output, fence = [], None
+    for line in markdown.splitlines(keepends=True):
+        marker = re.match(r'^ {0,3}(`{3,}|~{3,})(.*)', line)
+        if fence:
+            output.append(line)
+            if marker and marker[1][0] == fence[0] and len(marker[1]) >= fence[1] and not marker[2].strip():
+                fence = None
+        elif marker:
+            fence = (marker[1][0], len(marker[1]))
+            output.append(line)
+        elif line.startswith(("    ", "\t")):
+            output.append(line)
+        else:
+            output.append(links.sub(replace, line))
+    return "".join(output)
+
+
 def parse_html(html, final_url):
     try:
         from bs4 import BeautifulSoup, NavigableString
@@ -536,6 +592,7 @@ def parse_html(html, final_url):
     lines = markdown.strip().splitlines()
     if lines and lines[0].strip() == "# " + title:
         markdown = "\n".join(lines[1:]).lstrip()
+    markdown = normalize_markdown_links(markdown, final_url)
     # Raw Markdown sources can contain image syntax without HTML img tags.
     for match in re.finditer(r"!\[[^\]]*\]\((?:<([^>]+)>|([^\s)]+))\)", markdown):
         source = match[1] or match[2]
@@ -547,7 +604,7 @@ def parse_html(html, final_url):
         raise ValueError("Extracted body is too short; save and review it through the manual import path")
     published = soup.find("meta", attrs={"property": "article:published_time"})
     author = soup.find("meta", attrs={"name": "author"})
-    return {"title": title, "body": markdown.strip(), "image_urls": urls, "quality": "body-fallback" if fallback else "article-selector",
+    return {"title": title, "body": markdown.strip(), "image_urls": urls, "quality": "body-fallback" if fallback else "main-selector" if content.name == "main" else "article-selector",
             "published_at": published.get("content") if published else None, "author": author.get("content") if author else None}
 
 

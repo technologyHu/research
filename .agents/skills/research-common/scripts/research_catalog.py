@@ -12,6 +12,11 @@ TARGET = re.compile(r"[a-z0-9]+(?:(?:-{1,2}|__)[a-z0-9]+)*\Z")
 DATED = re.compile(r"(?P<base>.+?)(?P<separator>__|-)(?P<stamp>\d{8}-\d{6})\Z")
 LOCAL_TIME = timezone(timedelta(hours=8), "Asia/Shanghai")
 REGISTRY = "themes.yaml"
+LOCAL_REVIEW_LABELS = {
+    "complete": "局部复查完成",
+    "partial": "局部复查部分完成",
+    "blocked": "局部复查受阻",
+}
 
 
 def now():
@@ -168,10 +173,34 @@ def report_directory(workspace, kind, theme_slug, target, timestamp, *, separato
     return Path(workspace) / "research-reports" / theme_slug / kind / leaf
 
 
+def report_metadata_path(report):
+    return Path(report).with_suffix(".meta.json")
+
+
+def has_generated_report_opening(text):
+    """Recognize the compact opening, including its quote paragraph separator."""
+    front_matter = re.match(r"\A---[ \t]*\r?\n.*?^---[ \t]*\r?\n", text, re.S | re.M)
+    if front_matter:
+        text = text[front_matter.end():]
+    return bool(re.match(
+        r"\A\s*(?:# [^\r\n]+\r?\n\s*)?> 调研状态：[^\r\n]+\r?\n>\r?\n> 采用版本：",
+        text,
+    ))
+
+
 def report_summary(path):
-    if not Path(path).is_file():
+    path = Path(path)
+    if not path.is_file():
         return {}
-    matches = re.findall(r"<!--\s*research-summary\s*\n(.*?)-->", Path(path).read_text(encoding="utf-8-sig"), re.S)
+    metadata = report_metadata_path(path)
+    if metadata.is_symlink() or getattr(metadata, "is_junction", lambda: False)():
+        raise ValueError("Report metadata must be a regular file")
+    if metadata.exists():
+        value = json.loads(metadata.read_text(encoding="utf-8-sig"))
+        if not isinstance(value, dict):
+            raise ValueError("Report metadata must be a JSON object")
+        return value
+    matches = re.findall(r"<!--\s*research-summary\s*\n(.*?)-->", path.read_text(encoding="utf-8-sig"), re.S)
     if len(matches) != 1:
         return {}
     value = json.loads(matches[0])

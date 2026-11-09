@@ -110,6 +110,9 @@ def validate_scope(outline, docs, kind):
     if not plan or not docs.keys() <= set(plan["sections"] + plan["added_sections"]):
         raise ValueError("Section draft is outside the registered update scope")
     for heading, body in docs.items():
+        if heading == updates.INTRO:
+            updates.validate_intro(body)
+            continue
         entries = updates.headings(body)
         if not body.startswith(heading + "\n") or not entries or entries[0]["heading"] != heading or any(entry["level"] <= entries[0]["level"] for entry in entries[1:]):
             raise ValueError("Each draft must contain only its registered section: " + heading)

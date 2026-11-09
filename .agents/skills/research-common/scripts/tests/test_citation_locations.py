@@ -28,6 +28,7 @@ class CitationLocations(unittest.TestCase):
     def deliver(self, path, report, body):
         note = context.render_report_note(context.report_context(path / "outline.json"))
         report.write_text("# 报告\n\n" + note + "\n" + body + "\n\n[边界依据](https://example.org/original)\n", encoding="utf-8")
+        task.sync_report_note(path)
         return reports.validate(report.parent, path / "outline.json")
 
     def test_archive_rejects_wrong_section_before_writing_anything(self):

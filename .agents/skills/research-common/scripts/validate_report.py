@@ -11,8 +11,9 @@ import re
 import sys
 from urllib.parse import unquote, urlsplit
 
-from research_context import delivery_config, report_context, visible_note
-from research_update import check_update
+from research_catalog import has_generated_report_opening, report_metadata_path
+from research_context import OPENING_VERSION, delivery_config, legacy_visible_note, render_report_note, report_context
+from research_update import check_update, note_span, split_preamble
 from research_paths import delivery_entries, relative as project_relative, repo_report_path
 import research_articles as articles
 from validate_results import load_document
@@ -20,7 +21,7 @@ from validate_results import load_document
 IMAGES = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg", ".avif", ".bmp", ".tif", ".tiff"}
 
 
-def without_code(text):
+def without_code(text, *, keep_comments=False):
     """Ignore fenced blocks and inline code; keep line structure for headings."""
     lines, fence = [], None
     for line in text.splitlines():
@@ -34,7 +35,8 @@ def without_code(text):
             lines.append("")
         else:
             lines.append(line)
-    return re.sub(r"<!--.*?-->", "", "\n".join(lines), flags=re.S)
+    clean = "\n".join(lines)
+    return clean if keep_comments else re.sub(r"<!--.*?-->", "", clean, flags=re.S)
 
 
 def target_end(text, pos):
@@ -271,6 +273,10 @@ def validate(root, outline_path=None, fields_path=None):
     extra_files = {root / entry["path"] for entry in delivery["extra_files"]}
     if not root.is_dir():
         return {"valid": False, "errors": ["Output directory does not exist"], "documents": 0, "images": 0}
+    report = root / delivery["report"]
+    metadata_path = report_metadata_path(report)
+    report_files = {report_metadata_path(path): path for path in root.iterdir() if path.suffix.lower() == ".md" and path.is_file()}
+    metadata = {}
     documents, image_files = {}, set()
     for entry in delivery_entries(root):
         if entry.is_symlink() or getattr(entry, "is_junction", lambda: False)() or not entry.resolve().is_relative_to(root):
@@ -290,14 +296,35 @@ def validate(root, outline_path=None, fields_path=None):
                 errors.append(f"Unreadable Markdown {relative}: {exc}")
         elif relative.parts[0] == "assets" and entry.suffix.lower() in IMAGES:
             image_files.add(entry)
+        elif entry in report_files:
+            try:
+                value = json.loads(entry.read_text(encoding="utf-8-sig"))
+                if not isinstance(value, dict):
+                    raise ValueError("expected a JSON object")
+                metadata[entry] = value
+            except (OSError, ValueError) as exc:
+                errors.append(f"Invalid report metadata {relative}: {exc}")
         elif entry not in extra_files:
             errors.append(f"Unexpected delivered file: {relative}")
     for entry in extra_files:
         if not entry.is_file():
             errors.append(f"Requested extra file is missing: {entry.relative_to(root)}")
-    report = root / delivery["report"]
     if report not in documents or not documents.get(report, "").strip():
         errors.append(f"A nonempty {delivery['report']} is required")
+    report_text = documents.get(report, "")
+    legacy_metadata = []
+    for companion, document in report_files.items():
+        if document not in documents:
+            continue
+        content = documents[document]
+        embedded = re.findall(r"<!--\s*research-summary\s*\n(.*?)-->", without_code(content, keep_comments=True), re.S)
+        if document == report:
+            legacy_metadata = embedded
+        if companion in metadata and embedded:
+            errors.append(f"Keep {document.name} metadata only in {companion.name}")
+        if companion not in metadata and not embedded and has_generated_report_opening(content):
+            errors.append(f"Missing valid report metadata: {companion.name}")
+    saved_metadata = metadata.get(metadata_path)
     analysis_workspace, adopted_sources = None, set()
     if context is not None and outline.get("object_type") == "analysis":
         analysis_workspace = Path(outline["workspace"]).resolve()
@@ -305,9 +332,8 @@ def validate(root, outline_path=None, fields_path=None):
     elif outline_path is None and fields_path is None and ((root.parent.name == "analysis" and len(root.parents) >= 3) or root.parent.name == "analysis-reports"):
         # A cleaned task still permits independent link checks from its saved
         # summary. This does not restore evidence or check research consistency.
-        notes = re.findall(r"<!--\s*research-summary\s*\n(.*?)-->", documents.get(report, ""), re.S)
         try:
-            summary = json.loads(notes[0]) if len(notes) == 1 else {}
+            summary = saved_metadata if saved_metadata is not None else json.loads(legacy_metadata[0]) if len(legacy_metadata) == 1 else {}
             items = summary.get("items")
             sources = summary.get("source_urls")
             if (isinstance(items, list) and items and all(isinstance(item, dict) and item.get("type") == "analysis" for item in items)
@@ -394,23 +420,32 @@ def validate(root, outline_path=None, fields_path=None):
     for path in image_files - report_images - extra_files:
         errors.append(f"Image is not embedded in a report: {path.relative_to(root)}")
     if context is not None and report in documents:
-        text = documents[report]
-        metadata = re.findall(r"<!--\s*research-summary\s*\n(.*?)-->", text, re.S)
-        if len(metadata) != 1:
-            errors.append("Report needs exactly one research-summary note generated from this task")
+        if saved_metadata is not None:
+            saved_context = dict(saved_metadata)
+            opening_version = saved_context.pop("opening_version", 1)
+            if type(opening_version) is not int or not 1 <= opening_version <= OPENING_VERSION:
+                errors.append("Unknown report opening version")
+                opening_version = OPENING_VERSION
+            if saved_context != context:
+                errors.append("Report metadata is stale or disagrees with the current research")
+            preamble, _ = split_preamble(report_text)
+            span = note_span(preamble)
+            if span is None or preamble[slice(*span)].rstrip() != render_report_note(context, opening_version).rstrip():
+                errors.append("Missing or inconsistent report opening; run sync-report-note")
+        elif len(legacy_metadata) != 1:
+            errors.append("Report needs generated metadata; run sync-report-note")
         else:
             try:
-                if json.loads(metadata[0]) != context:
+                if json.loads(legacy_metadata[0]) != context:
                     errors.append("Report summary is stale or disagrees with research completion, versions or core gaps")
             except ValueError:
                 errors.append("Report research-summary is not valid JSON")
-        visible = without_code(text)
-        for line in visible_note(context):
-            if line not in visible.splitlines():
-                errors.append(f"Missing or inconsistent visible research note: {line}")
-        statuses = re.findall(r"^> 调研状态：(.+)$", visible, re.M)
-        if len(statuses) != 1:
-            errors.append("Report must show one unambiguous research status")
+            visible = without_code(report_text)
+            for line in legacy_visible_note(context):
+                if line not in visible.splitlines():
+                    errors.append(f"Missing or inconsistent visible research note: {line}")
+            if len(re.findall(r"^> 调研状态：(.+)$", visible, re.M)) != 1:
+                errors.append("Report must show one unambiguous research status")
         cited = set(local_sources)
         for path in reachable:
             content = without_code(documents[path])

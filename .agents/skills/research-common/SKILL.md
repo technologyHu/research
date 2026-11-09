@@ -17,4 +17,6 @@ description: 为研究类任务和报告提交提供共用的主题注册、计�
 
 公共任务、文章、校验和润色实现均位于本技能的 scripts/，调用方直接使用这些工具，不依赖顶层入口的私有目录。已有任务配置、报告位置和命令参数保持兼容。
 
+读取 YAML 使用本技能的 [Python 依赖清单](requirements.txt)。任务需要抓取或处理参考文章时，还需准备 [文章抓取技能的依赖](../web-article-fetcher/requirements.txt)。
+
 需要成稿时可使用 [research-report](../research-report/SKILL.md)；需要对象证据时可使用 [research-deep](../research-deep/SKILL.md)；配图可使用 [draw-diagram](../draw-diagram/SKILL.md)，仍遵守项目的图像能力条件。共用子技能只完成被请求的阶段，不回调顶层入口。

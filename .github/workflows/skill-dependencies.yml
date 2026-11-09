@@ -7,10 +7,10 @@ on:
       - '.agents/skills/**/references/**'
       - '.agents/skills/**/agents/**'
       - '.agents/skills/**/scripts/**'
+      - '.agents/skills/**/requirements*.txt'
       - 'tests/test_skill_dependencies.py'
       - 'tests/test_research_compat.py'
-      - 'scripts/research-graph-requirements.txt'
-      - 'scripts/research-skill-requirements.txt'
+      - 'tests/skill-dependencies-requirements.txt'
       - '.github/workflows/skill-dependencies.yml'
   pull_request:
     paths:
@@ -18,10 +18,10 @@ on:
       - '.agents/skills/**/references/**'
       - '.agents/skills/**/agents/**'
       - '.agents/skills/**/scripts/**'
+      - '.agents/skills/**/requirements*.txt'
       - 'tests/test_skill_dependencies.py'
       - 'tests/test_research_compat.py'
-      - 'scripts/research-graph-requirements.txt'
-      - 'scripts/research-skill-requirements.txt'
+      - 'tests/skill-dependencies-requirements.txt'
       - '.github/workflows/skill-dependencies.yml'
   workflow_dispatch:
 
@@ -29,6 +29,20 @@ permissions:
   contents: read
 
 jobs:
+  fetcher:
+    name: 验证文章抓取技能独立安装
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+          cache: pip
+          cache-dependency-path: .agents/skills/web-article-fetcher/requirements.txt
+      - run: python -m pip install -r .agents/skills/web-article-fetcher/requirements.txt
+      - run: python -B -m unittest discover -s .agents/skills/web-article-fetcher/scripts -p test_fetch_article.py
+
   validate:
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -39,9 +53,14 @@ jobs:
           python-version: '3.13'
           cache: pip
           cache-dependency-path: |
-            scripts/research-graph-requirements.txt
-            scripts/research-skill-requirements.txt
-      - run: python -m pip install -r scripts/research-skill-requirements.txt
+            .agents/skills/research-common/requirements.txt
+            .agents/skills/web-article-fetcher/requirements.txt
+            tests/skill-dependencies-requirements.txt
+      - run: >-
+          python -m pip install
+          -r .agents/skills/research-common/requirements.txt
+          -r .agents/skills/web-article-fetcher/requirements.txt
+          -r tests/skill-dependencies-requirements.txt
       - run: python -B -m unittest discover -s tests -p test_skill_dependencies.py -v
       - run: python -B -m unittest discover -s tests -p test_research_compat.py -v
       - run: python -B -m unittest discover -s .agents/skills/research-common/scripts/tests -v
