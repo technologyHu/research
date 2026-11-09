@@ -196,7 +196,7 @@ class ArchiveValidationTests(unittest.TestCase):
         self.assertEqual("fetched", result["status"])
 
     def test_windows_reserved_and_long_titles_keep_the_original_heading(self):
-        for title in ["CON", "中文长标题" * 25]:
+        for title in ["CON", "中文长标题" * 25, "🧭" * 90]:
             with self.subTest(title=title):
                 result = self.fetch(PAGE.replace("测试/文章?", title))
                 self.assertEqual("fetched", result["status"])
@@ -205,6 +205,9 @@ class ArchiveValidationTests(unittest.TestCase):
                 self.assertTrue(article.read_text(encoding="utf-8").startswith("# " + title + "\n"))
                 self.assertNotEqual("CON", article.parent.name)
                 self.assertLessEqual(len(article.parent.name), 90)
+                self.assertLessEqual(len(article.parent.name.encode("utf-8")), 255)
+                if title != "CON":
+                    self.assertTrue(title.startswith(article.parent.name))
 
     def test_explicit_name_is_not_a_parent_path(self):
         before = {p: p.read_bytes() for p in self.output.rglob("*") if p.is_file()}
@@ -261,6 +264,26 @@ class ArchiveValidationTests(unittest.TestCase):
         self.assertEqual("fetched", result["status"])
         self.assertEqual(result["article_path"], self.fetch(directory_name=base)["article_path"])
         self.assertTrue(all((self.output / name / "unknown.txt").is_file() for name in [base, conflict]))
+
+    def test_long_custom_name_reserves_bytes_for_numbered_conflict_suffix(self):
+        name = "中" * 90
+        key = fetcher.article_id(URL)
+        suffix = "--" + key.removeprefix("article-")
+        (self.output / ("中" * 85)).mkdir()
+        (self.output / ("中" * 79 + suffix)).mkdir()
+
+        result = self.fetch(directory_name=name)
+        self.assertEqual("fetched", result["status"])
+        self.assertEqual("中" * 78 + suffix + "-2/article.md", result["article_path"])
+        self.assertEqual(result["article_path"], self.fetch(directory_name=name)["article_path"])
+
+    def test_legacy_windows_names_still_match(self):
+        base = "中" * 90
+        key = fetcher.article_id(URL)
+        suffix = "--" + key.removeprefix("article-")
+        for name in [base, base + suffix, base + suffix + "-2"]:
+            with self.subTest(name=name):
+                self.assertTrue(fetcher.matches_archive_name(name, base, key))
 
     def test_explicit_name_cli_runs_the_normal_archive_flow(self):
         arguments = [str(Path(fetcher.__file__)), "--url", URL, "--output-dir", str(self.output),

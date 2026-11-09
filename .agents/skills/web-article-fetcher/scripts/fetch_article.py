@@ -16,6 +16,7 @@ import xml.etree.ElementTree as ET
 
 HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; ArticleReader/1.0)", "Accept": "text/html,application/xhtml+xml", "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8"}
 IMAGE_PATTERN = r"!\[([^\]\n]*)\]\(\s*(?:<([^>]+)>|([^\s)]+))\s*\)"
+MAX_ARCHIVE_NAME_BYTES = 255
 
 
 class ManualVerificationRequired(ValueError):
@@ -93,25 +94,33 @@ def split_directory_name(directory_name):
     return relative.parent.as_posix(), relative.name
 
 
+def archive_name(base, suffix=""):
+    budget = MAX_ARCHIVE_NAME_BYTES - len(suffix.encode("utf-8"))
+    prefix = base.encode("utf-8")[:budget].decode("utf-8", errors="ignore").rstrip(" .")
+    return prefix + suffix
+
+
 def matches_archive_name(name, base, key):
-    conflict = base + "--" + key.removeprefix("article-")
-    if name in {base, conflict}:
+    # Existing Windows archives may predate the byte limit.
+    if name in {base, archive_name(base)}:
         return True
-    prefix = conflict + "-"
-    number = name[len(prefix):] if name.startswith(prefix) else ""
-    return bool(number and number.isascii() and number.isdigit()
-                and int(number) >= 2 and str(int(number)) == number)
+    match = re.search(r"--" + key.removeprefix("article-") + r"(?:-(?:[2-9]|[1-9][0-9]+))?\Z", name)
+    if not match:
+        return False
+    suffix = match[0]
+    return name in {base + suffix, archive_name(base, suffix)}
 
 
 def article_folder(output_dir, title, url, directory_name=None):
     """Resolve title/custom names without overwriting another source or duplicating a retained archive."""
     key = article_id(url)
     base = archive_base(title, url, directory_name)
+    preferred = archive_name(base)
     parent = Path(output_dir)
-    # Reuse existing conflict-suffixed archives even after the original competing directory is removed.
+    # Reuse existing archives even after the original competing directory is removed.
     siblings = sorted(p.name for p in parent.iterdir()
-                      if p.name != base and matches_archive_name(p.name, base, key)) if parent.is_dir() else []
-    for candidate in [base, *siblings]:
+                      if p.name != preferred and matches_archive_name(p.name, base, key)) if parent.is_dir() else []
+    for candidate in [preferred, *siblings]:
         target = safe_target(Path(output_dir), candidate)
         article = safe_target(target, "article.md") if target.is_dir() else None
         if article and article.is_file():
@@ -122,12 +131,13 @@ def article_folder(output_dir, title, url, directory_name=None):
                     return candidate
             except (OSError, UnicodeError, ValueError):
                 pass
-    candidate, index = base, 0
+    candidate, index = preferred, 0
     while safe_target(parent, candidate).exists():
         index += 1
-        candidate = base + "--" + key.removeprefix("article-")
+        suffix = "--" + key.removeprefix("article-")
         if index > 1:
-            candidate += "-" + str(index)
+            suffix += "-" + str(index)
+        candidate = archive_name(base, suffix)
     return candidate
 
 
