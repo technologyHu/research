@@ -3,7 +3,7 @@ window.RESEARCH_GRAPH = {
   "schemaVersion": 2,
   "repository": "technologyHu/research",
   "branch": "openjiuwen-harness",
-  "fingerprint": "c8e72fada0b18844",
+  "fingerprint": "3daa73bb55431629",
   "types": {
     "paper": "论文",
     "open-source": "开源项目",
@@ -21,15 +21,97 @@ window.RESEARCH_GRAPH = {
     "unknown": "#9aaac6"
   },
   "stats": {
-    "themes": 0,
-    "types": 0,
-    "objects": 0,
-    "reports": 0
+    "themes": 1,
+    "types": 1,
+    "objects": 1,
+    "reports": 1
   },
-  "updatedAt": "",
-  "nodes": [],
-  "edges": [],
-  "reports": [],
-  "themeOverview": [],
+  "updatedAt": "2026-11-09",
+  "nodes": [
+    {
+      "id": "theme:research-reports/organization-agent",
+      "kind": "theme",
+      "type": "theme",
+      "theme": "research-reports/organization-agent",
+      "label": "调研报告 · 组织 Agent",
+      "status": "active",
+      "path": "research-reports/organization-agent/plan.md",
+      "revision": 18,
+      "updatedAt": "2026-11-09",
+      "color": "#b0a0ff",
+      "statusLabel": "进行中",
+      "url": "https://github.com/technologyHu/research/blob/openjiuwen-harness/research-reports/organization-agent/plan.md",
+      "x": 0.5,
+      "y": 0.5
+    },
+    {
+      "id": "work:research-reports/organization-agent:T001",
+      "kind": "object",
+      "type": "product",
+      "label": "参考已有的产品、源码和第三方资料。核对公开的持续集成（CI）案例用到哪些信息、给出什么结果、如何衡量效果，制定试点验收标准。",
+      "target": "product／Claude Tag",
+      "taskId": "T001",
+      "theme": "research-reports/organization-agent",
+      "path": "research-reports/organization-agent/plan.md",
+      "status": "done",
+      "priority": "P1",
+      "runId": "20261109t074836z-3b876ccb",
+      "updatedAt": "2026-11-09",
+      "color": "#75acff",
+      "statusLabel": "已完成",
+      "url": "https://github.com/technologyHu/research/blob/openjiuwen-harness/research-reports/organization-agent/plan.md",
+      "reportIds": [
+        "report:report-fd2531e6d5e24ef4817433ef6534fcf1"
+      ],
+      "pendingReportIds": [],
+      "sourceKind": "plan",
+      "x": 0.732214,
+      "y": 0.616947
+    }
+  ],
+  "edges": [
+    {
+      "source": "theme:research-reports/organization-agent",
+      "target": "work:research-reports/organization-agent:T001",
+      "relation": "includes",
+      "evidence": "research-reports/organization-agent/plan.md"
+    }
+  ],
+  "reports": [
+    {
+      "id": "report:report-fd2531e6d5e24ef4817433ef6534fcf1",
+      "label": "Claude Tag 产品调研：共享任务、组织身份与长期协作",
+      "path": "research-reports/organization-agent/product/claude-tag__20261109-154839/report.md",
+      "url": "https://github.com/technologyHu/research/blob/openjiuwen-harness/research-reports/organization-agent/product/claude-tag__20261109-154839/report.md",
+      "status": "review_complete",
+      "statusLabel": "局部复查完成",
+      "type": "product",
+      "updatedAt": "2026-11-09T15:48:39+08:00",
+      "createdAt": "2026-11-09T00:37:09+08:00",
+      "themeId": "organization-agent",
+      "themePath": [
+        "organization-agent"
+      ],
+      "associationStatus": "explicit",
+      "workIds": [
+        "work:research-reports/organization-agent:T001"
+      ]
+    }
+  ],
+  "themeOverview": [
+    {
+      "theme": "research-reports/organization-agent",
+      "title": "调研报告 · 组织 Agent",
+      "status": "active",
+      "statusLabel": "进行中",
+      "planPath": "research-reports/organization-agent/plan.md",
+      "reportIds": [
+        "report:report-fd2531e6d5e24ef4817433ef6534fcf1"
+      ],
+      "nextSteps": [
+        "复查 Claude Tag 是否公开核心源码，核对公开资料能确认的服务端实现。"
+      ]
+    }
+  ],
   "warnings": []
 };

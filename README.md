@@ -16,7 +16,7 @@
 
 [![动态调研图谱](docs/research-graph/preview.gif)](https://technologyhu.github.io/research/)
 
-**0 个调研主题 · 0 种类型 · 0 项调研工作**
+**1 个调研主题 · 1 种类型 · 1 项调研工作**
 
 [打开交互图谱](https://technologyhu.github.io/research/) · [本地页面](docs/research-graph/index.html) · [静态预览](docs/research-graph/preview.png) · [生成与维护说明](docs/research-graph-guide.md)
 
@@ -34,14 +34,14 @@
 
 | 类别 | 主题 | 状态 | 当前计划 | 更新日期 |
 | --- | --- | --- | --- | --- |
-| 调研 | 暂无调研计划 | — | — | — |
+| 调研 | 调研报告 · 组织 Agent | 进行中 | [查看计划](research-reports/organization-agent/plan.md) | 2026-11-09 |
 | 分析洞察 | 暂无分析洞察计划 | — | — | — |
 
 ## 调研报告总览
 
 | 主题 | 状态 | 计划 | 报告 | 下一步 |
 | --- | --- | --- | --- | --- |
-| 暂无调研主题 | — | 暂无计划 | 暂无报告 | 暂无下一步安排 |
+| 调研报告 · 组织 Agent | 进行中 | [调研计划](research-reports/organization-agent/plan.md) | [Claude Tag 产品调研：共享任务、组织身份与长期协作](research-reports/organization-agent/product/claude-tag__20261109-154839/report.md)（局部复查完成） · 2026-11-09 15:48:39 | 复查 Claude Tag 是否公开核心源码，核对公开资料能确认的服务端实现。 |
 
 ## 分析洞察报告总览
 
@@ -49,6 +49,6 @@
 | --- | --- | --- | --- | --- |
 | 暂无分析洞察主题 | — | 暂无计划 | 暂无报告 | 暂无下一步安排 |
 
-当前纳入总览：调研报告 0 份，分析洞察报告 0 份。暂无数据时显示空状态，不添加演示节点。
+当前纳入总览：调研报告 1 份，分析洞察报告 0 份。暂无数据时显示空状态，不添加演示节点。
 
 <!-- research-graph:end -->
