@@ -10,6 +10,10 @@ description: >-
 
 # Fireworks Tech Graph
 
+## 报告配图的形式选择
+
+用于调研／分析报告时，先按 [图表与代码](../research-common/references/writing-policy.md#图表与代码) 判断解释价值与格式。已有有用且适用的图可直接插入报告并注明来源，无需重绘或启动本后端；确需新绘且满足下述能力条件时，简单流程、时序或架构优先用 Markdown 可渲染代码图。需要复杂关系、精确布局或静态交付时再进入本技能，仍可按需要生成图片。用户明确指定本后端、风格或格式时优先遵循。
+
 One portable Agent Skill for Codex and Claude Code. SVG is the canonical artifact;
 PNG, offline HTML and supported GIF motion are output routes. Preserve requested
 labels, topology and meaning; a successful command is not a visual quality verdict.
