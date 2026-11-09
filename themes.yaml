@@ -36,6 +36,18 @@ themes:
     slug: harness
     name: Harness
     parent: null
+  - id: harness-codex
+    slug: codex
+    name: Codex
+    parent: harness
+  - id: harness-deepseek-harness
+    slug: deepseek-harness
+    name: DeepSeek Harness
+    parent: harness
+  - id: harness-claude-code
+    slug: claude-code
+    name: Claude Code
+    parent: harness
   - id: rsi
     slug: rsi
     name: RSI
