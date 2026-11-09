@@ -1,0 +1,126 @@
+# Personal connectors in channels
+
+Source: https://claude.com/docs/claude-tag/concepts/personal-connectors
+
+Accessed (UTC): 2026-11-08
+
+> ## Documentation Index
+> Fetch the complete documentation index at: https://claude.com/docs/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Personal connectors in channels
+
+> Claude can use your own claude.ai connectors, called personal connectors, for your tasks in a Slack channel. See how you approve connector use, when Claude asks you to review a result before posting it, and what other people in the channel can reach.
+
+> [!NOTE]
+>
+> Claude Tag is in public beta. Features and behavior described here may change before general availability.
+
+Personal connectors are the tools you add to your own claude.ai account, like your calendar or your email. When a task you ask for in a Slack channel needs one of your own tools, Claude can offer to use your connector for it.
+
+Personal connectors in channels are on for every organization on the Team plan, with nothing for an admin to set up. On the Enterprise plan, an admin manages them in the **Personal connectors** dialog, which opens with **Edit** on the **Personal connectors** row at [`claude.ai/admin-settings/claude-tag`](https://claude.ai/admin-settings/claude-tag); see [Admin controls for personal connectors](#admin-controls-for-personal-connectors). A channel also keeps working with the Claude Tag connectors an admin attached to it, as described in [how agent identity works](https://claude.com/docs/claude-tag/concepts/agent-identity.md).
+
+## Where your connectors apply
+
+Claude can use your personal connectors for the requests you make in a channel.
+
+* **Approval**: Claude asks you before it starts using your connectors in a channel.
+* **Access**: Claude works with your permissions and reaches only what your account can reach.
+* **Attribution**: Claude records what it does under your name.
+* **Review**: Before results post to the channel, you can [review every result, or only the ones a sensitive-content check flags](#review-results-before-posting).
+
+Claude uses your connectors only while working on a request you made yourself.
+
+* **You ask in a channel.** When your task needs one of your own tools, Claude can use your connector for it. The channel also uses the Claude Tag connectors an admin attached to it, and everyone who asks there gets the same access.
+* **Someone else asks in a channel.** Your connectors serve only you. Their request doesn't control or use your connectors, even in a shared channel.
+* **Claude starts work on its own.** [Routines](https://claude.com/docs/claude-tag/users/proactivity.md) and other work Claude starts on its own in a channel use the channel's own access, never your connectors.
+* **You ask in a [group DM](https://claude.com/docs/claude-tag/users/group-dms.md).** Claude uses your connectors after you allow it, and only your own requests use them.
+* **You ask in a one-to-one direct message (DM).** Your connectors apply on their own, because a DM runs on [your own claude.ai account](https://claude.com/docs/claude-tag/concepts/agent-identity.md#direct-message-channels).
+
+To add or remove connectors on your account, open the **Customize > Connectors** page on claude.ai; see [connectors on claude.ai](https://claude.com/docs/connectors/getting-started.md) for setup. To find a connector for a service you use, see [Connectors directory](https://claude.com/docs/connectors/directory.md).
+
+### Example calendar request in a channel
+
+This example shows what you see when a request you post in a channel needs your calendar. Google Calendar is connected on your claude.ai account.
+
+1. You post `@Claude find a free 30-minute slot on my calendar Thursday afternoon` in a channel.
+2. Claude replies in the thread with a prompt only you can see, asking whether it may use your connectors for this request.
+3. You choose [**Allow with review**](#approve-connector-use).
+4. Claude reads your calendar with your account's access and shows you the slot it found.
+5. You approve the slot, and Claude posts it to the thread.
+
+If a teammate posts the same request, Claude can offer to use the calendar connected on their own claude.ai account. Claude never uses your connector for their request.
+
+### What Claude Tag connectors in a channel can reach
+
+Claude Tag connectors an admin attached to the channel give everyone in the channel the same access. They use the account the admin set up for Claude in each service, so Claude reaches whatever that account can reach, whoever asks.
+
+If a Claude Tag connector in the channel can open a document your own account can't, Claude can still read and summarize it in that channel when you ask. See [agent access](https://claude.com/docs/claude-tag/concepts/agent-identity.md#agent-access) for how admins limit what a channel can reach.
+
+## Control connector use
+
+### Approve connector use
+
+By design, Claude asks before it starts using your connectors in a channel. The first time a task calls for one of your connectors, Claude shows you a prompt in the thread that only you can see, with three choices:
+
+* **Allow** starts the work in auto mode. Claude uses your connectors as the task needs them and checks with you before posting anything that looks sensitive.
+* **Allow with review** starts the work and shows you every result to approve before it posts to the channel.
+* **Don't allow** declines this request, and Claude doesn't use your connectors. A later request can prompt you again.
+
+To save **Allow** or **Allow with review** for future tasks in every channel, select the **Use this choice for future requests** checkbox on the prompt before you choose. Once you've saved a choice, Claude starts a task you @-mention it for without showing the prompt.
+
+To change a saved answer, open the Claude app in Slack and select its **Home** tab. The **Home** tab offers **Auto mode**, **Ask every time**, and **Allow with review**. **Ask every time** is the setting before you save a choice.
+
+### Review results before posting
+
+Claude can hold a result and show it to you before anything posts to the channel. When you chose **Allow with review**, Claude holds every result. When you chose **Allow**, Claude holds a result when the content looks sensitive and posts the rest directly.
+
+Before a result posts directly, Claude checks it for private or sensitive content and holds anything the check flags so you can review it first. The check looks for content such as:
+
+* Credentials and secret keys
+* Personal identifiers
+* Compensation, HR, and performance records
+* Personnel changes, including layoffs, offboarding, hiring, and candidates
+* Customer, deal, and other commercial information
+* Privileged legal material
+* Company strategy, unannounced plans, and in-flight projects
+* Protected-class information
+* Medical and health information
+* Security incidents
+
+The check is a screen, not a guarantee, and it doesn't consider whether other people in the channel have the same access you do. For sensitive topics, choose **Allow with review** so you see every result before it posts, and use judgment about what you bring into a shared channel.
+
+Once you approve a held result, Claude posts it in the thread where you asked.
+
+### Admin controls for personal connectors
+
+To manage personal connectors for the whole organization, an admin goes to [`claude.ai/admin-settings/claude-tag`](https://claude.ai/admin-settings/claude-tag) and selects **Edit** on the **Personal connectors** row. The settings in the **Personal connectors** dialog apply to every workspace and channel.
+
+* **Require human review of every message.** On the Enterprise plan, an admin can turn this switch on so that Claude holds every result for the requester's review, not only the ones the [sensitive-content check](#review-results-before-posting) flags. With it on, the prompt no longer offers **Allow** and the **Home** tab no longer offers **Auto mode**. With it off, and on the Team plan, which has no such switch, each member's own [choice](#approve-connector-use) decides which results Claude holds.
+* **Sensitive information requiring review.** Shows examples of what the check looks for. An Owner can add topics of their own under **Additional topics**, for example "Board meeting notes are confidential", and Claude holds results that touch them.
+
+There is no setting that turns personal connectors in channels off for an organization. To keep a service out of channels entirely, manage the connector itself in your organization's [connector settings](https://claude.com/docs/connectors/getting-started.md).
+
+On the Enterprise plan, keep Claude Opus 5 turned on under **Model access** on your organization's [**Models**](https://claude.ai/admin-settings/models) page, which an Owner or Admin can edit. With Claude Opus 5 turned off for the organization, Claude declines tasks that need a member's personal connectors, whichever model the thread runs on. Claude runs the checks on those tasks on Claude Opus 5, and other channel work continues. For the member's side of this, see [Claude says it needs Claude Opus 5 to use my personal connectors](https://claude.com/docs/claude-tag/users/troubleshooting.md#claude-says-it-needs-claude-opus-5-to-use-my-personal-connectors).
+
+### Stop connector use
+
+To stop a task that's using your connectors, select **Stop** under the message in the task's thread where Claude says it's going to use your connectors. Only you can see the **Stop** button.
+
+## How Claude protects your connectors
+
+Other people can't use your connectors. Requests other people make to Claude in your task's thread run with the access an admin applied to the channel, not with your connectors.
+
+While Claude works on your connector task, it is designed to take direction from you. Other people's messages in the thread reach Claude as information about the task, not as instructions. A message that tells Claude to change course or share what it found can't use your connectors, and Claude is designed not to let it redirect your task.
+
+Claude treats anything else it reads while it works the same way. A web page it visits, a comment on a GitHub pull request, or a Slack conversation you ask it to summarize can all contain text written to look like instructions for Claude, a technique called prompt injection. Claude is designed to treat what it reads as material to weigh rather than commands to follow.
+
+## What other people in the channel see
+
+Results stay visible in the channel. What Claude posts back to a channel thread is readable by everyone there, like any other work Claude does in a channel. Claude's detailed work on a task you approved lives in a session only you can open. The work runs with your permissions and is recorded under your name.
+
+## Related resources
+
+* [How agent identity works](https://claude.com/docs/claude-tag/concepts/agent-identity.md): whose identity and access Claude uses in channels and DMs
+* [Connectors](https://claude.com/docs/connectors/getting-started.md): set up and manage connectors on your claude.ai account
+* [Get started](https://claude.com/docs/claude-tag/users/getting-started.md): hand Claude your first task in a channel

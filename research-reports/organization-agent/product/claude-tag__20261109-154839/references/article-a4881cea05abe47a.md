@@ -1,0 +1,93 @@
+# Configure GitLab access
+
+Source: https://claude.com/docs/claude-tag/admins/configure-gitlab
+
+Accessed (UTC): 2026-11-08
+
+> ## Documentation Index
+> Fetch the complete documentation index at: https://claude.com/docs/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Configure GitLab access
+
+> Give Claude its own GitLab identity to read projects, manage issues, review merge requests, and check pipelines. Covers the account, token, and connector.
+
+> [!NOTE]
+>
+> Claude Tag is in public beta. Features and behavior described here may change before general availability.
+
+Connecting GitLab lets Claude read repository contents, manage issues, review and comment on merge requests, and check pipeline status from any channel where the GitLab connector applies, all through the GitLab API. Unlike GitHub, there is no Claude app to install in GitLab. Instead, you give Claude its own GitLab user and add that user's personal access token as a connector.
+
+The connector is API-only. The token authenticates GitLab API requests, not git, so over HTTPS, cloning a private project or pushing to any project fails, even with the connector in place. To clone a repository into the session workspace, connect it through [GitHub](https://claude.com/docs/claude-tag/admins/configure-github.md) instead.
+
+A dedicated service account keeps Claude's GitLab activity attributed to a single identity you control. You decide which groups and projects it can reach by granting that account membership the same way you would for a person, and you can revoke or rescope it at any time without touching anyone else's access.
+
+## Prerequisites
+
+* The **Owner** role or the [**Claude Tag Admin** permission](https://claude.com/docs/claude-tag/admins/restrict-access.md#delegate-claude-tag-administration) in your Claude organization, to add a connector.
+* Permission in GitLab to create a user (or a [service account](https://docs.gitlab.com/user/profile/service_accounts/) on tiers that offer it) and to add that user to the groups or projects Claude should reach.
+
+## Create a dedicated GitLab account for Claude
+
+Create a GitLab user that exists only for Claude, for example `claude@yourcompany.example.com`. On GitLab Premium or Ultimate, a [service account](https://docs.gitlab.com/user/profile/service_accounts/) is the cleanest fit because it is clearly non-human. On other tiers, a regular user works the same way; treat it as a bot seat.
+
+Set the account's display name and avatar to whatever you want teammates to see on Claude's comments and issue activity.
+
+## Grant the account access to your groups and projects
+
+Add the service account as a member of each GitLab group or project Claude should work in. Granting at the group level is usually simpler than adding it to projects one at a time, and it means new projects in that group are reachable without another grant.
+
+The role you grant determines which API calls succeed. Grant the lowest role that covers what you want Claude to do: reading code and browsing issues and merge requests needs less than creating issues, posting review comments, or acting on pipelines. See GitLab's [permissions reference](https://docs.gitlab.com/user/permissions/) for what each role allows.
+
+## Generate a personal access token
+
+Create a [personal access token](https://docs.gitlab.com/user/profile/personal_access_tokens/) for the account. For a GitLab.com service account, create the token from the group's service account settings or through the API; for a regular bot user, sign in as it and create the token from its profile. The token starts with `glpat-`.
+
+| Scope | When to grant it |
+| :- | :- |
+| `api` | Read and write. Required for Claude to create and update issues, post comments, and act on pipelines. |
+| `read_api` | Read-only. Use this instead of `api` if you want Claude to browse and answer questions but never write. |
+
+Set an expiry that matches your rotation policy, and store the token somewhere you can retrieve it once; GitLab shows it only at creation.
+
+> [!NOTE]
+>
+> Group access tokens and project access tokens also work in the same field. The service-account approach is recommended because one token covers every group you add the account to, and the identity on comments and issues is yours to name. A group or project token is scoped to that single group or project and appears under a GitLab-generated bot name.
+
+## Add the token as a connector
+
+The first GitLab token you add from the **Connectors** tab is on in every workspace and channel as soon as you save it. To add GitLab for only the channels a bundle covers, add it from the bundle's page under **What's in it** instead; see [Create a bundle](https://claude.com/docs/claude-tag/admins/add-connections.md#create-a-bundle). To add it for one workspace or channel, [connect it from that place's page](https://claude.com/docs/claude-tag/admins/add-connections.md#connect-a-service-for-one-workspace-or-channel).
+
+**1. Open the Connectors tab**
+
+Go to [**Organization settings > Claude Tag**](https://claude.ai/admin-settings/claude-tag). Under **Claude's access**, select the **Connectors** tab and click **Add**.
+
+**2. Connect GitLab**
+
+Search for **GitLab** and select it. Paste the token into **Claude’s personal access token** and click **Connect**.
+
+**3. Choose where GitLab applies**
+
+If this is GitLab's first token, GitLab is now on in every workspace and channel. A later token starts off everywhere until you pick its places under **Assign access** on GitLab's page. To use GitLab in only some channels, [restrict it on GitLab's page](https://claude.com/docs/claude-tag/admins/add-connections.md#restrict-a-connector-to-some-channels).
+
+**4. Add the GitLab plugin**
+
+If your organization's plugin library includes a GitLab plugin, add it where GitLab applies so Claude knows how to call the GitLab API. See [Attach plugins](https://claude.com/docs/claude-tag/admins/add-connections.md#attach-plugins). The connector works without the plugin, which adds ready-made workflows.
+
+The token is held by [Agent Proxy](https://claude.com/docs/claude-tag/concepts/agent-identity.md#agent-proxy) and injected on every API request to your GitLab host. The model and the session sandbox never see it.
+
+## Self-managed GitLab
+
+Self-managed GitLab instances are supported when reachable from the public internet. In the **Connect GitLab** form, open the **Advanced** tab and add your instance's hostname under **Allowed websites**; `gitlab.com` is preset for GitLab SaaS. An instance on a private network without a public address can't be connected.
+
+## Verify GitLab access
+
+* GitLab appears on the **Connectors** tab, and its page's **Access from** table lists the token, with where it applies under **Used at**.
+* In a channel where GitLab applies, `@Claude what can you access from this channel?` returns GitLab.
+* In that same channel, ask Claude to list the open issues in one of your GitLab projects. Claude returns them without prompting for credentials.
+
+## Related resources
+
+* [Connect GitLab](https://claude.com/docs/claude-tag/admins/connections/gitlab.md): the credential field reference and how GitLab differs from GitHub
+* [Give Claude access](https://claude.com/docs/claude-tag/admins/add-connections.md): the full connector and bundle reference
+* [Configure GitHub access](https://claude.com/docs/claude-tag/admins/configure-github.md): the GitHub App path, which is different

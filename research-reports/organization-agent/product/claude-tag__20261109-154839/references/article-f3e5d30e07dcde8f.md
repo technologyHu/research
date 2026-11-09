@@ -1,0 +1,139 @@
+# Set up routines
+
+Source: https://claude.com/docs/claude-tag/users/proactivity
+
+Accessed (UTC): 2026-11-08
+
+> ## Documentation Index
+> Fetch the complete documentation index at: https://claude.com/docs/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Set up routines
+
+> Claude Tag runs routines you set up from a channel. See scheduled jobs, channel watching, pull request subscriptions, where results post, and how to pause them.
+
+> [!NOTE]
+>
+> Claude Tag is in public beta. Features and behavior described here may change before general availability.
+
+You can give Claude standing work from any channel it's in. This standing work is called a routine: a job that runs on a schedule, such as watching a channel, following a pull request, or posting status updates. You set a routine up in the channel where it should run, and it uses that channel's connections with the same permissions as a typed request.
+
+## Set up standing work
+
+### Scheduled jobs
+
+Describe the schedule you want and the work Claude should do in one message:
+
+```text wrap theme={null}
+@Claude every weekday at 9am, read the open threads in this channel, check the tickets and pull requests linked in them, and post a one-line status per item. Skip anything with a ✅ reaction.
+```
+
+Name the output format in the job so recurring posts stay scannable.
+
+You can schedule a job to run at most once an hour, and Claude declines a schedule that runs more often.
+
+### Watch channels
+
+Ask Claude to watch named channels and post here when something matches a topic:
+
+```text wrap theme={null}
+@Claude watch #product-announce, #eng-announce, and #design-announce. Once a day, post here if anything is relevant to user education. Skip days with nothing.
+```
+
+Naming both the channels and the topic is what keeps a watch useful. The watch can cover this channel too ("keep an eye on this channel and post a morning summary").
+
+### Follow a pull request
+
+Claude can subscribe to a single pull request and react when it updates. A subscription is the one way Claude reacts to GitHub events; it wakes on activity on that pull request, such as a comment, a failed check, or a merge. You can't set up a routine from Slack that fires on other repository events, such as every new pull request.
+
+```text wrap theme={null}
+@Claude subscribe to PR #482 in acme/data-pipeline. When CI finishes or a review lands, post here, and tag me if anything failed.
+```
+
+## Routine recipes
+
+Each recipe below sets up a complete routine with one message. Adapt the channel names, repositories, and times to your own, and name the timezone in each message, since schedules run in UTC.
+
+### Daily standup summary
+
+Claude posts a morning rollup of open threads and anything waiting on someone, before the team starts the day.
+
+```text wrap theme={null}
+@Claude every weekday at 9am Pacific, post a summary of open threads in this channel and anything that looks like it's waiting on someone.
+```
+
+"Waiting on someone" makes the rollup surface actions, not just a recap; [Catch up](https://claude.com/docs/claude-tag/users/use-cases/catch-up.md) has the one-off version.
+
+### Weekly channel digest
+
+Claude posts one recap at the end of each week, so the channel has a single place to see what happened.
+
+```text wrap theme={null}
+@Claude every Friday at 3pm Eastern, post a digest of this week in this channel: what got decided, what's still open, and anything waiting on someone.
+```
+
+For an intake channel, the [Triage requests](https://claude.com/docs/claude-tag/users/use-cases/triage-requests.md) version of this rollup also sweeps posts that never tagged Claude.
+
+### Watch a pull request until it merges
+
+Claude subscribes to a single pull request and posts as it moves through CI, review, and merge.
+
+```text wrap theme={null}
+@Claude subscribe to PR #482 in acme/data-pipeline. Post here when CI finishes, a review lands, or it merges, and tag me if anything failed.
+```
+
+[Follow a pull request](#follow-a-pull-request) explains what the subscription reacts to.
+
+### Alert investigation when a monitor fires
+
+Claude checks the alerting dashboard on a schedule and posts a first pass at diagnosis for anything new, so the investigation is underway before anyone asks. This recipe needs a monitoring connection such as Datadog or PagerDuty; [Watch monitors and alerts](https://claude.com/docs/claude-tag/users/use-cases/watch-monitors.md) has the full setup.
+
+```text wrap theme={null}
+@Claude every two hours, check the alerting dashboard against its last state. For anything new, post when it started, what changed around then, and what to look at first.
+```
+
+The routine posts only when something changed, not on every check.
+
+### Automatic triage for new requests
+
+Claude answers, deduplicates, and routes requests as they arrive. This recipe is a standing role rather than a schedule; "remember for this channel" saves it to [channel memory](https://claude.com/docs/claude-tag/users/memory.md), so it applies to everyone's threads.
+
+```text wrap theme={null}
+@Claude remember for this channel: when someone tags you on a request, check whether it duplicates something already reported, answer it directly if the answer exists, and otherwise route it to the right owner with a one-line summary.
+```
+
+Pair it with a weekly rollup so untagged posts are still swept; [Triage requests](https://claude.com/docs/claude-tag/users/use-cases/triage-requests.md) has both messages.
+
+## Where a routine posts its results
+
+A routine you set up from inside a thread usually reports back in that thread each time it runs. To keep the results in the thread, ask Claude to report back there when you set the routine up.
+
+If a routine's results start posting at the channel's top level instead, disable the routine and set it up again from the thread where you want them.
+
+For a routine you set up at the channel's top level, Claude usually announces each run in a short top-level message and does the work in the thread under it. To follow up on any routine post, mention `@Claude` in a reply under it.
+
+## Manage standing work
+
+Anyone in the channel can manage its standing work:
+
+* **List.** Ask "what routines do you have set up in this channel?", or send [`@Claude !scheduled`](https://claude.com/docs/claude-tag/users/commands#list-the-routines-in-a-channel). When you ask in plain language from inside a thread, Claude lists that thread's own routines first and may leave out the rest of the channel's; ask for "every routine in this channel" to get them all, or use `!scheduled`, which lists the channel's routines wherever you send it. Add a channel mention or its ID, as in `@Claude !scheduled #other-channel`, to list another channel's routines; pick the channel from Slack's autocomplete so it lands as a real mention, since a typed name on its own isn't accepted.
+* **Reschedule, pause, or stop a routine.** Name the routine and the change, as in "disable the Friday rollup" or "move the standup summary to 10am Pacific"
+* **Change what a routine does.** Ask Claude to stop the routine, then set up a replacement from the channel where the results should post.
+
+Standing work is visible to the channel: jobs post into the channel they belong to, or into another public channel you name that Claude has been added to. A channel's routines keep running if their creator leaves the channel, is removed from your Claude organization, or has their Slack account deactivated, and anyone still in the channel can disable them. Routines a person set up in a one-to-one direct message with Claude belong to that person's account and are turned off when the person is removed from your Claude organization.
+
+A few boundaries apply:
+
+* A job runs with the channel's connections, the same as an interactive request.
+* Claude can post a job's output into another public channel in the same workspace only if the job's own channel is public and Claude has been added to the target channel. It labels the message with the channel it came from.
+* A routine you set up in a [group DM](https://claude.com/docs/claude-tag/users/group-dms.md) posts its output in that group DM only.
+* Claude doesn't post a channel job's output into a different channel that's private or externally shared, or into a DM or group DM, and doesn't message people directly. Claude does send a completion or failure notice to whoever set up the routine, when that person's Slack account is connected to their Claude account.
+* Schedules run in UTC. Name the timezone when you set a schedule, as in "every weekday at 9am Pacific". With no timezone in your message, Claude uses the one on your Slack profile. To confirm the time Claude set, send [`@Claude !scheduled`](https://claude.com/docs/claude-tag/users/commands#list-the-routines-in-a-channel), which lists schedules in UTC.
+* A routine runs at a fixed UTC time, so each daylight saving change shifts its local time by an hour, in the same direction the clocks move. A routine running at 9am Pacific moves to 10am after the clocks go forward, or to 8am after they go back. Ask Claude to reschedule the routine to the local time you want.
+* A scheduled job that touches a github.com repository uses the same GitHub connection your admin set up for interactive work. See [Configure GitHub access](https://claude.com/docs/claude-tag/admins/configure-github.md#scheduled-work-uses-the-same-connection).
+
+## Related resources
+
+* [Use case library](https://claude.com/docs/claude-tag/users/use-cases.md): every entry has a proactive form to copy
+* [Prompt library](https://claude.com/docs/claude-tag/users/prompt-library.md#manage-routines): prompts to create, audit, and stop routines
+* [Good habits](https://claude.com/docs/claude-tag/users/good-habits.md): write schedules that keep working

@@ -1,0 +1,347 @@
+{
+  "classification": {
+    "target": "claude-tag",
+    "theme": "organization-agent",
+    "type": "product"
+  },
+  "completion": "complete",
+  "conflicts": [
+    {
+      "field_id": "context",
+      "id": "channel-isolation",
+      "issue": "是否所有频道的信息都互不流通？",
+      "item_id": "claude-tag",
+      "positions": [
+        {
+          "claim": "跨频道访问在架构层面不可能",
+          "conditions": "第三方概括，未细分公开与私有频道",
+          "locator": "Claude 有自己的公司账户段落",
+          "source_id": "article-3e13aa151d9f5e72",
+          "url": "https://mp.weixin.qq.com/s/lDt69gADM9OipK-7jgvN9Q",
+          "version": null
+        },
+        {
+          "claim": "公开频道可写工作区共享笔记；私有频道可读工作区笔记但只写本频道笔记",
+          "conditions": "按笔记种类与工作位置划分",
+          "locator": "Channel and workspace memory",
+          "source_id": "article-041f3893dd104163",
+          "url": "https://claude.com/docs/claude-tag/users/memory",
+          "version": "2026-11-09 文档快照"
+        }
+      ],
+      "rationale": "以直接说明当前读写矩阵的官方文档为准；第三方将私有边界推广到所有频道。报告保留双方和适用条件。",
+      "resolution": "prefer_source",
+      "selected_source_ids": [
+        "article-041f3893dd104163"
+      ]
+    },
+    {
+      "field_id": "pricing",
+      "id": "spend-warning",
+      "issue": "预算提醒的第二阈值是多少？",
+      "item_id": "claude-tag",
+      "positions": [
+        {
+          "claim": "75% 和 95%",
+          "conditions": "第三方文章，未注明文档版本",
+          "locator": "管理员可以给每个频道设置 token 配额段落",
+          "source_id": "article-3e13aa151d9f5e72",
+          "url": "https://mp.weixin.qq.com/s/lDt69gADM9OipK-7jgvN9Q",
+          "version": null
+        },
+        {
+          "claim": "75% 和 90%",
+          "conditions": "组织与频道月度 spend limit",
+          "locator": "Warnings before the limit is reached",
+          "source_id": "article-54511591c6c9b34c",
+          "url": "https://claude.com/docs/claude-tag/admins/set-spend-limit",
+          "version": "2026-11-09 文档快照"
+        }
+      ],
+      "rationale": "当前部署参数采用直接维护的官方计费文档，不推断第三方差异的历史原因。",
+      "resolution": "prefer_source",
+      "selected_source_ids": [
+        "article-54511591c6c9b34c"
+      ]
+    }
+  ],
+  "core_gaps": [],
+  "created_at": "2026-11-09T00:37:09+08:00",
+  "delivery": {
+    "extra_files": [],
+    "report": "report.md"
+  },
+  "derived_from": {
+    "run_id": "20261109t015115z-2394aa81",
+    "sources": [
+      {
+        "accessed_at": "2026-11-08",
+        "title": "65%的产品代码由 AI 生成：Claude 不再等你打开聊天框，而是直接住进了工作群",
+        "url": "https://mp.weixin.qq.com/s/NEZnQMpzM_MWQcmZ8O_Tdw"
+      },
+      {
+        "accessed_at": "2026-11-08",
+        "title": "Claude深夜炸场！新增Tag，一键帮你干完脏活累活，打工人爽翻了",
+        "url": "https://mp.weixin.qq.com/s/CR9Yypl5Y5EYYKFkFpV1RA"
+      },
+      {
+        "accessed_at": "2026-11-08",
+        "title": "一夜之间，Claude成我同事了",
+        "url": "https://mp.weixin.qq.com/s/34OgEvysvJynD7Tm-GIlvQ"
+      },
+      {
+        "accessed_at": "2026-11-08",
+        "title": "Claude重磅升级！AI同事这次真要上班了 ，卡帕西兴奋表示：这是LLM UI的第三次改革。",
+        "url": "https://mp.weixin.qq.com/s/ZMNOPRG_ayH6YHN0GFihCw"
+      },
+      {
+        "accessed_at": "2026-11-08",
+        "title": "Claude住进了讨论群组：AI从工具变成了常驻同事",
+        "url": "https://mp.weixin.qq.com/s/lDt69gADM9OipK-7jgvN9Q"
+      },
+      {
+        "accessed_at": "2026-11-08",
+        "title": "Claude Tag 深读：AI 第一次坐在你们中间，而不是等你去访问",
+        "url": "https://mp.weixin.qq.com/s/t9CBUyC6Cpzqa282PDNu5w"
+      },
+      {
+        "accessed_at": "2026-11-08",
+        "title": "万字深度解析 Claude Tag！9 大落地场景全覆盖！干货拉满！",
+        "url": "https://mp.weixin.qq.com/s/_bS4LHzJ41eziyJ1RjAAiw"
+      },
+      {
+        "accessed_at": "2026-11-08",
+        "title": "你的AI同事，今天正式入职了——Claude Tag 全面解析",
+        "url": "https://mp.weixin.qq.com/s/MRseMQAA1kI9t1pmQCU7hA"
+      },
+      {
+        "accessed_at": "2026-11-08",
+        "title": "Claude Tag 的真正意义：AI 开始获得组织身份",
+        "url": "https://mp.weixin.qq.com/s/L4_1MJJloHZTJpeuunFU6g"
+      },
+      {
+        "accessed_at": "2026-11-08",
+        "title": "Introducing Claude Tag",
+        "url": "https://www.anthropic.com/news/introducing-claude-tag"
+      },
+      {
+        "accessed_at": "2026-11-08",
+        "title": "Work with Claude Tag",
+        "url": "https://claude.com/docs/claude-tag/overview"
+      },
+      {
+        "accessed_at": "2026-11-08",
+        "title": "How Claude Tag works",
+        "url": "https://claude.com/docs/claude-tag/concepts/how-it-works"
+      },
+      {
+        "accessed_at": "2026-11-08",
+        "title": "What Claude Tag remembers",
+        "url": "https://claude.com/docs/claude-tag/users/memory"
+      },
+      {
+        "accessed_at": "2026-11-08",
+        "title": "Set up routines",
+        "url": "https://claude.com/docs/claude-tag/users/proactivity"
+      },
+      {
+        "accessed_at": "2026-11-08",
+        "title": "How agent identity works",
+        "url": "https://claude.com/docs/claude-tag/concepts/agent-identity"
+      },
+      {
+        "accessed_at": "2026-11-08",
+        "title": "Personal connectors in channels",
+        "url": "https://claude.com/docs/claude-tag/concepts/personal-connectors"
+      },
+      {
+        "accessed_at": "2026-11-08",
+        "title": "Security and data handling",
+        "url": "https://claude.com/docs/claude-tag/concepts/security-and-data"
+      },
+      {
+        "accessed_at": "2026-11-08",
+        "title": "Set a spend limit",
+        "url": "https://claude.com/docs/claude-tag/admins/set-spend-limit"
+      },
+      {
+        "accessed_at": "2026-11-08",
+        "title": "Give Claude access to your tools",
+        "url": "https://claude.com/docs/claude-tag/admins/add-connections"
+      },
+      {
+        "accessed_at": "2026-11-08",
+        "title": "Work with your GitHub repositories",
+        "url": "https://claude.com/docs/claude-tag/users/use-cases/work-with-github"
+      },
+      {
+        "accessed_at": "2026-11-08",
+        "title": "Claude Tag API",
+        "url": "https://platform.claude.com/docs/en/manage-claude/claude-tag-api"
+      },
+      {
+        "accessed_at": "2026-11-08",
+        "title": "Claude Tag now reads even more of the room",
+        "url": "https://claude.com/resources/articles/claude-tag-now-reads-even-more-of-the-room"
+      },
+      {
+        "accessed_at": "2026-11-08",
+        "title": "Control when Claude Tag responds",
+        "url": "https://claude.com/docs/claude-tag/users/when-claude-responds"
+      },
+      {
+        "accessed_at": "2026-11-08",
+        "title": "Data lifecycle and deletion",
+        "url": "https://claude.com/docs/claude-tag/concepts/data-lifecycle"
+      },
+      {
+        "accessed_at": "2026-11-08",
+        "title": "Configure GitLab access",
+        "url": "https://claude.com/docs/claude-tag/admins/configure-gitlab"
+      },
+      {
+        "accessed_at": "2026-11-08",
+        "title": "Federated agent access",
+        "url": "https://claude.com/docs/claude-tag/admins/federated-access/overview"
+      },
+      {
+        "accessed_at": "2026-11-08",
+        "title": "Review what Claude Tag has done",
+        "url": "https://claude.com/docs/claude-tag/admins/audit"
+      },
+      {
+        "accessed_at": "2026-11-08",
+        "title": "Set up Claude Tag",
+        "url": "https://claude.com/docs/claude-tag/admins/setup-overview"
+      },
+      {
+        "accessed_at": "2026-11-08",
+        "title": "claude-tag-plugins README",
+        "url": "https://github.com/anthropics/claude-tag-plugins/blob/b6ee25f8f00a291cbdf31eb75bd7cc1a987d6782/README.md"
+      },
+      {
+        "accessed_at": "2026-11-08",
+        "title": "Datadog logs helper",
+        "url": "https://github.com/anthropics/claude-tag-plugins/blob/b6ee25f8f00a291cbdf31eb75bd7cc1a987d6782/datadog/skills/datadog-api/scripts/dd_logs.sh"
+      },
+      {
+        "accessed_at": "2026-11-08",
+        "title": "Gateway token validation",
+        "url": "https://github.com/anthropics/claude-tag-wif-gateway-sample/blob/89b1e49e31b12117fa3efcd3aede817599215ea9/gateway/auth.py"
+      },
+      {
+        "accessed_at": "2026-11-08",
+        "title": "Gateway routing and proxy",
+        "url": "https://github.com/anthropics/claude-tag-wif-gateway-sample/blob/89b1e49e31b12117fa3efcd3aede817599215ea9/gateway/main.py"
+      },
+      {
+        "accessed_at": "2026-11-08",
+        "title": "Gateway subject mapping",
+        "url": "https://github.com/anthropics/claude-tag-wif-gateway-sample/blob/89b1e49e31b12117fa3efcd3aede817599215ea9/gateway/mapping.py"
+      },
+      {
+        "accessed_at": "2026-11-08",
+        "title": "Gateway sample scope",
+        "url": "https://github.com/anthropics/claude-tag-wif-gateway-sample/blob/89b1e49e31b12117fa3efcd3aede817599215ea9/README.md"
+      },
+      {
+        "accessed_at": "2026-11-08",
+        "title": "Tag Claude in Slack — How it works 官方界面预览",
+        "url": "https://claude.com/product/tag"
+      },
+      {
+        "accessed_at": "2026-11-09",
+        "title": "Claude on call: How Claude Tag serves as Anthropic’s first responder for CI/CD failures",
+        "url": "https://claude.com/resources/articles/ai-ci-cd-on-call"
+      }
+    ]
+  },
+  "directory_layout": "dated-flat",
+  "items": [
+    {
+      "completion": "complete",
+      "id": "claude-tag",
+      "name": "Claude Tag",
+      "type": "product",
+      "version": "Public Beta；公开文档快照 2026-11-09"
+    }
+  ],
+  "non_core_gaps": [
+    {
+      "display_question": "真实任务的成功率、能省多少人工时间和长期成本",
+      "item_id": "claude-tag",
+      "question": "能否确认真实任务成功率、人工净节时及长期成本？",
+      "reason": "本次未接入付费组织或 Slack，未执行真实任务；所读材料未提供可据以推定本团队成功率、净节时与长期成本的独立同口径实验。"
+    },
+    {
+      "display_question": "服务端怎样找回已保存的信息、安排任务和控制访问权限",
+      "item_id": "claude-tag",
+      "question": "闭源核心的记忆检索、调度器与权限执行内部实现能否从源码验证？",
+      "reason": "未找到完整官方核心服务源码；插件与客户侧网关不足以核实服务端记忆检索、调度与所有权限执行细节。"
+    }
+  ],
+  "opening_version": 3,
+  "report_id": "report-fd2531e6d5e24ef4817433ef6534fcf1",
+  "research_digest": "e25419cc3ebff2181d43a6fba67819be1c2bd3bd62ffa37dbb9739e366f4e72e",
+  "researcher": "technologyHu",
+  "run_id": "20261109t074836z-3b876ccb",
+  "schema_version": 1,
+  "source_urls": [
+    "https://claude.com/docs/claude-tag/admins/add-connections",
+    "https://claude.com/docs/claude-tag/admins/audit",
+    "https://claude.com/docs/claude-tag/admins/configure-gitlab",
+    "https://claude.com/docs/claude-tag/admins/federated-access/overview",
+    "https://claude.com/docs/claude-tag/admins/set-spend-limit",
+    "https://claude.com/docs/claude-tag/admins/setup-overview",
+    "https://claude.com/docs/claude-tag/concepts/agent-identity",
+    "https://claude.com/docs/claude-tag/concepts/data-lifecycle",
+    "https://claude.com/docs/claude-tag/concepts/how-it-works",
+    "https://claude.com/docs/claude-tag/concepts/personal-connectors",
+    "https://claude.com/docs/claude-tag/concepts/security-and-data",
+    "https://claude.com/docs/claude-tag/overview",
+    "https://claude.com/docs/claude-tag/users/memory",
+    "https://claude.com/docs/claude-tag/users/proactivity",
+    "https://claude.com/docs/claude-tag/users/use-cases/work-with-github",
+    "https://claude.com/docs/claude-tag/users/when-claude-responds",
+    "https://claude.com/product/tag",
+    "https://claude.com/resources/articles/ai-ci-cd-on-call",
+    "https://claude.com/resources/articles/claude-tag-now-reads-even-more-of-the-room",
+    "https://github.com/anthropics/claude-tag-plugins/blob/b6ee25f8f00a291cbdf31eb75bd7cc1a987d6782/README.md",
+    "https://github.com/anthropics/claude-tag-plugins/blob/b6ee25f8f00a291cbdf31eb75bd7cc1a987d6782/datadog/skills/datadog-api/scripts/dd_logs.sh",
+    "https://github.com/anthropics/claude-tag-wif-gateway-sample/blob/89b1e49e31b12117fa3efcd3aede817599215ea9/README.md",
+    "https://github.com/anthropics/claude-tag-wif-gateway-sample/blob/89b1e49e31b12117fa3efcd3aede817599215ea9/gateway/auth.py",
+    "https://github.com/anthropics/claude-tag-wif-gateway-sample/blob/89b1e49e31b12117fa3efcd3aede817599215ea9/gateway/main.py",
+    "https://github.com/anthropics/claude-tag-wif-gateway-sample/blob/89b1e49e31b12117fa3efcd3aede817599215ea9/gateway/mapping.py",
+    "https://mp.weixin.qq.com/s/34OgEvysvJynD7Tm-GIlvQ",
+    "https://mp.weixin.qq.com/s/CR9Yypl5Y5EYYKFkFpV1RA",
+    "https://mp.weixin.qq.com/s/L4_1MJJloHZTJpeuunFU6g",
+    "https://mp.weixin.qq.com/s/MRseMQAA1kI9t1pmQCU7hA",
+    "https://mp.weixin.qq.com/s/NEZnQMpzM_MWQcmZ8O_Tdw",
+    "https://mp.weixin.qq.com/s/ZMNOPRG_ayH6YHN0GFihCw",
+    "https://mp.weixin.qq.com/s/_bS4LHzJ41eziyJ1RjAAiw",
+    "https://mp.weixin.qq.com/s/lDt69gADM9OipK-7jgvN9Q",
+    "https://mp.weixin.qq.com/s/t9CBUyC6Cpzqa282PDNu5w",
+    "https://platform.claude.com/docs/en/manage-claude/claude-tag-api",
+    "https://www.anthropic.com/news/introducing-claude-tag"
+  ],
+  "theme_id": "organization-agent",
+  "theme_name": "组织 Agent",
+  "theme_path": [
+    "organization-agent"
+  ],
+  "theme_slug": "organization-agent",
+  "update": {
+    "added_sections": [],
+    "allow_files": [],
+    "baseline_date": "2026-11-09",
+    "baseline_gaps": "能否确认真实任务成功率、人工净节时及长期成本？：本次未接入付费组织或 Slack，未执行真实任务；所读材料未提供可据以推定本团队成功率、净节时与长期成本的独立同口径实验。、闭源核心的记忆检索、调度器与权限执行内部实现能否从源码验证？：未找到完整官方核心服务源码；插件与客户侧网关不足以核实服务端记忆检索、调度与所有权限执行细节。；更早记录：无；非核心缺口：Claude Tag／能否确认真实任务成功率、人工净节时及长期成本？：本次未接入付费组织或 Slack，未执行真实任务；所读材料未提供可据以推定本团队成功率、净节时与长期成本的独立同口径实验。；Claude Tag／闭源核心的记忆检索、调度器与权限执行内部实现能否从源码验证？：未找到完整官方核心服务源码；插件与客户侧网关不足以核实服务端记忆检索、调度与所有权限执行细节。；更早记录：无；非核心缺口：Claude Tag／能否确认真实任务成功率、人工净节时及长期成本？：本次未接入付费组织或 Slack，未执行真实任务；所读材料未提供可据以推定本团队成功率、净节时与长期成本的独立同口径实验。；Claude Tag／闭源核心的记忆检索、调度器与权限执行内部实现能否从源码验证？：未找到完整官方核心服务源码；插件与客户侧网关不足以核实服务端记忆检索、调度与所有权限执行细节。",
+    "baseline_sha256": "5380dadd3461374697e176adbb14f35db7c0e47871f8499bf771d3b52e6d1b2f",
+    "baseline_version": "Claude Tag（Public Beta；公开文档快照 2026-11-09）；更早未复核记录：Public Beta；公开文档快照 2026-11-09；更早未复核记录：Public Beta；公开文档快照 2026-11-09",
+    "files_sha256": "7f5298fda15fc04b7a3fc430bfe022761ded2228a5d1af458f5bf2cc01f4ac7e",
+    "sections": [
+      "@intro"
+    ]
+  },
+  "updated_at": "2026-11-09T15:48:39+08:00",
+  "workflow": "full"
+}
