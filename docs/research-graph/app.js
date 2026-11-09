@@ -11,6 +11,7 @@
   const canvas = $("graph"), ctx = canvas.getContext("2d"), container = $("map");
   const byId = new Map(data.nodes.map(n => [n.id, n]));
   const kindNames = {theme: "主题", object: "调研工作"};
+  const displayLabel = node => node.displayLabel || node.taskId || node.label;
   const relationNames = {includes: "关联", depends: "依赖"};
   const reportById = new Map(data.reports.map(r => [r.id, r]));
   const neighbors = new Map(data.nodes.map(n => [n.id, new Set()]));
@@ -85,7 +86,7 @@
     const matched = data.nodes.filter(n => {
       if (theme !== "all" && !(n.themes || [n.theme]).includes(theme)) return false;
       if (type !== "all" && n.type !== type) return false;
-      return !query || `${n.label} ${n.path} ${n.taskId || ""}`.toLocaleLowerCase().includes(query);
+      return !query || `${displayLabel(n)} ${n.label} ${n.target || ""} ${n.path} ${n.taskId || ""}`.toLocaleLowerCase().includes(query);
     });
     const ids = new Set(matched.map(n => n.id));
     // Keep theme centers as context, but do not let contextual nodes mask zero results.
@@ -109,8 +110,8 @@
       button.setAttribute("aria-pressed", String(n.id === selected));
       const swatch = element("span", "swatch");
       swatch.style.backgroundColor = n.color;
-      button.append(swatch, element("span", "result-label", n.label), element("span", "result-kind", kindNames[n.kind]));
-      button.title = n.label;
+      button.append(swatch, element("span", "result-label", displayLabel(n)), element("span", "result-kind", kindNames[n.kind]));
+      button.title = displayLabel(n);
       button.addEventListener("click", () => select(n.id));
       $("results").append(button);
     }
@@ -162,7 +163,7 @@
       const row = element("li");
       let relation = relationNames[edge.relation];
       if (edge.relation === "depends") relation = edge.target === n.id ? "前置调研工作" : "后续调研工作";
-      const action = element("button", "text-button", target.label);
+      const action = element("button", "text-button", displayLabel(target));
       action.style.marginLeft = "0";
       action.title = edge.evidence;
       action.addEventListener("click", () => select(target.id));
@@ -251,7 +252,7 @@
       ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
       ctx.fill();
       if (!active || (visible.length > 35 && n.kind !== "theme" && n.id !== focus && camera.zoom < 1.7)) continue;
-      let label = n.label;
+      let label = displayLabel(n);
       if (label.length > 26 && n.id !== focus) label = label.slice(0, 25) + "…";
       ctx.font = `${n.kind === "theme" ? 12 : 10}px "Segoe UI","Microsoft YaHei","Noto Sans CJK SC",sans-serif`;
       const textWidth = ctx.measureText(label).width;
@@ -303,7 +304,7 @@
     canvas.style.cursor = n ? "pointer" : "grab";
     $("tooltip").hidden = !n;
     if (n) {
-      $("tooltip").textContent = `${n.label}\n${kindNames[n.kind]}${data.types[n.type] ? " · " + data.types[n.type] : ""}`;
+      $("tooltip").textContent = displayLabel(n);
       $("tooltip").style.left = `${Math.max(8, Math.min(width - 265, p.x + 14))}px`;
       $("tooltip").style.top = `${Math.max(8, Math.min(height - 85, p.y + 14))}px`;
     }

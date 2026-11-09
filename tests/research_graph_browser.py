@@ -56,7 +56,13 @@ def exercise(page, url, expected):
     require(page.locator(".result").count() == product_count, "type filter must match exact type")
     page.locator("#clear-filters").click()
     work = next((n for n in expected["nodes"] if n["kind"] == "object"), expected["nodes"][0])
-    page.locator(f'button[data-node-id={json.dumps(work["id"], ensure_ascii=False)}]').click()
+    work_button = page.locator(f'button[data-node-id={json.dumps(work["id"], ensure_ascii=False)}]')
+    require(work_button.locator(".result-label").inner_text() == work["displayLabel"],
+            "node list uses the short display label")
+    page.locator("#search").fill(work["displayLabel"])
+    require(work_button.is_visible(), "the short display label is searchable")
+    page.locator("#clear-filters").click()
+    work_button.click()
     require(page.locator("#detail h2").inner_text() == work["label"], "selecting work shows details")
     require(page.locator("#detail .open-link").get_attribute("href") == work["url"], "detail opens correct branch source")
     for report_id in work.get("reportIds", []):

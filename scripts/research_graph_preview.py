@@ -50,13 +50,6 @@ def two_lines(text, face, width):
     return [first] + ([fit(text, face, width)] if text else [])
 
 
-def work_labels(node):
-    """The work's name is primary; its stable identifier is supplementary."""
-    name = str(node.get("label") or "").strip()
-    identifier = str(node.get("taskId") or "").strip()
-    return name or identifier or "未命名调研工作", identifier if name and identifier != name else ""
-
-
 def render_preview(graph, output: Path):
     fonts = {size: font(size) for size in (12, 13, 14, 16, 18, 20, 30)}
     base = Image.new("RGB", (WIDTH, HEIGHT), BG)
@@ -134,17 +127,17 @@ def render_preview(graph, output: Path):
                 halo = radius + 7 + pulse * 5
                 pen.ellipse((x - halo, y - halo, x + halo, y + halo), outline=blend(color, 0.12 + pulse * 0.1))
             pen.ellipse((x - radius, y - radius, x + radius, y + radius), fill=color)
+            display_label = n.get("displayLabel") or n.get("taskId") or n["label"]
             if n["kind"] == "theme":
-                label = fit(n["label"], fonts[13], 240 if n["kind"] == "theme" else 195)
+                label = fit(display_label, fonts[13], 240)
                 tx = min(840 - fonts[13].getlength(label), max(40, x - fonts[13].getlength(label) / 2))
                 pen.text((tx, y + radius + 9), label, font=fonts[13], fill=TEXT,
                          stroke_width=2, stroke_fill=BG)
                 label_boxes.append((tx - 3, y + radius + 7, tx + fonts[13].getlength(label) + 3, y + radius + 29))
             elif len(selected) <= 35:
-                name, identifier = work_labels(n)
-                label = fit(name, fonts[13], 178)
+                label = fit(display_label, fonts[13], 178)
                 label_width = fonts[13].getlength(label)
-                label_height = 36 if identifier else 20
+                label_height = 20
                 candidates = [(x + 10, y - 10), (x - label_width / 2, y + 13),
                               (x - label_width / 2, y - label_height - 10), (x - label_width - 10, y - 10)]
                 for tx, ty in candidates:
@@ -155,8 +148,6 @@ def render_preview(graph, output: Path):
                     if any(box[0] < b[2] and box[2] > b[0] and box[1] < b[3] and box[3] > b[1] for b in label_boxes):
                         continue
                     pen.text((tx, ty), label, font=fonts[13], fill=TEXT, stroke_width=2, stroke_fill=BG)
-                    if identifier:
-                        pen.text((tx, ty + 18), identifier, font=fonts[12], fill=MUTED, stroke_width=1, stroke_fill=BG)
                     label_boxes.append(box)
                     break
         frames.append(frame.quantize(colors=128, method=Image.Quantize.MEDIANCUT))

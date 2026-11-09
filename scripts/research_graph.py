@@ -376,7 +376,10 @@ def build_graph(root: Path, repository: str, branch: str, *, input_paths: set[st
                 if report_key in report_directories and report_directories[report_key] != directory:
                     raise ValueError("Duplicate report identity in multiple directories: " + report_key)
                 report_directories[report_key] = directory
-            _, directory_time = split_name(path.parent.name)
+            subject, directory_time = split_name(path.parent.name)
+            object_ids = {item["id"].strip() for item in summary.get("items", [])
+                          if isinstance(item.get("id"), str) and item["id"].strip()}
+            display_label = next(iter(object_ids)) if len(object_ids) == 1 else subject
             stable_id = ("report:" + report_key + (":" + path.name if path.name != summary.get("delivery", {}).get("report", "report.md") else "")) if report_key else "report:" + rel
             completion = summary.get("completion", "")
             if not completion:
@@ -386,7 +389,7 @@ def build_graph(root: Path, repository: str, branch: str, *, input_paths: set[st
             if isinstance(summary.get("update"), dict) and status in LOCAL_REVIEW_LABELS:
                 status = f"review_{status}"
             report = node(id=stable_id, kind="report", type=report_type,
-                          label=parsed["title"] or path.stem, path=rel, theme=theme,
+                          label=parsed["title"] or path.stem, displayLabel=display_label, path=rel, theme=theme,
                           status=status, runId=summary.get("run_id", ""),
                           updatedAt=text_value(metadata.get("updated_at")) or directory_time or "",
                           createdAt=text_value(metadata.get("created_at")),
@@ -429,6 +432,7 @@ def build_graph(root: Path, repository: str, branch: str, *, input_paths: set[st
         theme = text_value(meta.get("theme_id") or default_theme)
         group = path.relative_to(root).parts[0]
         theme_data = registered(theme)
+        display_label = theme_data["label"] if theme_data else theme
         theme = theme_key(group, theme)
         if theme in plans:
             raise ValueError(f"Duplicate theme_id: {theme}")
@@ -437,7 +441,7 @@ def build_graph(root: Path, repository: str, branch: str, *, input_paths: set[st
         if group in GROUP_LABELS:
             label = GROUP_LABELS[group] + " · " + (theme_data["label"] if theme_data else label)
         theme_node = node(id="theme:" + theme, kind="theme", type="theme", theme=theme,
-                          label=label,
+                          label=label, displayLabel=display_label,
                           status=canonical_status(text_value(meta.get("status"))), path=rel,
                           revision=meta.get("revision"), updatedAt=text_value(meta.get("updated_at")))
         plans[theme] = (theme_node, parsed)
@@ -457,9 +461,11 @@ def build_graph(root: Path, repository: str, branch: str, *, input_paths: set[st
                     raise ValueError(f"Duplicate task ID in {rel}: {task_id}")
                 target = table_value(table["headers"], row, "类型", "对象")
                 task_type = re.split(r"[／/：:]", target)[0].strip()
+                object_id = next((value.strip() for header, value in zip(table["headers"], row)
+                                  if re.sub(r"\s+", "", header).casefold() == "对象id"), "")
                 task = node(id=identity, kind="task", type=task_type if task_type in TYPES else "unknown",
                             label=table_value(table["headers"], row, "本次目标", "目标") or target,
-                            target=target,
+                            displayLabel=object_id or task_id, target=target,
                             taskId=task_id, theme=theme, path=rel,
                             status=canonical_status(table_value(table["headers"], row, "状态")),
                             priority=table_value(table["headers"], row, "优先级"),
@@ -476,7 +482,8 @@ def build_graph(root: Path, repository: str, branch: str, *, input_paths: set[st
             theme_data = registered(short_theme)
             label = GROUP_LABELS[group] + " · " + (theme_data["label"] if theme_data else short_theme) if group in GROUP_LABELS else theme
             theme_node = node(id="theme:" + theme, kind="theme", type="theme", theme=theme,
-                              label=label, status="unknown", path=rel, revision=None,
+                              label=label, displayLabel=theme_data["label"] if theme_data else short_theme or theme,
+                              status="unknown", path=rel, revision=None,
                               updatedAt="", inferredFromDirectory=True)
             plans[theme] = (theme_node, {"tables": [], "links": []})
         theme_node = plans[theme][0]
@@ -566,7 +573,8 @@ def build_graph(root: Path, repository: str, branch: str, *, input_paths: set[st
                                    "pendingReportIds": [], "sourceKind": "report"}
         elif rel == primary_reports.get(directory):
             # The canonical report supplies the directory work's display name.
-            work_nodes[work_id].update({key: report[key] for key in ("label", "path", "url", "status", "statusLabel", "runId", "updatedAt")})
+            work_nodes[work_id].update({key: report[key] for key in (
+                "label", "displayLabel", "path", "url", "status", "statusLabel", "runId", "updatedAt")})
         work_nodes[work_id]["reportIds"].append(report["id"])
         report_work[report["id"]] = {work_id}
         report_metadata[report["id"]].update(associationStatus="directory", workIds=[work_id])

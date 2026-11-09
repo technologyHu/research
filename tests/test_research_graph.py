@@ -9,7 +9,6 @@ from unittest.mock import patch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from research_graph import build_graph, parse_markdown, next_steps, resolve_link, update_readme, generate_artifacts, work_ids, START, END
 import research_graph_delivery as delivery
-from research_graph_preview import work_labels
 from research_graph_publication import publication_manifest, ASSETS
 import hashlib
 
@@ -101,6 +100,7 @@ updated_at: 2026-11-06
         self.assertEqual(graph["stats"], {"themes": 1, "reports": 4, "types": 1, "objects": 4})
         self.assertEqual({node["id"] for node in graph["nodes"] if node["kind"] == "object"},
                          {"work:report-" + key * 32 for key in ("a", "b", "c", "d")})
+        self.assertEqual({node["displayLabel"] for node in graph["nodes"] if node["kind"] == "object"}, {"codex"})
         update_readme(self.root, graph, "https://example.com/")
         content = (self.root / "README.md").read_text(encoding="utf8")
         for path in paths:
@@ -822,10 +822,21 @@ updated_at: {updated}
         self.assertEqual((self.root / "docs/research-graph/graph.json").read_bytes(), old_data)
         self.assertEqual((self.root / "README.md").read_text(encoding="utf-8"), "并行编辑的人工内容\n")
 
-    def test_preview_label_prioritizes_work_name_with_optional_identifier(self):
-        self.assertEqual(work_labels({"label": "分析工具的扩展机制", "taskId": "T001"}), ("分析工具的扩展机制", "T001"))
-        self.assertEqual(work_labels({"label": "  ", "taskId": "T001"}), ("T001", ""))
-        self.assertEqual(work_labels({"label": "独立调研工作"}), ("独立调研工作", ""))
+    def test_plan_node_display_labels_keep_task_details_separate(self):
+        self.registry()
+        self.write("research-reports/agent-memory/plan.md", """# 记忆调研计划
+## 对象与任务
+| ID | 类型／对象 | 对象 ID | 本次目标 |
+| --- | --- | --- | --- |
+| T001 | product／某产品 | `memory-tool` | 分析工具的扩展机制 |
+| T002 | paper／某论文 | | 比较论文的实验条件 |
+""")
+        nodes = {node["id"]: node for node in self.build()["nodes"]}
+        self.assertEqual(nodes["theme:research-reports/agent-memory"]["displayLabel"], "Agent / 记忆")
+        first = nodes["work:research-reports/agent-memory:T001"]
+        self.assertEqual(first["displayLabel"], "memory-tool")
+        self.assertEqual(first["label"], "分析工具的扩展机制")
+        self.assertEqual(nodes["work:research-reports/agent-memory:T002"]["displayLabel"], "T002")
 
     def test_publication_manifest_binds_version_and_all_asset_bytes(self):
         site = self.root / "docs/research-graph"
@@ -955,13 +966,15 @@ theme_id: agents
     def test_standalone_directory_keeps_one_stable_work_and_canonical_title(self):
         self.report()
         before = next(n for n in self.build()["nodes"] if n["kind"] == "object")
-        supplement = self.report("agents/paper/one/aaa-details.md", run="supplement-run")
+        supplement = self.report("agents/paper/one/aaa-details.md", run="supplement-run",
+                                 items=[{"id": "supplement"}])
         supplement.write_text(supplement.read_text(encoding="utf-8").replace("# 报告一", "# 补充分析"), encoding="utf-8")
         graph = self.build()
         after = next(n for n in graph["nodes"] if n["kind"] == "object")
         self.assertEqual(graph["stats"]["objects"], 1)
         self.assertEqual(after["id"], before["id"])
         self.assertEqual(after["label"], "报告一")
+        self.assertEqual(after["displayLabel"], "one")
         self.assertTrue(after["path"].endswith("/report.md"))
         self.assertEqual(after["runId"], before["runId"])
         self.assertEqual(len(after["reportIds"]), 2)
