@@ -425,7 +425,7 @@ T002 [不算引用](paper/one/report.md)
         positions = [content.index("## " + heading + "\n") for heading in headings]
         self.assertEqual(positions, sorted(positions))
         self.assertIn("[在线图谱](https://example.com/)", content)
-        self.assertIn("[动态预览](docs/research-graph/preview.gif)", content)
+        self.assertIn("[![调研图谱动态预览](docs/research-graph/preview.gif)](https://example.com/)", content)
         self.assertEqual(graph, before)
         self.assertEqual(self.build(), before)
         works = {node["taskId"]: node for node in graph["nodes"] if node["kind"] == "object"}

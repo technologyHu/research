@@ -40,7 +40,9 @@
 
 按主题查看调研工作、任务依赖和关联报告。
 
-[在线图谱](https://technologyhu.github.io/research/) · [本地图谱](docs/research-graph/index.html) · [动态预览](docs/research-graph/preview.gif) · [图谱维护指南](docs/research-graph-guide.md)
+[![调研图谱动态预览](docs/research-graph/preview.gif)](https://technologyhu.github.io/research/)
+
+[在线图谱](https://technologyhu.github.io/research/) · [本地图谱](docs/research-graph/index.html) · [图谱维护指南](docs/research-graph-guide.md)
 
 <!-- research-graph:end -->
 

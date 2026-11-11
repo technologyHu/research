@@ -749,8 +749,9 @@ def update_readme(root: Path, graph: dict, site_url: str):
 
     lines += ["", "## 调研图谱", "",
               "按主题查看调研工作、任务依赖和关联报告。", "",
+              f"[![调研图谱动态预览](docs/research-graph/preview.gif)]({site_url})", "",
               f"[在线图谱]({site_url}) · [本地图谱](docs/research-graph/index.html) · "
-              "[动态预览](docs/research-graph/preview.gif) · [图谱维护指南](docs/research-graph-guide.md)",
+              "[图谱维护指南](docs/research-graph-guide.md)",
               "", END]
     generated = "\n".join(lines)
     if old.count(START) != old.count(END) or old.count(START) > 1:
