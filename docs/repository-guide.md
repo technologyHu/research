@@ -199,6 +199,8 @@ git diff --cached --stat
 
 ### 技能与工具
 
+优化或更新技能前，先按[技能维护规则](../AGENTS.md#技能维护)执行。
+
 技能维护直接修改 `.agents/skills/` 中对应技能及支持文件；新增或修改流程时同步核对入口、相对链接、脚本参数和相关测试。公共规则集中在 research-common，其他技能按需引用，避免复制出不同版本。子技能返回结果给调用方，不回调三个顶层入口。
 
 修改技能关系后运行 `python -B -m unittest discover -s tests -p test_skill_dependencies.py -v`，检查链接、正文、元数据、脚本路径及本地导入形成的直接和间接依赖。`test_research_compat.py` 检查仅安装共用子技能时的实际流程及旧入口兼容。技能独立性工作流使用 [共用调研依赖](../.agents/skills/research-common/requirements.txt)、[文章抓取依赖](../.agents/skills/web-article-fetcher/requirements.txt) 和 [仓库技能测试依赖](../tests/skill-dependencies-requirements.txt)，执行这两项检查、公共任务回归及 Git 流程测试。抓取回归另在只安装文章抓取依赖的作业中运行。需要 HTTP 403 浏览器回退时使用 [抓取技能的浏览器清单](../.agents/skills/web-article-fetcher/requirements-browser.txt) 并准备 Chromium。图谱生成和浏览器测试依赖由 `scripts/` 下的图谱清单维护。
