@@ -1019,6 +1019,7 @@ window.RESEARCH_GRAPH = {
       "themePath": [
         "team-agent"
       ],
+      "researcher": "technologyHu",
       "associationStatus": "explicit",
       "workIds": [
         "work:research-reports/team-agent:T001"

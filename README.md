@@ -1,54 +1,53 @@
-# openJiuwen Harness 调研工作
+# openJiuwen Harness 项目组内部调研报告
 
-本分支归纳 openJiuwen Harness 组织内部的调研计划、报告与后续工作。
+项目组在这里记录产品、开源项目、论文和评测的调研成果，为 openJiuwen Harness 的方案讨论和试点验证提供参考。报告说明采用的版本、证据来源和待核实的问题。分析洞察围绕具体问题综合已有报告，主题计划记录任务目标、验收条件和后续安排。
 
-## 如何贡献
+## 当前调研方向
 
-登记主题、开展调研、补充报告或维护工具前，请先阅读[仓库使用、贡献与维护指南](docs/repository-guide.md)。指南介绍如何选择和使用技能，也说明报告交付、提交检查和仓库维护的要求。
-
-查阅已有成果可从下方图谱和总览开始。项目约定见 [AGENTS.md](AGENTS.md)。
+- **Team Agent** 关注团队如何委派任务、共享上下文和接续工作，以及组织身份与权限如何影响 Agent 执行。
+- **Personal Agent** 关注个人助理如何记住用户偏好、调用外部服务并持续跟进购物、预约等日常事务。
 
 <!-- research-graph:start -->
 
-## 调研图谱
-
-[![动态调研图谱](docs/research-graph/preview.gif)](https://technologyhu.github.io/research/)
-
-**2 个调研主题 · 1 种类型 · 29 项调研工作**
-
-[打开交互图谱](https://technologyhu.github.io/research/) · [本地页面](docs/research-graph/index.html) · [静态预览](docs/research-graph/preview.png) · [生成与维护说明](docs/research-graph-guide.md)
-
-数据分支：`openjiuwen-harness`。只索引已纳入 Git 的调研内容；技能资料不进入总览。
-
-主题命名统一维护在 `themes.yaml`，主题层次压成一个目录名。调研报告：`research-reports/<主题名>/<type>/<target>__YYYYMMDD-HHmmss/`，主题层级用 `-` 连接；target 表示本篇报告的研究专题，不要求等于对象 ID，多个片段用 `__` 分隔，片段内用 `-` 连接单词，数量不固定；旧单连字符及双连字符名称原样保留。分析洞察：`analysis-reports/<主题名>[__<专题>]__YYYYMMDD-HHmmss/`，多级主题及主题与专题之间均用 `__`，保持一层报告目录。时间采用北京时间，记录创建或最近修订时间。
-
-当前计划：调研使用 `research-reports/<主题名>/plan.md`，分析洞察使用 `analysis-reports/<主题名>.plan.md`。报告按主题层次聚合，同主题内按最近修订时间倒序。
-
-图谱按实际关联自由布局：主题与具体调研工作连接，类型通过颜色、标签和筛选体现。
-
-主题状态取自计划；报告旁标注其自身完整度。下一步取自计划记录，未记录时不自动推断。
-
-## 调研与分析计划总览
-
-| 类别 | 主题 | 状态 | 当前计划 | 更新日期 |
-| --- | --- | --- | --- | --- |
-| 调研 | 调研报告 · Personal Agent | 草案 | [查看计划](research-reports/personal-agent/plan.md) | 2026-11-11 |
-| 调研 | 调研报告 · Team Agent | 进行中 | [查看计划](research-reports/team-agent/plan.md) | 2026-11-11 |
-| 分析洞察 | 暂无分析洞察计划 | — | — | — |
-
 ## 调研报告总览
 
-| 主题 | 状态 | 计划 | 报告 | 下一步 |
-| --- | --- | --- | --- | --- |
-| 调研报告 · Personal Agent | 草案 | [调研计划](research-reports/personal-agent/plan.md) | 暂无报告 | 核对可用地区、商家和结账方式，准备两轮购物用例。<br>核对账号开放和可用消息渠道，确认外部服务沟通权限。<br>核对个人账号资格，测试跨会话偏好和连接器权限。<br>核对访问资格和连接器范围，再安排可执行用例。<br>核对当前套餐、地区和邮件过滤条件。<br>核对个人套餐的邮箱、日历和后台任务条件。<br>核对可接入的生活服务和授权边界，筛选可复跑场景。<br>核对国内版的邮箱和日历支持，建立跨天观察记录。<br>确认可访问站点、账号登录和支付确认要求。<br>查可用消息渠道、地区和人工代办费用。<br>核对可拨打的地区、账号资格和合适的测试商家。<br>核对邀请状态和预约、购物、支付的地区限制。<br>复核邀测状态，分别查千问 Go! 和千问 App 通用办事功能的覆盖。<br>核对个人版可用事件及套餐，准备例行跟进测试。<br>核对群聊与私聊支持，准备两个测试账号。<br>核对连接器权限和可执行操作，再选可比场景。<br>准备三套脱敏测试资料，固定验收条件和测试账号。补查服务接入、订阅或交易收费、实际采用和持续使用证据。 |
-| 调研报告 · Team Agent | 进行中 | [调研计划](research-reports/team-agent/plan.md) | [Claude Tag 产品调研：共享任务、组织身份与长期协作](research-reports/team-agent/product/claude-tag__20261109-154839/report.md)（局部复查完成） · 2026-11-09 15:48:39 | 复查 Claude Tag 是否公开核心源码，核对公开资料能确认的服务端实现。<br>核对企业账号可用的触发事件、云端执行条件及空间、自动任务和连接器的归属。<br>核对专享版项目自动化、所有者权限、连接器授权和任务流转后的更新规则。<br>核对项目群事件是否可触发所选技能，以及应用身份可读写哪些表格。<br>核对可体验的企业版本、项目角色和事件触发文档。<br>核对 Pod 权限、任务认领规则、外部触发和任务历史。<br>核对工作流触发、共享房间权限及原发起人离开后的接续条件。<br>核对 Manager 权限、所有权交接和组织服务账号可用范围。<br>核对付费团队的事件触发、运行日志和连接器权限。<br>核对组织套餐、编辑角色、连接器身份和所有权转移条件。<br>核对 AI Teammates 与 AI Studio 的触发分工，以及哪些来源可成为共享记忆。<br>核对可用套餐、触发范围和私有数据授权对共享输出的影响。 |
+| 主题 | 调研报告 | 贡献者 |
+| --- | --- | --- |
+| Team Agent | [Claude Tag 产品调研：共享任务、组织身份与长期协作](research-reports/team-agent/product/claude-tag__20261109-154839/report.md) | technologyHu |
+
+### 调研报告排名
+
+| 排名 | 贡献者 | 报告数 |
+| --- | --- | --- |
+| 1 | technologyHu | 1 |
 
 ## 分析洞察报告总览
 
-| 主题 | 状态 | 计划 | 报告 | 下一步 |
-| --- | --- | --- | --- | --- |
-| 暂无分析洞察主题 | — | 暂无计划 | 暂无报告 | 暂无下一步安排 |
+暂无分析洞察报告。
 
-当前纳入总览：调研报告 1 份，分析洞察报告 0 份。暂无数据时显示空状态，不添加演示节点。
+### 分析洞察报告排名
+
+暂无已署名的分析洞察报告。
+
+## 调研与分析计划总览
+
+| 主题计划 | 类别 | 状态 |
+| --- | --- | --- |
+| [Personal Agent](research-reports/personal-agent/plan.md) | 调研 | 草案 |
+| [Team Agent](research-reports/team-agent/plan.md) | 调研 | 进行中 |
+
+## 调研图谱
+
+按主题查看调研工作、任务依赖和关联报告。
+
+[在线图谱](https://technologyhu.github.io/research/) · [本地图谱](docs/research-graph/index.html) · [动态预览](docs/research-graph/preview.gif) · [图谱维护指南](docs/research-graph-guide.md)
 
 <!-- research-graph:end -->
+
+## 如何贡献
+
+1. 先查看[调研与分析计划总览](#调研与分析计划总览)，确认相关任务、已有成果和待查问题。新增主题时在[主题注册表](themes.yaml)登记。
+2. 调研具体对象或续查已有报告，使用 [research](.agents/skills/research/SKILL.md)。围绕一个问题综合已有调研成果，使用 [research-analysis](.agents/skills/research-analysis/SKILL.md)。
+3. 交付报告时写明调研人、采用版本、关键证据和待确认事项，并将报告链接、验收结果和后续待查事项回写到主题计划。
+
+操作示例和提交检查见[仓库贡献指南](docs/repository-guide.md)与[项目约定](AGENTS.md)。

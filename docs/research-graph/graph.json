@@ -1018,6 +1018,7 @@
       "themePath": [
         "team-agent"
       ],
+      "researcher": "technologyHu",
       "associationStatus": "explicit",
       "workIds": [
         "work:research-reports/team-agent:T001"

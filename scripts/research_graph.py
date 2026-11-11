@@ -395,6 +395,9 @@ def build_graph(root: Path, repository: str, branch: str, *, input_paths: set[st
                           createdAt=text_value(metadata.get("created_at")),
                           reportKey=report_key or "", themeId=short_theme,
                           themePath=theme_data["path"] if theme_data else [short_theme])
+            researcher = metadata.get("researcher")
+            if isinstance(researcher, str) and researcher.strip() not in {"", "未记录"}:
+                report["researcher"] = " ".join(researcher.split())
             reports[rel] = (report, parsed)
 
             directory = path.parent.relative_to(root).as_posix()
@@ -537,6 +540,8 @@ def build_graph(root: Path, repository: str, branch: str, *, input_paths: set[st
     report_work = {}
     for rel, (report, _) in reports.items():
         report_metadata[report["id"]] = {k: report[k] for k in ("id", "label", "path", "url", "status", "statusLabel", "type", "updatedAt", "createdAt", "themeId", "themePath")}
+        if "researcher" in report:
+            report_metadata[report["id"]]["researcher"] = report["researcher"]
     for key, (task, _) in tasks.items():
         work = {**task, "id": f"work:{task['theme']}:{task['taskId']}", "kind": "object",
                 "reportIds": [], "pendingReportIds": [], "sourceKind": "plan"}
@@ -656,19 +661,23 @@ def table_text(value):
     return escape(str(value), quote=False).replace("|", "&#124;").replace("\n", "<br>")
 
 
+def contributor_ranks(counts: Counter[str]):
+    ordered = sorted(counts.items(), key=lambda entry: (-entry[1], entry[0]))
+    previous_count = None
+    rank = 1
+    for position, (researcher, count) in enumerate(ordered, start=1):
+        if count != previous_count:
+            rank = position
+            previous_count = count
+        yield rank, researcher, count
+
+
 def update_readme(root: Path, graph: dict, site_url: str):
     path = root / "README.md"
-    old = path.read_text(encoding="utf-8") if path.exists() else "# openJiuwen Harness 调研工作\n\n本分支归纳 openJiuwen Harness 组织内部的调研计划、报告与后续工作。\n"
-    counts = graph["stats"]
-    lines = [START, "", "## 调研图谱", "",
-             f"[![动态调研图谱](docs/research-graph/preview.gif)]({site_url})", "",
-             f"**{counts['themes']} 个调研主题 · {counts['types']} 种类型 · {counts['objects']} 项调研工作**", "",
-             f"[打开交互图谱]({site_url}) · [本地页面](docs/research-graph/index.html) · [静态预览](docs/research-graph/preview.png) · [生成与维护说明](docs/research-graph-guide.md)", "",
-             f"数据分支：`{graph['branch']}`。只索引已纳入 Git 的调研内容；技能资料不进入总览。", "",
-             "主题命名统一维护在 `themes.yaml`，主题层次压成一个目录名。调研报告：`research-reports/<主题名>/<type>/<target>__YYYYMMDD-HHmmss/`，主题层级用 `-` 连接；target 表示本篇报告的研究专题，不要求等于对象 ID，多个片段用 `__` 分隔，片段内用 `-` 连接单词，数量不固定；旧单连字符及双连字符名称原样保留。分析洞察：`analysis-reports/<主题名>[__<专题>]__YYYYMMDD-HHmmss/`，多级主题及主题与专题之间均用 `__`，保持一层报告目录。时间采用北京时间，记录创建或最近修订时间。", "",
-             "当前计划：调研使用 `research-reports/<主题名>/plan.md`，分析洞察使用 `analysis-reports/<主题名>.plan.md`。报告按主题层次聚合，同主题内按最近修订时间倒序。", "",
-             "图谱按实际关联自由布局：主题与具体调研工作连接，类型通过颜色、标签和筛选体现。", "",
-             "主题状态取自计划；报告旁标注其自身完整度。下一步取自计划记录，未记录时不自动推断。", ""]
+    old = path.read_text(encoding="utf-8") if path.exists() else (
+        "# openJiuwen Harness 项目组内部调研报告\n\n收录项目组的调研报告、分析洞察和相关主题计划。\n"
+    )
+    lines = [START, ""]
     report_index = {r["id"]: r for r in graph["reports"]}
     work_types = {}
     for work in graph["nodes"]:
@@ -681,6 +690,8 @@ def update_readme(root: Path, graph: dict, site_url: str):
         analysis_ids = [key for key in topic["reportIds"] if report_index[key]["type"] == "analysis"]
         research_ids = [key for key in topic["reportIds"] if report_index[key]["type"] != "analysis"]
         group = topic["theme"].split("/", 1)[0]
+        if group in GROUP_LABELS:
+            topic = {**topic, "title": topic["title"].removeprefix(f"{GROUP_LABELS[group]} · ")}
         has_analysis = group == "analysis-reports" or analysis_ids or "analysis" in types
         has_research = group == "research-reports" or research_ids or types - {"analysis"} or not has_analysis
         if has_research and group != "analysis-reports":
@@ -688,48 +699,59 @@ def update_readme(root: Path, graph: dict, site_url: str):
         if has_analysis:
             overviews["analysis"].append({**topic, "reportIds": analysis_ids})
 
-    theme_nodes = {node["theme"]: node for node in graph["nodes"] if node["kind"] == "theme"}
-    plan_index = {}
-    for category, topics in overviews.items():
-        for topic in topics:
-            if topic["planPath"]:
-                entry = plan_index.setdefault(topic["planPath"], {"topic": topic, "categories": []})
-                entry["categories"].append(category)
-    lines += ["## 调研与分析计划总览", "", "| 类别 | 主题 | 状态 | 当前计划 | 更新日期 |",
-              "| --- | --- | --- | --- | --- |"]
-    for plan_path, entry in plan_index.items():
-        topic = entry["topic"]
-        category = "／".join("调研" if value == "research" else "分析洞察" for value in entry["categories"])
-        updated = theme_nodes[topic["theme"]].get("updatedAt") or "未记录"
-        lines.append(f"| {category} | {table_text(topic['title'])} | {table_text(topic['statusLabel'])} | "
-                     f"{markdown_link('查看计划', plan_path)} | {table_text(updated)} |")
-    for category, label, empty in (("research", "调研", "暂无调研计划"),
-                                   ("analysis", "分析洞察", "暂无分析洞察计划")):
-        if not any(category in entry["categories"] for entry in plan_index.values()):
-            lines.append(f"| {label} | {empty} | — | — | — |")
-    lines.append("")
+    contributor_counts = {"research": Counter(), "analysis": Counter()}
+    for report in graph["reports"]:
+        if "researcher" in report:
+            category = "analysis" if report["type"] == "analysis" else "research"
+            contributor_counts[category][report["researcher"]] += 1
 
-    for category, title, empty, plan_label in (
-            ("research", "调研报告总览", "暂无调研主题", "调研计划"),
-            ("analysis", "分析洞察报告总览", "暂无分析洞察主题", "分析计划")):
-        lines += [f"## {title}", "", "| 主题 | 状态 | 计划 | 报告 | 下一步 |", "| --- | --- | --- | --- | --- |"]
+    for category, label in (("research", GROUP_LABELS["research-reports"]),
+                            ("analysis", GROUP_LABELS["analysis-reports"])):
+        lines += [f"## {label}总览", ""]
+        rows = []
         for topic in overviews[category]:
-            plan = markdown_link(plan_label, topic["planPath"]) if topic["planPath"] else "尚未建立"
-            report_links = []
+            title = table_text(topic["title"])
             for report_id in topic["reportIds"]:
                 report = report_index[report_id]
-                association = "；工作待关联" if report.get("associationStatus") == "pending" else ""
-                updated = report.get("updatedAt", "")
-                date_label = " · " + table_text(updated.replace("T", " ").removesuffix("+08:00")) if "T" in updated else ""
-                report_links.append(markdown_link(report["label"], report["path"]) + f"（{table_text(report['statusLabel'])}{association}）" + date_label)
-            reports = "<br>".join(report_links) or "暂无报告"
-            actions = "<br>".join(table_text(step) for step in topic["nextSteps"]) or "未记录"
-            lines.append(f"| {table_text(topic['title'])} | {table_text(topic['statusLabel'])} | {plan} | {reports} | {actions} |")
-        if not overviews[category]:
-            lines.append(f"| {empty} | — | 暂无计划 | 暂无报告 | 暂无下一步安排 |")
+                link = markdown_link(report["label"], report["path"])
+                researcher = table_text(report.get("researcher", "—"))
+                rows.append(f"| {title} | {link} | {researcher} |")
+        if rows:
+            lines += [f"| 主题 | {label} | 贡献者 |", "| --- | --- | --- |", *rows]
+        else:
+            lines.append(f"暂无{label}。")
+        lines += ["", f"### {label}排名", ""]
+        counts = contributor_counts[category]
+        if counts:
+            lines += ["| 排名 | 贡献者 | 报告数 |", "| --- | --- | --- |"]
+            for rank, researcher, count in contributor_ranks(counts):
+                lines.append(f"| {rank} | {table_text(researcher)} | {count} |")
+        else:
+            lines.append(f"暂无已署名的{label}。")
         lines.append("")
-    analysis_count = sum(report["type"] == "analysis" for report in graph["reports"])
-    lines += [f"当前纳入总览：调研报告 {counts['reports'] - analysis_count} 份，分析洞察报告 {analysis_count} 份。暂无数据时显示空状态，不添加演示节点。", "", END]
+
+    plan_index = {}
+    for category, label in (("research", "调研"), ("analysis", "分析洞察")):
+        for topic in overviews[category]:
+            if topic["planPath"]:
+                entry = plan_index.setdefault(topic["planPath"], {"topic": topic, "categories": []})
+                entry["categories"].append(label)
+    lines += ["## 调研与分析计划总览", ""]
+    if plan_index:
+        lines += ["| 主题计划 | 类别 | 状态 |", "| --- | --- | --- |"]
+        for plan_path, entry in plan_index.items():
+            topic = entry["topic"]
+            link = markdown_link(topic["title"], plan_path)
+            categories = "／".join(entry["categories"])
+            lines.append(f"| {link} | {categories} | {table_text(topic['statusLabel'])} |")
+    else:
+        lines.append("暂无主题计划。")
+
+    lines += ["", "## 调研图谱", "",
+              "按主题查看调研工作、任务依赖和关联报告。", "",
+              f"[在线图谱]({site_url}) · [本地图谱](docs/research-graph/index.html) · "
+              "[动态预览](docs/research-graph/preview.gif) · [图谱维护指南](docs/research-graph-guide.md)",
+              "", END]
     generated = "\n".join(lines)
     if old.count(START) != old.count(END) or old.count(START) > 1:
         raise ValueError("README graph markers are unbalanced or duplicated")

@@ -79,7 +79,7 @@ updated_at: 2026-11-06
         text = (self.root / "README.md").read_text(encoding="utf8")
         self.assertIn("Agent / 记忆", text)
         self.assertLess(text.index(newer), text.index(older))
-        self.assertIn("2026-11-09 12:00:00", text)
+        self.assertNotIn("2026-11-09 12:00:00", text)
 
     def test_same_product_in_distinct_report_subjects_keeps_separate_work_ids(self):
         self.write("themes.yaml", json.dumps({"schema_version": 1, "themes": [
@@ -105,9 +105,6 @@ updated_at: 2026-11-06
         content = (self.root / "README.md").read_text(encoding="utf8")
         for path in paths:
             self.assertIn(path, content)
-        self.assertIn("target 表示本篇报告的研究专题，不要求等于对象 ID", content)
-        self.assertIn("多个片段用 `__` 分隔", content)
-        self.assertIn("旧单连字符及双连字符名称原样保留", content)
 
     def test_flat_analysis_and_root_level_plan_use_registered_theme(self):
         self.registry()
@@ -424,8 +421,11 @@ T002 [不算引用](paper/one/report.md)
         content = (self.root / "README.md").read_text(encoding="utf8")
         self.assertNotIn("## 调研工作索引", content)
         self.assertNotIn("旧工作表", content)
-        for heading in ("调研与分析计划总览", "调研报告总览", "分析洞察报告总览"):
-            self.assertIn("## " + heading, content)
+        headings = ("调研报告总览", "分析洞察报告总览", "调研与分析计划总览", "调研图谱")
+        positions = [content.index("## " + heading + "\n") for heading in headings]
+        self.assertEqual(positions, sorted(positions))
+        self.assertIn("[在线图谱](https://example.com/)", content)
+        self.assertIn("[动态预览](docs/research-graph/preview.gif)", content)
         self.assertEqual(graph, before)
         self.assertEqual(self.build(), before)
         works = {node["taskId"]: node for node in graph["nodes"] if node["kind"] == "object"}
@@ -435,9 +435,13 @@ T002 [不算引用](paper/one/report.md)
         self.assertTrue(any(edge["relation"] == "depends" and edge["source"] == "work:agents:T001"
                             and edge["target"] == "work:agents:T002" for edge in graph["edges"]))
 
-    def test_readme_separates_analysis_overview_and_counts(self):
+    def test_readme_separates_research_and_analysis_reports(self):
         self.report("research-reports/memory/paper/survey-memory/report.md")
-        self.report("analysis-reports/memory/analysis/architecture/report.md", completion="complete")
+        self.write("analysis-reports/memory/analysis/architecture/report.md", """---
+researcher: 洞察贡献者
+---
+# 架构洞察报告
+""")
         self.write("analysis-reports/memory/plan.md", """---
 theme_id: memory
 status: active
@@ -449,25 +453,54 @@ status: active
         update_readme(self.root, self.build(), "https://example.com/")
         content = (self.root / "README.md").read_text(encoding="utf8")
         research = content.split("## 调研报告总览\n", 1)[1].split("## 分析洞察报告总览\n", 1)[0]
-        analysis = content.split("## 分析洞察报告总览\n", 1)[1].split("\n当前纳入总览", 1)[0]
+        analysis = content.split("## 分析洞察报告总览\n", 1)[1].split("### 分析洞察报告排名\n", 1)[0]
         self.assertIn("research-reports/memory/paper/survey-memory/report.md", research)
         self.assertNotIn("analysis-reports/", research)
-        self.assertIn("analysis-reports/memory/analysis/architecture/report.md", analysis)
-        self.assertNotIn("research-reports/", analysis)
-        self.assertIn("[分析计划](analysis-reports/memory/plan.md)", analysis)
-        self.assertIn("完整", analysis)
-        self.assertIn("补充反例。", analysis)
-        self.assertIn("调研报告 1 份，分析洞察报告 1 份", content)
+        self.assertEqual(analysis.strip().splitlines(), [
+            "| 主题 | 分析洞察报告 | 贡献者 |",
+            "| --- | --- | --- |",
+            "| 架构洞察 | [架构洞察报告](analysis-reports/memory/analysis/architecture/report.md) | 洞察贡献者 |",
+        ])
 
-    def test_readme_analysis_plan_without_reports_is_not_lost(self):
+    def test_readme_lists_analysis_plan_outside_empty_report_overview(self):
         self.write("analysis-reports/memory/plan.md", "# 分析计划\n")
         update_readme(self.root, self.build(), "https://example.com/")
         content = (self.root / "README.md").read_text(encoding="utf8")
         research = content.split("## 调研报告总览\n", 1)[1].split("## 分析洞察报告总览\n", 1)[0]
-        analysis = content.split("## 分析洞察报告总览\n", 1)[1].split("\n当前纳入总览", 1)[0]
-        self.assertIn("暂无调研主题", research)
-        self.assertIn("[分析计划](analysis-reports/memory/plan.md)", analysis)
-        self.assertIn("暂无报告", analysis)
+        analysis = content.split("## 分析洞察报告总览\n", 1)[1].split("### 分析洞察报告排名\n", 1)[0]
+        self.assertIn("暂无调研报告。", research)
+        self.assertIn("[分析计划](analysis-reports/memory/plan.md)", content)
+        self.assertEqual(analysis.strip(), "暂无分析洞察报告。")
+
+    def test_readme_ranks_contributors_by_signed_reports_across_both_categories(self):
+        for name, researcher in (("one", "Mei"), ("two", "Chen"), ("three", "Chen"),
+                                 ("four", "An"), ("five", "未记录")):
+            self.write(f"research-reports/memory/paper/{name}/report.md",
+                       f"---\nresearcher: {researcher}\n---\n# {name}\n")
+        self.write("analysis-reports/memory/analysis/insights/report.md",
+                   "---\nresearcher: Mei\n---\n# 洞察\n")
+        self.write("analysis-reports/memory/analysis/comparison/report.md",
+                   "---\nresearcher: Bo\n---\n# 对比\n")
+        self.report("research-reports/memory/paper/unsigned/report.md")
+        update_readme(self.root, self.build(), "https://example.com/")
+        content = (self.root / "README.md").read_text(encoding="utf8")
+        research = content.split("## 调研报告总览\n", 1)[1].split("## 分析洞察报告总览\n", 1)[0]
+        analysis = content.split("## 分析洞察报告总览\n", 1)[1].split("## 调研与分析计划总览\n", 1)[0]
+        self.assertNotIn("\n## 贡献者排名\n", content)
+        self.assertNotIn("### 综合排名", content)
+        self.assertEqual(research.split("### 调研报告排名\n", 1)[1].strip().splitlines(), [
+            "| 排名 | 贡献者 | 报告数 |",
+            "| --- | --- | --- |",
+            "| 1 | Chen | 2 |",
+            "| 2 | An | 1 |",
+            "| 2 | Mei | 1 |",
+        ])
+        self.assertEqual(analysis.split("### 分析洞察报告排名\n", 1)[1].strip().splitlines(), [
+            "| 排名 | 贡献者 | 报告数 |",
+            "| --- | --- | --- |",
+            "| 1 | Bo | 1 |",
+            "| 1 | Mei | 1 |",
+        ])
 
     def test_readme_partitions_legacy_mixed_theme_reports(self):
         self.report("agents/paper/one/report.md")
@@ -475,19 +508,17 @@ status: active
         update_readme(self.root, self.build(), "https://example.com/")
         content = (self.root / "README.md").read_text(encoding="utf8")
         research = content.split("## 调研报告总览\n", 1)[1].split("## 分析洞察报告总览\n", 1)[0]
-        analysis = content.split("## 分析洞察报告总览\n", 1)[1].split("\n当前纳入总览", 1)[0]
+        analysis = content.split("## 分析洞察报告总览\n", 1)[1].split("## 调研与分析计划总览\n", 1)[0]
         self.assertIn("agents/paper/one/report.md", research)
         self.assertNotIn("agents/analysis/insights/report.md", research)
         self.assertIn("agents/analysis/insights/report.md", analysis)
         self.assertNotIn("agents/paper/one/report.md", analysis)
 
     def test_readme_lists_both_plan_roots_without_requiring_reports(self):
-        for group, status, updated in (("research-reports", "draft", "2026-11-07"),
-                                        ("analysis-reports", "paused", "2026-11-08")):
+        for group, status in (("research-reports", "draft"), ("analysis-reports", "paused")):
             self.write(f"{group}/memory/plan.md", f"""---
 theme_id: memory
 status: {status}
-updated_at: {updated}
 ---
 # 记忆计划
 """)
@@ -495,14 +526,13 @@ updated_at: {updated}
         graph = self.build()
         update_readme(self.root, graph, "https://example.com/")
         content = (self.root / "README.md").read_text(encoding="utf8")
-        plans = content.split("## 调研与分析计划总览\n", 1)[1].split("## 调研报告总览\n", 1)[0]
-        self.assertIn("[查看计划](research-reports/memory/plan.md)", plans)
-        self.assertIn("[查看计划](analysis-reports/memory/plan.md)", plans)
-        self.assertIn("草案", plans)
-        self.assertIn("暂停", plans)
-        self.assertIn("2026-11-07", plans)
-        self.assertIn("2026-11-08", plans)
-        self.assertNotIn("standalone", plans)
+        plans = content.split("## 调研与分析计划总览\n", 1)[1].split("## 调研图谱\n", 1)[0]
+        self.assertEqual(plans.strip().splitlines(), [
+            "| 主题计划 | 类别 | 状态 |",
+            "| --- | --- | --- |",
+            "| [记忆计划](research-reports/memory/plan.md) | 调研 | 草案 |",
+            "| [记忆计划](analysis-reports/memory/plan.md) | 分析洞察 | 暂停 |",
+        ])
         update_readme(self.root, graph, "https://example.com/")
         self.assertEqual(content, (self.root / "README.md").read_text(encoding="utf8"))
 
@@ -512,7 +542,7 @@ updated_at: {updated}
         self.report("agents/analysis/insights/report.md")
         update_readme(self.root, self.build(), "https://example.com/")
         content = (self.root / "README.md").read_text(encoding="utf8")
-        plans = content.split("## 调研与分析计划总览\n", 1)[1].split("## 调研报告总览\n", 1)[0]
+        plans = content.split("## 调研与分析计划总览\n", 1)[1].split("## 调研图谱\n", 1)[0]
         self.assertEqual(plans.count("](agents/plan.md)"), 1)
         self.assertIn("调研／分析洞察", plans)
 
@@ -564,15 +594,15 @@ updated_at: {updated}
         self.assertEqual(graph["edges"], [])
         update_readme(self.root, graph, "https://example.com/")
         content = (self.root / "README.md").read_text(encoding="utf-8")
-        self.assertIn("暂无调研主题", content)
-        self.assertIn("0 份", content)
+        self.assertIn("暂无调研报告。", content)
         self.assertIn("## 分析洞察报告总览", content)
-        self.assertIn("暂无分析洞察主题", content)
+        self.assertIn("暂无分析洞察报告。", content)
         self.assertIn("## 调研与分析计划总览", content)
-        self.assertIn("暂无调研计划", content)
-        self.assertIn("暂无分析洞察计划", content)
+        self.assertIn("暂无主题计划。", content)
+        self.assertIn("### 调研报告排名\n\n暂无已署名的调研报告。", content)
+        self.assertIn("### 分析洞察报告排名\n\n暂无已署名的分析洞察报告。", content)
 
-    def test_readme_summarizes_theme_status_plan_reports_and_next_steps(self):
+    def test_readme_research_overview_shows_only_theme_report_and_contributor(self):
         self.report(completion="partial")
         path = self.plan("- T001、T002：[共同报告](paper/one/report.md)。")
         path.write_text(path.read_text(encoding="utf-8") + """
@@ -584,21 +614,26 @@ updated_at: {updated}
         graph = self.build()
         update_readme(self.root, graph, "https://example.com/")
         content = (self.root / "README.md").read_text(encoding="utf-8")
-        self.assertIn("| 主题 | 状态 | 计划 | 报告 | 下一步 |", content)
-        self.assertIn("| 智能体 | 进行中 | [调研计划](agents/plan.md)", content)
-        self.assertEqual(content.count("[报告一](agents/paper/one/report.md)（部分完成）"), 1)
-        self.assertIn("Q001／T001：补查独立复现", content)
+        research = content.split("## 调研报告总览\n", 1)[1].split("### 调研报告排名\n", 1)[0]
+        self.assertEqual(research.strip().splitlines(), [
+            "| 主题 | 调研报告 | 贡献者 |",
+            "| --- | --- | --- |",
+            "| 智能体 | [报告一](agents/paper/one/report.md) | — |",
+        ])
+        self.assertIn("| [智能体](agents/plan.md) | 调研 | 进行中 |", content)
         self.assertEqual(graph["themeOverview"][0]["status"], "active")
+        self.assertEqual(graph["themeOverview"][0]["nextSteps"], ["Q001／T001：补查独立复现"])
 
-    def test_readme_keeps_archived_theme_and_does_not_invent_next_actions(self):
+    def test_readme_keeps_archived_plan_outside_report_overview(self):
         self.plan(status="archived")
         self.write("agents/archive/plan.md", "# 不应新增主题")
         graph = self.build()
         update_readme(self.root, graph, "https://example.com/")
         content = (self.root / "README.md").read_text(encoding="utf-8")
         self.assertEqual(len(graph["themeOverview"]), 1)
-        self.assertIn("| 智能体 | 已归档 |", content)
-        self.assertIn("| 暂无报告 | 未记录 |", content)
+        self.assertIn("| [智能体](agents/plan.md) | 调研 | 已归档 |", content)
+        research = content.split("## 调研报告总览\n", 1)[1].split("### 调研报告排名\n", 1)[0]
+        self.assertEqual(research.strip(), "暂无调研报告。")
 
     def test_task_heading_preserves_work_results_and_next_steps(self):
         self.report()
@@ -619,13 +654,11 @@ updated_at: {updated}
                 self.assertEqual(task["reportIds"], ["report:agents/paper/one/report.md"])
                 self.assertEqual(graph["themeOverview"][0]["nextSteps"], ["补查公开源码"])
 
-    def test_next_steps_support_prose_and_escape_table_delimiters(self):
-        path = self.plan()
-        path.write_text(path.read_text(encoding="utf-8") + "\n## 下一步\n\n先核对 A | B，再继续研究。\n\n- 补查数据来源\n", encoding="utf-8")
+    def test_next_steps_support_prose_and_lists(self):
+        self.write("analysis-reports/memory.plan.md",
+                   "# 分析计划\n\n## 下一步\n\n先核对 A | B，再继续研究。\n\n- 补查数据来源\n")
         graph = self.build()
         self.assertEqual(graph["themeOverview"][0]["nextSteps"], ["先核对 A | B，再继续研究。", "补查数据来源"])
-        update_readme(self.root, graph, "https://example.com/")
-        self.assertIn("先核对 A &#124; B，再继续研究。<br>补查数据来源", (self.root / "README.md").read_text(encoding="utf-8"))
 
     def test_report_only_theme_has_no_fake_plan_link(self):
         self.report()
@@ -633,18 +666,22 @@ updated_at: {updated}
         self.assertIsNone(graph["themeOverview"][0]["planPath"])
         update_readme(self.root, graph, "https://example.com/")
         content = (self.root / "README.md").read_text(encoding="utf-8")
-        self.assertIn("| agents | 未标注 | 尚未建立 | [报告一]", content)
-        self.assertNotIn("[调研计划]", content)
+        self.assertIn("| agents | [报告一](agents/paper/one/report.md) | — |", content)
+        self.assertIn("暂无主题计划。", content)
 
     def test_graph_uses_tracked_report_metadata_file(self):
         report = self.write("agents/paper/one/report.md", "# 报告一\n\n> 调研状态：部分完成\n>\n> 采用版本：v1\n")
         metadata = report.with_suffix(".meta.json")
         report_id = "report-" + "a" * 32
-        metadata.write_text(json.dumps({"report_id": report_id, "completion": "partial"}), encoding="utf-8")
+        metadata.write_text(json.dumps({"report_id": report_id, "completion": "partial",
+                                        "researcher": "调研员甲 | 调研员乙"}), encoding="utf-8")
         paths = {path.relative_to(self.root).as_posix() for path in (report, metadata)}
         graph = build_graph(self.root, "owner/repo", "main", input_paths=paths)
         self.assertEqual(graph["reports"][0]["id"], "report:" + report_id)
         self.assertEqual(graph["reports"][0]["status"], "partial")
+        update_readme(self.root, graph, "https://example.com/")
+        content = (self.root / "README.md").read_text(encoding="utf-8")
+        self.assertIn("| agents | [报告一](agents/paper/one/report.md) | 调研员甲 &#124; 调研员乙 |", content)
         with self.assertRaisesRegex(ValueError, "Missing tracked report metadata: .*report.meta.json"):
             build_graph(self.root, "owner/repo", "main", input_paths={report.relative_to(self.root).as_posix()})
 
@@ -938,7 +975,7 @@ theme_id: agents
         self.assertEqual(pending["candidateWorkIds"], [work["id"]])
         self.assertTrue(any("补充报告待关联" in w for w in graph["warnings"]))
         update_readme(self.root, graph, "https://example.com/")
-        self.assertIn("details.md)（部分完成；工作待关联）", (self.root / "README.md").read_text(encoding="utf-8"))
+        self.assertIn("[报告一](agents/paper/one/details.md) | — |", (self.root / "README.md").read_text(encoding="utf-8"))
 
     def test_shared_report_directory_keeps_ambiguous_supplement_pending(self):
         self.report()
