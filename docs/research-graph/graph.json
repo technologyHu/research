@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "repository": "technologyHu/research",
   "branch": "openjiuwen-harness",
-  "fingerprint": "c5bf383a31311adf",
+  "fingerprint": "df165d0438fbe99b",
   "types": {
     "paper": "论文",
     "open-source": "开源项目",
@@ -20,13 +20,30 @@
     "unknown": "#9aaac6"
   },
   "stats": {
-    "themes": 1,
+    "themes": 2,
     "types": 1,
-    "objects": 12,
+    "objects": 29,
     "reports": 1
   },
   "updatedAt": "2026-11-11",
   "nodes": [
+    {
+      "id": "theme:research-reports/personal-agent",
+      "kind": "theme",
+      "type": "theme",
+      "theme": "research-reports/personal-agent",
+      "label": "调研报告 · Personal Agent",
+      "displayLabel": "Personal Agent",
+      "status": "draft",
+      "path": "research-reports/personal-agent/plan.md",
+      "revision": 1,
+      "updatedAt": "2026-11-11",
+      "color": "#b0a0ff",
+      "statusLabel": "草案",
+      "url": "https://github.com/technologyHu/research/blob/openjiuwen-harness/research-reports/personal-agent/plan.md",
+      "x": 0.5,
+      "y": 0.21
+    },
     {
       "id": "theme:research-reports/team-agent",
       "kind": "theme",
@@ -42,7 +59,398 @@
       "statusLabel": "进行中",
       "url": "https://github.com/technologyHu/research/blob/openjiuwen-harness/research-reports/team-agent/plan.md",
       "x": 0.5,
-      "y": 0.5
+      "y": 0.79
+    },
+    {
+      "id": "work:research-reports/personal-agent:T001",
+      "kind": "object",
+      "type": "product",
+      "label": "以消费版建立生活事务基线。观察长期目标如何触发建议，以及跨商家比价、下单确认和结果回传。",
+      "displayLabel": "meta-muse",
+      "target": "product／Meta Muse",
+      "taskId": "T001",
+      "theme": "research-reports/personal-agent",
+      "path": "research-reports/personal-agent/plan.md",
+      "status": "planned",
+      "priority": "P1",
+      "runId": "",
+      "updatedAt": "2026-11-11",
+      "color": "#75acff",
+      "statusLabel": "待开始",
+      "url": "https://github.com/technologyHu/research/blob/openjiuwen-harness/research-reports/personal-agent/plan.md",
+      "reportIds": [],
+      "pendingReportIds": [],
+      "sourceKind": "plan",
+      "x": 0.595095,
+      "y": 0.12
+    },
+    {
+      "id": "work:research-reports/personal-agent:T002",
+      "kind": "object",
+      "type": "product",
+      "label": "研究从日常消息交办后，助理能否保存任务背景、联系外部服务并跨天继续。",
+      "displayLabel": "instinct",
+      "target": "product／Instinct",
+      "taskId": "T002",
+      "theme": "research-reports/personal-agent",
+      "path": "research-reports/personal-agent/plan.md",
+      "status": "planned",
+      "priority": "P1",
+      "runId": "",
+      "updatedAt": "2026-11-11",
+      "color": "#75acff",
+      "statusLabel": "待开始",
+      "url": "https://github.com/technologyHu/research/blob/openjiuwen-harness/research-reports/personal-agent/plan.md",
+      "reportIds": [],
+      "pendingReportIds": [],
+      "sourceKind": "plan",
+      "x": 0.354801,
+      "y": 0.12
+    },
+    {
+      "id": "work:research-reports/personal-agent:T003",
+      "kind": "object",
+      "type": "product",
+      "label": "研究个人 dot 怎样使用记忆与授权应用，以及离线推进、请示和暂停。按个人账号权限取证。",
+      "displayLabel": "openai-dots",
+      "target": "product／OpenAI dots",
+      "taskId": "T003",
+      "theme": "research-reports/personal-agent",
+      "path": "research-reports/personal-agent/plan.md",
+      "status": "planned",
+      "priority": "P1",
+      "runId": "",
+      "updatedAt": "2026-11-11",
+      "color": "#75acff",
+      "statusLabel": "待开始",
+      "url": "https://github.com/technologyHu/research/blob/openjiuwen-harness/research-reports/personal-agent/plan.md",
+      "reportIds": [],
+      "pendingReportIds": [],
+      "sourceKind": "plan",
+      "x": 0.418152,
+      "y": 0.12
+    },
+    {
+      "id": "work:research-reports/personal-agent:T004",
+      "kind": "object",
+      "type": "product",
+      "label": "研究 Duet 如何从个人邮箱、日历中发现该处理的事项，准备下一步并请求用户授权。",
+      "displayLabel": "claude-duet",
+      "target": "product／Claude Duet",
+      "taskId": "T004",
+      "theme": "research-reports/personal-agent",
+      "path": "research-reports/personal-agent/plan.md",
+      "status": "planned",
+      "priority": "P1",
+      "runId": "",
+      "updatedAt": "2026-11-11",
+      "color": "#75acff",
+      "statusLabel": "待开始",
+      "url": "https://github.com/technologyHu/research/blob/openjiuwen-harness/research-reports/personal-agent/plan.md",
+      "reportIds": [],
+      "pendingReportIds": [],
+      "sourceKind": "plan",
+      "x": 0.289062,
+      "y": 0.12
+    },
+    {
+      "id": "work:research-reports/personal-agent:T005",
+      "kind": "object",
+      "type": "product",
+      "label": "比较定时、邮件事件和主题监测如何触发个人任务，追踪 Google 生态内外的处理结果。",
+      "displayLabel": "gemini-spark",
+      "target": "product／Gemini Spark",
+      "taskId": "T005",
+      "theme": "research-reports/personal-agent",
+      "path": "research-reports/personal-agent/plan.md",
+      "status": "planned",
+      "priority": "P2",
+      "runId": "",
+      "updatedAt": "2026-11-11",
+      "color": "#75acff",
+      "statusLabel": "待开始",
+      "url": "https://github.com/technologyHu/research/blob/openjiuwen-harness/research-reports/personal-agent/plan.md",
+      "reportIds": [],
+      "pendingReportIds": [],
+      "sourceKind": "plan",
+      "x": 0.549915,
+      "y": 0.391415
+    },
+    {
+      "id": "work:research-reports/personal-agent:T006",
+      "kind": "object",
+      "type": "product",
+      "label": "比较个人 Bot 的持久运行、授权连接和例行任务。Team Bots 资料用于判定产品边界。",
+      "displayLabel": "grok-bot",
+      "target": "product／Grok Bot（个人 Bot）",
+      "taskId": "T006",
+      "theme": "research-reports/personal-agent",
+      "path": "research-reports/personal-agent/plan.md",
+      "status": "planned",
+      "priority": "P2",
+      "runId": "",
+      "updatedAt": "2026-11-11",
+      "color": "#75acff",
+      "statusLabel": "待开始",
+      "url": "https://github.com/technologyHu/research/blob/openjiuwen-harness/research-reports/personal-agent/plan.md",
+      "reportIds": [],
+      "pendingReportIds": [],
+      "sourceKind": "plan",
+      "x": 0.668333,
+      "y": 0.270638
+    },
+    {
+      "id": "work:research-reports/personal-agent:T007",
+      "kind": "object",
+      "type": "product",
+      "label": "建立国内生活服务对照。查看事务如何从主动跟进推进到授权、服务操作与结果确认。",
+      "displayLabel": "lingguang",
+      "target": "product／蚂蚁灵光 2.0",
+      "taskId": "T007",
+      "theme": "research-reports/personal-agent",
+      "path": "research-reports/personal-agent/plan.md",
+      "status": "planned",
+      "priority": "P1",
+      "runId": "",
+      "updatedAt": "2026-11-11",
+      "color": "#75acff",
+      "statusLabel": "待开始",
+      "url": "https://github.com/technologyHu/research/blob/openjiuwen-harness/research-reports/personal-agent/plan.md",
+      "reportIds": [],
+      "pendingReportIds": [],
+      "sourceKind": "plan",
+      "x": 0.616586,
+      "y": 0.344251
+    },
+    {
+      "id": "work:research-reports/personal-agent:T008",
+      "kind": "object",
+      "type": "product",
+      "label": "优先体验国内版。测试对日程、人物和偏好的长期记忆，以及日程变化后的主动处理。海外版的连接器条件分别记录。",
+      "displayLabel": "today-ai",
+      "target": "product／Today AI",
+      "taskId": "T008",
+      "theme": "research-reports/personal-agent",
+      "path": "research-reports/personal-agent/plan.md",
+      "status": "planned",
+      "priority": "P1",
+      "runId": "",
+      "updatedAt": "2026-11-11",
+      "color": "#75acff",
+      "statusLabel": "待开始",
+      "url": "https://github.com/technologyHu/research/blob/openjiuwen-harness/research-reports/personal-agent/plan.md",
+      "reportIds": [],
+      "pendingReportIds": [],
+      "sourceKind": "plan",
+      "x": 0.665855,
+      "y": 0.12
+    },
+    {
+      "id": "work:research-reports/personal-agent:T009",
+      "kind": "object",
+      "type": "product",
+      "label": "验证持续记忆、定时任务和 Handoff 网页操作能否配合完成购物或预约。",
+      "displayLabel": "hark-pro",
+      "target": "product／Hark Pro",
+      "taskId": "T009",
+      "theme": "research-reports/personal-agent",
+      "path": "research-reports/personal-agent/plan.md",
+      "status": "planned",
+      "priority": "P1",
+      "runId": "",
+      "updatedAt": "2026-11-11",
+      "color": "#75acff",
+      "statusLabel": "待开始",
+      "url": "https://github.com/technologyHu/research/blob/openjiuwen-harness/research-reports/personal-agent/plan.md",
+      "reportIds": [],
+      "pendingReportIds": [],
+      "sourceKind": "plan",
+      "x": 0.736782,
+      "y": 0.131063
+    },
+    {
+      "id": "work:research-reports/personal-agent:T010",
+      "kind": "object",
+      "type": "product",
+      "label": "研究消息入口怎样复用邮箱、日历和偏好。明确 Poke Human 在预约等流程中的接手位置。",
+      "displayLabel": "poke",
+      "target": "product／Poke",
+      "taskId": "T010",
+      "theme": "research-reports/personal-agent",
+      "path": "research-reports/personal-agent/plan.md",
+      "status": "planned",
+      "priority": "P1",
+      "runId": "",
+      "updatedAt": "2026-11-11",
+      "color": "#75acff",
+      "statusLabel": "待开始",
+      "url": "https://github.com/technologyHu/research/blob/openjiuwen-harness/research-reports/personal-agent/plan.md",
+      "reportIds": [],
+      "pendingReportIds": [],
+      "sourceKind": "plan",
+      "x": 0.414354,
+      "y": 0.405438
+    },
+    {
+      "id": "work:research-reports/personal-agent:T011",
+      "kind": "object",
+      "type": "product",
+      "label": "优先测试电话或邮件往返怎样完成预约改期，观察身份、授权和人工协助。",
+      "displayLabel": "wajo-fo",
+      "target": "product／Fo（Wajo 个人版）",
+      "taskId": "T011",
+      "theme": "research-reports/personal-agent",
+      "path": "research-reports/personal-agent/plan.md",
+      "status": "planned",
+      "priority": "P1",
+      "runId": "",
+      "updatedAt": "2026-11-11",
+      "color": "#75acff",
+      "statusLabel": "待开始",
+      "url": "https://github.com/technologyHu/research/blob/openjiuwen-harness/research-reports/personal-agent/plan.md",
+      "reportIds": [],
+      "pendingReportIds": [],
+      "sourceKind": "plan",
+      "x": 0.689448,
+      "y": 0.389551
+    },
+    {
+      "id": "work:research-reports/personal-agent:T012",
+      "kind": "object",
+      "type": "product",
+      "label": "研究用户怎样授权带独立邮箱、电话、电脑和钱包的代理订购或预约，核对权限与执行记录。",
+      "displayLabel": "manus-cue",
+      "target": "product／Cue by Manus",
+      "taskId": "T012",
+      "theme": "research-reports/personal-agent",
+      "path": "research-reports/personal-agent/plan.md",
+      "status": "planned",
+      "priority": "P1",
+      "runId": "",
+      "updatedAt": "2026-11-11",
+      "color": "#75acff",
+      "statusLabel": "待开始",
+      "url": "https://github.com/technologyHu/research/blob/openjiuwen-harness/research-reports/personal-agent/plan.md",
+      "reportIds": [],
+      "pendingReportIds": [],
+      "sourceKind": "plan",
+      "x": 0.220292,
+      "y": 0.12
+    },
+    {
+      "id": "work:research-reports/personal-agent:T013",
+      "kind": "object",
+      "type": "product",
+      "label": "研究千问 App 中的生活代办流程，重点看跨平台价保、预约或改期能推进到哪一步。",
+      "displayLabel": "qwen-go",
+      "target": "product／千问 Go!",
+      "taskId": "T013",
+      "theme": "research-reports/personal-agent",
+      "path": "research-reports/personal-agent/plan.md",
+      "status": "planned",
+      "priority": "P1",
+      "runId": "",
+      "updatedAt": "2026-11-11",
+      "color": "#75acff",
+      "statusLabel": "待开始",
+      "url": "https://github.com/technologyHu/research/blob/openjiuwen-harness/research-reports/personal-agent/plan.md",
+      "reportIds": [],
+      "pendingReportIds": [],
+      "sourceKind": "plan",
+      "x": 0.483805,
+      "y": 0.433347
+    },
+    {
+      "id": "work:research-reports/personal-agent:T014",
+      "kind": "object",
+      "type": "product",
+      "label": "查看个人 Townie 如何从个人连接器、记忆与例行任务持续跟进。团队所有的 Background Routines 用于判定产品边界。",
+      "displayLabel": "town",
+      "target": "product／Town（个人 Townie）",
+      "taskId": "T014",
+      "theme": "research-reports/personal-agent",
+      "path": "research-reports/personal-agent/plan.md",
+      "status": "planned",
+      "priority": "P2",
+      "runId": "",
+      "updatedAt": "2026-11-11",
+      "color": "#75acff",
+      "statusLabel": "待开始",
+      "url": "https://github.com/technologyHu/research/blob/openjiuwen-harness/research-reports/personal-agent/plan.md",
+      "reportIds": [],
+      "pendingReportIds": [],
+      "sourceKind": "plan",
+      "x": 0.321524,
+      "y": 0.310169
+    },
+    {
+      "id": "work:research-reports/personal-agent:T015",
+      "kind": "object",
+      "type": "product",
+      "label": "比较个人助理在群聊、私聊和助理间协作时如何取得权限、协调日程和报告结果。",
+      "displayLabel": "pally",
+      "target": "product／Pally",
+      "taskId": "T015",
+      "theme": "research-reports/personal-agent",
+      "path": "research-reports/personal-agent/plan.md",
+      "status": "planned",
+      "priority": "P2",
+      "runId": "",
+      "updatedAt": "2026-11-11",
+      "color": "#75acff",
+      "statusLabel": "待开始",
+      "url": "https://github.com/technologyHu/research/blob/openjiuwen-harness/research-reports/personal-agent/plan.md",
+      "reportIds": [],
+      "pendingReportIds": [],
+      "sourceKind": "plan",
+      "x": 0.610035,
+      "y": 0.44969
+    },
+    {
+      "id": "work:research-reports/personal-agent:T016",
+      "kind": "object",
+      "type": "product",
+      "label": "研究 Mapo Labs 的 Tomo 如何用消息、日历和个人目标提供持续提醒，观察它能推进哪些后续操作。",
+      "displayLabel": "tomo",
+      "target": "product／Tomo",
+      "taskId": "T016",
+      "theme": "research-reports/personal-agent",
+      "path": "research-reports/personal-agent/plan.md",
+      "status": "planned",
+      "priority": "P2",
+      "runId": "",
+      "updatedAt": "2026-11-11",
+      "color": "#75acff",
+      "statusLabel": "待开始",
+      "url": "https://github.com/technologyHu/research/blob/openjiuwen-harness/research-reports/personal-agent/plan.md",
+      "reportIds": [],
+      "pendingReportIds": [],
+      "sourceKind": "plan",
+      "x": 0.74024,
+      "y": 0.275961
+    },
+    {
+      "id": "work:research-reports/personal-agent:T017",
+      "kind": "object",
+      "type": "product",
+      "label": "研究能用授权账户和长期个人上下文发现需求、后台推进事务、在关键节点交回决定权的产品。判断组织拥有的形态时，核对团队记忆、任务能否跨人员交接、协作状态能否一致。第 1 周查访问条件，准备人工基线，以 Today AI、Hark Pro、Fo 和有访问条件的 Muse 校准用例。第 2 周做同题测试和跨天复跑。第 3 周汇总，接入受限的产品保留公开资料记录。",
+      "displayLabel": "T017",
+      "target": "product／16 款通用 Personal Agent 横向对比",
+      "taskId": "T017",
+      "theme": "research-reports/personal-agent",
+      "path": "research-reports/personal-agent/plan.md",
+      "status": "planned",
+      "priority": "P1",
+      "runId": "",
+      "updatedAt": "2026-11-11",
+      "color": "#75acff",
+      "statusLabel": "待开始",
+      "url": "https://github.com/technologyHu/research/blob/openjiuwen-harness/research-reports/personal-agent/plan.md",
+      "reportIds": [],
+      "pendingReportIds": [],
+      "sourceKind": "plan",
+      "x": 0.279912,
+      "y": 0.224063
     },
     {
       "id": "work:research-reports/team-agent:T001",
@@ -66,8 +474,8 @@
       ],
       "pendingReportIds": [],
       "sourceKind": "plan",
-      "x": 0.521995,
-      "y": 0.759068
+      "x": 0.58615,
+      "y": 0.88
     },
     {
       "id": "work:research-reports/team-agent:T002",
@@ -89,8 +497,8 @@
       "reportIds": [],
       "pendingReportIds": [],
       "sourceKind": "plan",
-      "x": 0.770344,
-      "y": 0.500246
+      "x": 0.713359,
+      "y": 0.774287
     },
     {
       "id": "work:research-reports/team-agent:T003",
@@ -112,8 +520,8 @@
       "reportIds": [],
       "pendingReportIds": [],
       "sourceKind": "plan",
-      "x": 0.374213,
-      "y": 0.274954
+      "x": 0.395244,
+      "y": 0.613243
     },
     {
       "id": "work:research-reports/team-agent:T004",
@@ -135,8 +543,8 @@
       "reportIds": [],
       "pendingReportIds": [],
       "sourceKind": "plan",
-      "x": 0.240125,
-      "y": 0.491926
+      "x": 0.296107,
+      "y": 0.783665
     },
     {
       "id": "work:research-reports/team-agent:T005",
@@ -158,8 +566,8 @@
       "reportIds": [],
       "pendingReportIds": [],
       "sourceKind": "plan",
-      "x": 0.604002,
-      "y": 0.256671
+      "x": 0.605253,
+      "y": 0.603708
     },
     {
       "id": "work:research-reports/team-agent:T006",
@@ -181,8 +589,8 @@
       "reportIds": [],
       "pendingReportIds": [],
       "sourceKind": "plan",
-      "x": 0.533106,
-      "y": 0.238218
+      "x": 0.535133,
+      "y": 0.579728
     },
     {
       "id": "work:research-reports/team-agent:T007",
@@ -204,8 +612,8 @@
       "reportIds": [],
       "pendingReportIds": [],
       "sourceKind": "plan",
-      "x": 0.624187,
-      "y": 0.728424
+      "x": 0.651708,
+      "y": 0.88
     },
     {
       "id": "work:research-reports/team-agent:T008",
@@ -227,8 +635,8 @@
       "reportIds": [],
       "pendingReportIds": [],
       "sourceKind": "plan",
-      "x": 0.307668,
-      "y": 0.315377
+      "x": 0.328712,
+      "y": 0.653688
     },
     {
       "id": "work:research-reports/team-agent:T009",
@@ -250,8 +658,8 @@
       "reportIds": [],
       "pendingReportIds": [],
       "sourceKind": "plan",
-      "x": 0.461122,
-      "y": 0.240265
+      "x": 0.463155,
+      "y": 0.57813
     },
     {
       "id": "work:research-reports/team-agent:T010",
@@ -273,8 +681,8 @@
       "reportIds": [],
       "pendingReportIds": [],
       "sourceKind": "plan",
-      "x": 0.332784,
-      "y": 0.699095
+      "x": 0.368805,
+      "y": 0.88
     },
     {
       "id": "work:research-reports/team-agent:T011",
@@ -296,8 +704,8 @@
       "reportIds": [],
       "pendingReportIds": [],
       "sourceKind": "plan",
-      "x": 0.696691,
-      "y": 0.659819
+      "x": 0.719042,
+      "y": 0.88
     },
     {
       "id": "work:research-reports/team-agent:T012",
@@ -319,11 +727,113 @@
       "reportIds": [],
       "pendingReportIds": [],
       "sourceKind": "plan",
-      "x": 0.758115,
-      "y": 0.604586
+      "x": 0.788595,
+      "y": 0.88
     }
   ],
   "edges": [
+    {
+      "source": "theme:research-reports/personal-agent",
+      "target": "work:research-reports/personal-agent:T001",
+      "relation": "includes",
+      "evidence": "research-reports/personal-agent/plan.md"
+    },
+    {
+      "source": "theme:research-reports/personal-agent",
+      "target": "work:research-reports/personal-agent:T002",
+      "relation": "includes",
+      "evidence": "research-reports/personal-agent/plan.md"
+    },
+    {
+      "source": "theme:research-reports/personal-agent",
+      "target": "work:research-reports/personal-agent:T003",
+      "relation": "includes",
+      "evidence": "research-reports/personal-agent/plan.md"
+    },
+    {
+      "source": "theme:research-reports/personal-agent",
+      "target": "work:research-reports/personal-agent:T004",
+      "relation": "includes",
+      "evidence": "research-reports/personal-agent/plan.md"
+    },
+    {
+      "source": "theme:research-reports/personal-agent",
+      "target": "work:research-reports/personal-agent:T005",
+      "relation": "includes",
+      "evidence": "research-reports/personal-agent/plan.md"
+    },
+    {
+      "source": "theme:research-reports/personal-agent",
+      "target": "work:research-reports/personal-agent:T006",
+      "relation": "includes",
+      "evidence": "research-reports/personal-agent/plan.md"
+    },
+    {
+      "source": "theme:research-reports/personal-agent",
+      "target": "work:research-reports/personal-agent:T007",
+      "relation": "includes",
+      "evidence": "research-reports/personal-agent/plan.md"
+    },
+    {
+      "source": "theme:research-reports/personal-agent",
+      "target": "work:research-reports/personal-agent:T008",
+      "relation": "includes",
+      "evidence": "research-reports/personal-agent/plan.md"
+    },
+    {
+      "source": "theme:research-reports/personal-agent",
+      "target": "work:research-reports/personal-agent:T009",
+      "relation": "includes",
+      "evidence": "research-reports/personal-agent/plan.md"
+    },
+    {
+      "source": "theme:research-reports/personal-agent",
+      "target": "work:research-reports/personal-agent:T010",
+      "relation": "includes",
+      "evidence": "research-reports/personal-agent/plan.md"
+    },
+    {
+      "source": "theme:research-reports/personal-agent",
+      "target": "work:research-reports/personal-agent:T011",
+      "relation": "includes",
+      "evidence": "research-reports/personal-agent/plan.md"
+    },
+    {
+      "source": "theme:research-reports/personal-agent",
+      "target": "work:research-reports/personal-agent:T012",
+      "relation": "includes",
+      "evidence": "research-reports/personal-agent/plan.md"
+    },
+    {
+      "source": "theme:research-reports/personal-agent",
+      "target": "work:research-reports/personal-agent:T013",
+      "relation": "includes",
+      "evidence": "research-reports/personal-agent/plan.md"
+    },
+    {
+      "source": "theme:research-reports/personal-agent",
+      "target": "work:research-reports/personal-agent:T014",
+      "relation": "includes",
+      "evidence": "research-reports/personal-agent/plan.md"
+    },
+    {
+      "source": "theme:research-reports/personal-agent",
+      "target": "work:research-reports/personal-agent:T015",
+      "relation": "includes",
+      "evidence": "research-reports/personal-agent/plan.md"
+    },
+    {
+      "source": "theme:research-reports/personal-agent",
+      "target": "work:research-reports/personal-agent:T016",
+      "relation": "includes",
+      "evidence": "research-reports/personal-agent/plan.md"
+    },
+    {
+      "source": "theme:research-reports/personal-agent",
+      "target": "work:research-reports/personal-agent:T017",
+      "relation": "includes",
+      "evidence": "research-reports/personal-agent/plan.md"
+    },
     {
       "source": "theme:research-reports/team-agent",
       "target": "work:research-reports/team-agent:T001",
@@ -395,6 +905,102 @@
       "target": "work:research-reports/team-agent:T012",
       "relation": "includes",
       "evidence": "research-reports/team-agent/plan.md"
+    },
+    {
+      "source": "work:research-reports/personal-agent:T001",
+      "target": "work:research-reports/personal-agent:T017",
+      "relation": "depends",
+      "evidence": "research-reports/personal-agent/plan.md · 前置任务"
+    },
+    {
+      "source": "work:research-reports/personal-agent:T002",
+      "target": "work:research-reports/personal-agent:T017",
+      "relation": "depends",
+      "evidence": "research-reports/personal-agent/plan.md · 前置任务"
+    },
+    {
+      "source": "work:research-reports/personal-agent:T003",
+      "target": "work:research-reports/personal-agent:T017",
+      "relation": "depends",
+      "evidence": "research-reports/personal-agent/plan.md · 前置任务"
+    },
+    {
+      "source": "work:research-reports/personal-agent:T004",
+      "target": "work:research-reports/personal-agent:T017",
+      "relation": "depends",
+      "evidence": "research-reports/personal-agent/plan.md · 前置任务"
+    },
+    {
+      "source": "work:research-reports/personal-agent:T005",
+      "target": "work:research-reports/personal-agent:T017",
+      "relation": "depends",
+      "evidence": "research-reports/personal-agent/plan.md · 前置任务"
+    },
+    {
+      "source": "work:research-reports/personal-agent:T006",
+      "target": "work:research-reports/personal-agent:T017",
+      "relation": "depends",
+      "evidence": "research-reports/personal-agent/plan.md · 前置任务"
+    },
+    {
+      "source": "work:research-reports/personal-agent:T007",
+      "target": "work:research-reports/personal-agent:T017",
+      "relation": "depends",
+      "evidence": "research-reports/personal-agent/plan.md · 前置任务"
+    },
+    {
+      "source": "work:research-reports/personal-agent:T008",
+      "target": "work:research-reports/personal-agent:T017",
+      "relation": "depends",
+      "evidence": "research-reports/personal-agent/plan.md · 前置任务"
+    },
+    {
+      "source": "work:research-reports/personal-agent:T009",
+      "target": "work:research-reports/personal-agent:T017",
+      "relation": "depends",
+      "evidence": "research-reports/personal-agent/plan.md · 前置任务"
+    },
+    {
+      "source": "work:research-reports/personal-agent:T010",
+      "target": "work:research-reports/personal-agent:T017",
+      "relation": "depends",
+      "evidence": "research-reports/personal-agent/plan.md · 前置任务"
+    },
+    {
+      "source": "work:research-reports/personal-agent:T011",
+      "target": "work:research-reports/personal-agent:T017",
+      "relation": "depends",
+      "evidence": "research-reports/personal-agent/plan.md · 前置任务"
+    },
+    {
+      "source": "work:research-reports/personal-agent:T012",
+      "target": "work:research-reports/personal-agent:T017",
+      "relation": "depends",
+      "evidence": "research-reports/personal-agent/plan.md · 前置任务"
+    },
+    {
+      "source": "work:research-reports/personal-agent:T013",
+      "target": "work:research-reports/personal-agent:T017",
+      "relation": "depends",
+      "evidence": "research-reports/personal-agent/plan.md · 前置任务"
+    },
+    {
+      "source": "work:research-reports/personal-agent:T014",
+      "target": "work:research-reports/personal-agent:T017",
+      "relation": "depends",
+      "evidence": "research-reports/personal-agent/plan.md · 前置任务"
+    },
+    {
+      "source": "work:research-reports/personal-agent:T015",
+      "target": "work:research-reports/personal-agent:T017",
+      "relation": "depends",
+      "evidence": "research-reports/personal-agent/plan.md · 前置任务"
+    },
+    {
+      "source": "work:research-reports/personal-agent:T016",
+      "target": "work:research-reports/personal-agent:T017",
+      "relation": "depends",
+      "evidence": "research-reports/personal-agent/plan.md · 前置任务"
     }
   ],
   "reports": [
@@ -419,6 +1025,33 @@
     }
   ],
   "themeOverview": [
+    {
+      "theme": "research-reports/personal-agent",
+      "title": "调研报告 · Personal Agent",
+      "status": "draft",
+      "statusLabel": "草案",
+      "planPath": "research-reports/personal-agent/plan.md",
+      "reportIds": [],
+      "nextSteps": [
+        "核对可用地区、商家和结账方式，准备两轮购物用例。",
+        "核对账号开放和可用消息渠道，确认外部服务沟通权限。",
+        "核对个人账号资格，测试跨会话偏好和连接器权限。",
+        "核对访问资格和连接器范围，再安排可执行用例。",
+        "核对当前套餐、地区和邮件过滤条件。",
+        "核对个人套餐的邮箱、日历和后台任务条件。",
+        "核对可接入的生活服务和授权边界，筛选可复跑场景。",
+        "核对国内版的邮箱和日历支持，建立跨天观察记录。",
+        "确认可访问站点、账号登录和支付确认要求。",
+        "查可用消息渠道、地区和人工代办费用。",
+        "核对可拨打的地区、账号资格和合适的测试商家。",
+        "核对邀请状态和预约、购物、支付的地区限制。",
+        "复核邀测状态，分别查千问 Go! 和千问 App 通用办事功能的覆盖。",
+        "核对个人版可用事件及套餐，准备例行跟进测试。",
+        "核对群聊与私聊支持，准备两个测试账号。",
+        "核对连接器权限和可执行操作，再选可比场景。",
+        "准备三套脱敏测试资料，固定验收条件和测试账号。补查服务接入、订阅或交易收费、实际采用和持续使用证据。"
+      ]
+    },
     {
       "theme": "research-reports/team-agent",
       "title": "调研报告 · Team Agent",
