@@ -78,10 +78,8 @@ def render_preview(graph, output: Path):
         draw.text((330, 315), "暂无调研工作", font=fonts[20], fill=TEXT)
         draw.text((177, 360), "新增调研计划或报告并纳入 Git 后，这里会自动更新。", font=fonts[14], fill=MUTED)
     draw.line((38, 576, WIDTH - 38, 576), fill=(33, 48, 70))
-    for x, kind, label in [(43, "theme", "主题"), (117, "object", "对象 = 具体调研工作")]:
-        radius = 4 if kind != "small" else 2
-        shape = (x - radius, 606 - radius, x + radius, 606 + radius)
-        draw.ellipse(shape, fill=(176, 160, 255) if kind == "theme" else MUTED)
+    for x, fill, label in [(43, (176, 160, 255), "主题"), (117, MUTED, "已有报告"), (217, None, "仅有计划")]:
+        draw.ellipse((x - 4, 602, x + 4, 610), fill=fill, outline=MUTED if fill is None else None)
         draw.text((x + 11, 596), label, font=fonts[13], fill=MUTED)
     caption = "点击进入交互图谱  ↗"
     draw.text((WIDTH - 39 - fonts[14].getlength(caption), 593), caption, font=fonts[14], fill=(101, 216, 201))
@@ -126,7 +124,9 @@ def render_preview(graph, output: Path):
                 pulse = (1 + math.sin(phase)) / 2
                 halo = radius + 7 + pulse * 5
                 pen.ellipse((x - halo, y - halo, x + halo, y + halo), outline=blend(color, 0.12 + pulse * 0.1))
-            pen.ellipse((x - radius, y - radius, x + radius, y + radius), fill=color)
+            planned = n["kind"] == "object" and not n.get("reportIds")
+            pen.ellipse((x - radius, y - radius, x + radius, y + radius),
+                        fill=BG if planned else color, outline=color, width=2 if planned else 1)
             display_label = n.get("displayLabel") or n.get("taskId") or n["label"]
             if n["kind"] == "theme":
                 label = fit(display_label, fonts[13], 240)

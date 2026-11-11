@@ -55,6 +55,24 @@ def exercise(page, url, expected):
     product_count = sum(n["type"] == "product" for n in expected["nodes"])
     require(page.locator(".result").count() == product_count, "type filter must match exact type")
     page.locator("#clear-filters").click()
+    for value, label in (("reported", "已有报告"), ("planned", "仅有计划")):
+        matches = [n for n in expected["nodes"] if n["kind"] == "object"
+                   and bool(n.get("reportIds")) == (value == "reported")]
+        page.locator("#report-filter").select_option(value)
+        result_ids = page.locator(".result").evaluate_all("items => items.map(item => item.dataset.nodeId)")
+        require(set(result_ids) == {n["id"] for n in matches}, "report filter uses linked reports")
+        if matches:
+            result = page.locator(".result").first
+            require(result.locator(".result-kind").inner_text() == label, "work list shows its report label")
+            require(bool(result.locator(".planned-symbol").count()) == (value == "planned"),
+                    "work list shows the corresponding node symbol")
+            result.click()
+            require(page.locator("#detail .report-state").inner_text() == label, "details show the report label")
+        page.locator("#type-filter").select_option("product")
+        require(page.locator(".result").count() == sum(n["type"] == "product" for n in matches),
+                "report and type filters combine")
+        page.locator("#clear-filters").click()
+        require(page.locator("#report-filter").input_value() == "all", "clear resets the report filter")
     work = next((n for n in expected["nodes"] if n["kind"] == "object"), expected["nodes"][0])
     work_button = page.locator(f'button[data-node-id={json.dumps(work["id"], ensure_ascii=False)}]')
     require(work_button.locator(".result-label").inner_text() == work["displayLabel"],
@@ -136,6 +154,10 @@ def main():
                 first_id = phone.locator(".result").first.get_attribute("data-node-id")
                 phone.locator(".result").first.click()
                 require(phone.locator("#detail h2").inner_text() == next(n for n in expected["nodes"] if n["id"] == first_id)["label"], "mobile node list works")
+                phone.locator("#report-filter").select_option("reported")
+                require(phone.locator(".result").count() == sum(n["kind"] == "object" and bool(n.get("reportIds")) for n in expected["nodes"]),
+                        "mobile report filter works")
+                phone.locator("#clear-filters").click()
             else:
                 require(phone.locator("#empty").is_visible(), "mobile empty state is visible")
             phone.screenshot(path=str(OUTPUT / "mobile.png"), full_page=True)
@@ -145,7 +167,7 @@ def main():
                 fixture_root = Path(fixture_dir)
                 plan_path = fixture_root / "evaluation" / "plan.md"
                 plan_path.parent.mkdir(parents=True)
-                plan_path.write_text('---\ntheme_id: evaluation\ntitle: 评估方法\n---\n# 评估方法\n## 对象与任务\n| ID | 类型／对象 | 本次目标 | 前置任务 | 状态 |\n| --- | --- | --- | --- | --- |\n| T001 | product／工具甲 | 分析工具甲 | 无 | planned |\n| T002 | paper／方法乙 | 分析方法乙 | T001 | planned |\n', encoding="utf-8")
+                plan_path.write_text('---\ntheme_id: evaluation\ntitle: 评估方法\n---\n# 评估方法\n## 对象与任务\n| ID | 类型／对象 | 本次目标 | 前置任务 | 状态 |\n| --- | --- | --- | --- | --- |\n| T001 | product／工具甲 | 分析工具甲 | 无 | planned |\n| T002 | paper／方法乙 | 分析方法乙 | T001 | done |\n', encoding="utf-8")
                 plan_path.write_text(plan_path.read_text(encoding="utf-8") + '\n## 成果索引\n\nT001：[主报告](product/tool/report.md)\n', encoding="utf-8")
                 report_root = fixture_root / "evaluation/product/tool"
                 report_root.mkdir(parents=True)

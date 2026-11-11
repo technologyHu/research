@@ -28,6 +28,11 @@
           <div class="filter-row">
             <select id="theme-filter" aria-label="按主题筛选"><option value="all">全部主题</option></select>
             <select id="type-filter" aria-label="按对象类型筛选"><option value="all">全部类型</option></select>
+            <select id="report-filter" aria-label="按报告情况筛选">
+              <option value="all">报告情况</option>
+              <option value="reported">已有报告</option>
+              <option value="planned">仅有计划</option>
+            </select>
           </div>
         </div>
         <div class="map" id="map">
@@ -43,7 +48,13 @@
           <div id="tooltip" class="tooltip" role="tooltip" hidden></div>
           <div class="map-help">拖动节点或画布 · 滚轮缩放 · 点击查看详情</div>
         </div>
-        <div class="legend"><span><i class="theme-symbol"></i>主题</span><span><i></i>对象 = 具体调研工作</span><div id="type-legend" class="type-legend"></div><button id="clear-filters" class="text-button">清除筛选</button></div>
+        <div class="legend">
+          <span><i class="theme-symbol"></i>主题</span>
+          <span><i class="work-symbol"></i>已有报告</span>
+          <span><i class="work-symbol planned-symbol"></i>仅有计划</span>
+          <div id="type-legend" class="type-legend"></div>
+          <button id="clear-filters" class="text-button">清除筛选</button>
+        </div>
       </section>
       <aside class="detail-panel" aria-label="节点详情">
         <div class="panel-heading"><span id="detail-eyebrow">探索入口</span><span class="small-mark">↗</span></div>
