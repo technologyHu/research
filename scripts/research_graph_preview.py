@@ -13,6 +13,7 @@ WIDTH, HEIGHT = 1200, 640
 BG = (9, 15, 29)
 TEXT = (228, 237, 248)
 MUTED = (139, 157, 182)
+REPORT_ACCENT = (131, 244, 211)
 
 
 def font(size):
@@ -33,6 +34,17 @@ def rgb(hex_color):
 
 def blend(color, ratio):
     return tuple(int(BG[i] + (color[i] - BG[i]) * ratio) for i in range(3))
+
+
+def diamond(draw, x, y, radius, fill):
+    points = [(x, y - radius), (x + radius, y), (x, y + radius), (x - radius, y)]
+    draw.polygon(points, fill=fill, outline=REPORT_ACCENT, width=2)
+
+
+def node_rank(node):
+    if node["kind"] == "theme":
+        return 0
+    return 1 if node.get("reportIds") else 2
 
 
 def fit(text, face, width):
@@ -78,17 +90,19 @@ def render_preview(graph, output: Path):
         draw.text((330, 315), "暂无调研工作", font=fonts[20], fill=TEXT)
         draw.text((177, 360), "新增调研计划或报告并纳入 Git 后，这里会自动更新。", font=fonts[14], fill=MUTED)
     draw.line((38, 576, WIDTH - 38, 576), fill=(33, 48, 70))
-    for x, fill, label in [(43, (176, 160, 255), "主题"), (117, MUTED, "已有报告"), (217, None, "仅有计划")]:
-        draw.ellipse((x - 4, 602, x + 4, 610), fill=fill, outline=MUTED if fill is None else None)
-        draw.text((x + 11, 596), label, font=fonts[13], fill=MUTED)
+    draw.ellipse((39, 602, 47, 610), fill=(176, 160, 255))
+    diamond(draw, 117, 606, 6, REPORT_ACCENT)
+    draw.ellipse((213, 602, 221, 610), outline=MUTED)
+    for x, label, color in [(54, "主题", MUTED), (129, "已有报告", REPORT_ACCENT), (228, "仅有计划", MUTED)]:
+        draw.text((x, 596), label, font=fonts[13], fill=color)
     caption = "点击进入交互图谱  ↗"
     draw.text((WIDTH - 39 - fonts[14].getlength(caption), 593), caption, font=fonts[14], fill=(101, 216, 201))
     nodes = graph["nodes"]
     indexed = {n["id"]: n for n in nodes}
     frames = []
     # A bounded preview stays readable as the full interactive graph grows.
-    order = {"theme": 0, "object": 1}
-    selected = {n["id"] for n in sorted(nodes, key=lambda n: (order[n["kind"]], n["id"]))[:85]}
+    visible_nodes = sorted(nodes, key=lambda n: (node_rank(n), n["id"]))[:85]
+    selected = {n["id"] for n in visible_nodes}
     if len(nodes) > len(selected):
         draw.text((44, 166), f"预览 {len(selected)}/{len(nodes)} 个节点 · 完整图谱见交互页面", font=fonts[12], fill=MUTED)
     for frame_index in range(48 if nodes else 1):
@@ -114,32 +128,36 @@ def render_preview(graph, output: Path):
             else:
                 pen.line((start, end), fill=color, width=1)
         label_boxes = []
-        for n in sorted(nodes, key=lambda n: n["kind"] != "theme"):
-            if n["id"] not in selected:
-                continue
+        for n in reversed(visible_nodes):
             x, y = positions[n["id"]]
-            radius = {"theme": 11, "object": 5}[n["kind"]]
             color = rgb(n["color"])
             if n["kind"] == "theme":
                 pulse = (1 + math.sin(phase)) / 2
-                halo = radius + 7 + pulse * 5
+                halo = 18 + pulse * 5
                 pen.ellipse((x - halo, y - halo, x + halo, y + halo), outline=blend(color, 0.12 + pulse * 0.1))
-            planned = n["kind"] == "object" and not n.get("reportIds")
-            pen.ellipse((x - radius, y - radius, x + radius, y + radius),
-                        fill=BG if planned else color, outline=color, width=2 if planned else 1)
+                pen.ellipse((x - 11, y - 11, x + 11, y + 11), fill=color)
+            elif n.get("reportIds"):
+                diamond(pen, x, y, 10, color)
+            else:
+                pen.ellipse((x - 5, y - 5, x + 5, y + 5), fill=BG, outline=color)
+        for n in visible_nodes:
+            x, y = positions[n["id"]]
             display_label = n.get("displayLabel") or n.get("taskId") or n["label"]
             if n["kind"] == "theme":
+                radius = 11
                 label = fit(display_label, fonts[13], 240)
                 tx = min(840 - fonts[13].getlength(label), max(40, x - fonts[13].getlength(label) / 2))
                 pen.text((tx, y + radius + 9), label, font=fonts[13], fill=TEXT,
                          stroke_width=2, stroke_fill=BG)
                 label_boxes.append((tx - 3, y + radius + 7, tx + fonts[13].getlength(label) + 3, y + radius + 29))
-            elif len(selected) <= 35:
+            elif n.get("reportIds") or len(selected) <= 35:
+                reported = bool(n.get("reportIds"))
                 label = fit(display_label, fonts[13], 178)
                 label_width = fonts[13].getlength(label)
                 label_height = 20
-                candidates = [(x + 10, y - 10), (x - label_width / 2, y + 13),
-                              (x - label_width / 2, y - label_height - 10), (x - label_width - 10, y - 10)]
+                gap = 15 if reported else 10
+                candidates = [(x - label_width / 2, y + gap + 3), (x + gap, y - 10),
+                              (x - label_width / 2, y - label_height - gap), (x - label_width - gap, y - 10)]
                 for tx, ty in candidates:
                     tx = min(841 - label_width, max(40, tx))
                     box = (tx - 3, ty - 2, tx + label_width + 3, ty + label_height)
@@ -147,7 +165,8 @@ def render_preview(graph, output: Path):
                         continue
                     if any(box[0] < b[2] and box[2] > b[0] and box[1] < b[3] and box[3] > b[1] for b in label_boxes):
                         continue
-                    pen.text((tx, ty), label, font=fonts[13], fill=TEXT, stroke_width=2, stroke_fill=BG)
+                    pen.text((tx, ty), label, font=fonts[13], fill=REPORT_ACCENT if reported else TEXT,
+                             stroke_width=2, stroke_fill=BG)
                     label_boxes.append(box)
                     break
         frames.append(frame.quantize(colors=128, method=Image.Quantize.MEDIANCUT))

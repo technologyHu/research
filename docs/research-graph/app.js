@@ -13,7 +13,10 @@
   const kindNames = {theme: "主题", object: "调研工作"};
   const reportLabels = {reported: "已有报告", planned: "仅有计划"};
   const reportState = n => n.kind === "object" ? (n.reportIds?.length ? "reported" : "planned") : null;
-  const filters = ["theme-filter", "type-filter", "report-filter"];
+  const filters = [$("theme-filter"), $("type-filter")];
+  const reportButtons = [...document.querySelectorAll(".report-filters button")];
+  const reportAccent = getComputedStyle(canvas).getPropertyValue("--report-accent").trim();
+  let reportFilter = "all";
   const displayLabel = node => node.displayLabel || node.taskId || node.label;
   const relationNames = {includes: "关联", depends: "依赖"};
   const reportById = new Map(data.reports.map(r => [r.id, r]));
@@ -85,13 +88,25 @@
 
   function applyFilters() {
     const query = $("search").value.trim().toLocaleLowerCase();
-    const [theme, type, report] = filters.map(id => $(id).value);
-    const matched = data.nodes.filter(n => {
+    const [theme, type] = filters.map(filter => filter.value);
+    const candidates = data.nodes.filter(n => {
       if (theme !== "all" && !(n.themes || [n.theme]).includes(theme)) return false;
       if (type !== "all" && n.type !== type) return false;
-      if (report !== "all" && reportState(n) !== report) return false;
       return !query || `${displayLabel(n)} ${n.label} ${n.target || ""} ${n.path} ${n.taskId || ""}`.toLocaleLowerCase().includes(query);
     });
+    const counts = {all: 0, reported: 0, planned: 0};
+    for (const n of candidates) {
+      const state = reportState(n);
+      if (state) {
+        counts[state]++;
+        counts.all++;
+      }
+    }
+    for (const button of reportButtons) {
+      button.setAttribute("aria-pressed", String(button.value === reportFilter));
+      button.querySelector(".report-count").textContent = String(counts[button.value]);
+    }
+    const matched = reportFilter === "all" ? candidates : candidates.filter(n => reportState(n) === reportFilter);
     const ids = new Set(matched.map(n => n.id));
     // Keep theme centers as context, but do not let contextual nodes mask zero results.
     for (const n of matched) for (const t of n.themes || [n.theme]) if (byId.has("theme:" + t)) ids.add("theme:" + t);
@@ -113,7 +128,8 @@
       button.dataset.nodeId = n.id;
       button.setAttribute("aria-pressed", String(n.id === selected));
       const state = reportState(n);
-      const swatch = element("span", state === "planned" ? "swatch planned-symbol" : "swatch");
+      if (state) button.dataset.reportState = state;
+      const swatch = element("span", state ? `swatch ${state}-symbol` : "swatch");
       swatch.style.color = n.color;
       button.append(swatch, element("span", "result-label", displayLabel(n)),
         element("span", "result-kind", reportLabels[state] || kindNames[n.kind]));
@@ -125,7 +141,8 @@
   }
   function clearFilters() {
     $("search").value = "";
-    for (const id of filters) $(id).value = "all";
+    for (const filter of filters) filter.value = "all";
+    reportFilter = "all";
     applyFilters();
   }
   function select(id) {
@@ -155,7 +172,7 @@
     const badges = element("div", "detail-badges");
     for (const label of [data.types[n.type] || kindNames[n.kind]].filter(Boolean)) badges.append(element("span", "badge", label));
     const state = reportState(n);
-    if (state) badges.append(element("span", "badge report-state", reportLabels[state]));
+    if (state) badges.append(element("span", `badge report-state ${state}`, reportLabels[state]));
     if (n.target) detail.append(element("p", "", n.target));
     const openLabel = n.inferredFromDirectory ? "打开相关资料 ↗" : n.kind === "theme" || n.sourceKind === "plan" ? "打开主题计划 ↗" : "打开调研报告 ↗";
     detail.append(badges, element("div", "path", n.path), link(openLabel, n.url, "open-link"));
@@ -204,7 +221,10 @@
     return {x: width / 2 + camera.x + ((n.x - 0.5) * width * .98 + offset.x + Math.cos(phase + p) * float) * camera.zoom,
       y: height / 2 + camera.y + ((n.y - 0.5) * height * .92 + offset.y + Math.sin(phase + p) * float) * camera.zoom};
   }
-  function radius(n) { return {theme: 11, object: 6}[n.kind] * Math.sqrt(camera.zoom); }
+  function radius(n) {
+    const size = n.kind === "theme" ? 11 : reportState(n) === "reported" ? 10 : 5;
+    return size * Math.sqrt(camera.zoom);
+  }
   function nodeAt(x, y) {
     return [...visible].reverse().find(n => { const p = point(n); return Math.hypot(p.x - x, p.y - y) < Math.max(10, radius(n) + 5); });
   }
@@ -242,33 +262,50 @@
       }
     }
     const labelBoxes = [];
-    const order = {theme: 0, object: 1};
-    const sorted = [...visible].sort((a, b) => Number(b.id === focus) - Number(a.id === focus) || order[a.kind] - order[b.kind]);
-    for (const n of sorted) {
+    const labelRank = n => n.kind === "theme" ? 0 : reportState(n) === "reported" ? 1 : 2;
+    const sorted = [...visible].sort((a, b) => Number(b.id === focus) - Number(a.id === focus) || labelRank(a) - labelRank(b));
+    for (const n of [...sorted].reverse()) {
       const p = points.get(n.id), r = radius(n), active = !focus || n.id === focus || adjacent.has(n.id);
+      const state = reportState(n);
+      const accent = state === "reported" ? reportAccent : n.color;
       ctx.globalAlpha = active ? 1 : .22;
-      if (n.kind === "theme" || n.id === focus) {
+      if (n.kind === "theme" || n.id === focus || state === "reported") {
         const halo = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r + 22);
-        halo.addColorStop(0, n.color + "2b"); halo.addColorStop(1, n.color + "00");
+        halo.addColorStop(0, accent + "2b"); halo.addColorStop(1, accent + "00");
         ctx.fillStyle = halo;
         ctx.beginPath(); ctx.arc(p.x, p.y, r + 22, 0, Math.PI * 2); ctx.fill();
       }
       if (n.id === focus) {
-        ctx.strokeStyle = n.color; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(p.x, p.y, r + 7, 0, Math.PI * 2); ctx.stroke();
+        ctx.strokeStyle = accent; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(p.x, p.y, r + 7, 0, Math.PI * 2); ctx.stroke();
       }
-      const planned = reportState(n) === "planned";
-      ctx.fillStyle = planned ? "#0d1728" : n.color;
-      ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+      ctx.fillStyle = state === "planned" ? "#0d1728" : n.color;
+      ctx.beginPath();
+      if (state === "reported") {
+        ctx.moveTo(p.x, p.y - r);
+        ctx.lineTo(p.x + r, p.y);
+        ctx.lineTo(p.x, p.y + r);
+        ctx.lineTo(p.x - r, p.y);
+        ctx.closePath();
+      } else {
+        ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+      }
       ctx.fill();
-      if (planned) {
-        ctx.strokeStyle = n.color;
-        ctx.lineWidth = 1.8;
+      if (state) {
+        ctx.strokeStyle = accent;
+        ctx.lineWidth = state === "reported" ? 2 : 1.4;
         ctx.stroke();
       }
-      if (!active || (visible.length > 35 && n.kind !== "theme" && n.id !== focus && camera.zoom < 1.7)) continue;
+    }
+    ctx.globalAlpha = 1;
+    for (const n of sorted) {
+      const active = !focus || n.id === focus || adjacent.has(n.id);
+      const state = reportState(n);
+      if (!active || (visible.length > 35 && state === "planned" && n.id !== focus && camera.zoom < 1.7)) continue;
+      const p = points.get(n.id), r = radius(n);
       let label = displayLabel(n);
       if (label.length > 26 && n.id !== focus) label = label.slice(0, 25) + "…";
-      ctx.font = `${n.kind === "theme" ? 12 : 10}px "Segoe UI","Microsoft YaHei","Noto Sans CJK SC",sans-serif`;
+      const font = n.kind === "theme" ? "12px" : state === "reported" ? "600 12px" : "10px";
+      ctx.font = `${font} "Segoe UI","Microsoft YaHei","Noto Sans CJK SC",sans-serif`;
       const textWidth = ctx.measureText(label).width;
       let tx = p.x - textWidth / 2, ty = p.y + r + 19;
       tx = Math.max(8, Math.min(width - textWidth - 8, tx));
@@ -276,9 +313,9 @@
       if (n.id !== focus && labelBoxes.some(b => box.x < b.x + b.w && box.x + box.w > b.x && box.y < b.y + b.h && box.y + box.h > b.y)) continue;
       labelBoxes.push(box);
       ctx.lineWidth = 4; ctx.strokeStyle = "#0c1626"; ctx.lineJoin = "round"; ctx.strokeText(label, tx, ty);
-      ctx.fillStyle = n.kind === "theme" || n.id === focus ? "#e4edf8" : "#a1b3cc"; ctx.fillText(label, tx, ty);
+      ctx.fillStyle = state === "reported" ? reportAccent : n.kind === "theme" || n.id === focus ? "#e4edf8" : "#a1b3cc";
+      ctx.fillText(label, tx, ty);
     }
-    ctx.globalAlpha = 1;
     if (data.nodes.length && !paused && !document.hidden && inViewport) requestDraw();
   }
   function resize() {
@@ -367,7 +404,11 @@
     }
   });
   $("search").addEventListener("input", applyFilters);
-  for (const id of filters) $(id).addEventListener("change", applyFilters);
+  for (const filter of filters) filter.addEventListener("change", applyFilters);
+  for (const button of reportButtons) button.addEventListener("click", () => {
+    reportFilter = button.value;
+    applyFilters();
+  });
   $("clear-filters").addEventListener("click", clearFilters);
   new ResizeObserver(resize).observe(container);
   new IntersectionObserver(entries => { inViewport = entries[0].isIntersecting; lastTime = 0; if (inViewport) requestDraw(); }).observe(container);

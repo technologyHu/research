@@ -25,14 +25,14 @@
       <section class="map-panel" aria-label="交互调研图谱">
         <div class="toolbar">
           <label class="search-box"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="搜索主题或具体调研工作…" aria-label="搜索节点" autocomplete="off"><kbd>/</kbd></label>
+          <div class="report-filters" role="group" aria-label="按报告情况筛选">
+            <button type="button" value="all" aria-pressed="true">全部 <span class="report-count"></span></button>
+            <button type="button" value="reported" aria-pressed="false"><i class="reported-symbol" aria-hidden="true"></i>已有报告 <span class="report-count"></span></button>
+            <button type="button" value="planned" aria-pressed="false"><i class="planned-symbol" aria-hidden="true"></i>仅有计划 <span class="report-count"></span></button>
+          </div>
           <div class="filter-row">
             <select id="theme-filter" aria-label="按主题筛选"><option value="all">全部主题</option></select>
             <select id="type-filter" aria-label="按对象类型筛选"><option value="all">全部类型</option></select>
-            <select id="report-filter" aria-label="按报告情况筛选">
-              <option value="all">报告情况</option>
-              <option value="reported">已有报告</option>
-              <option value="planned">仅有计划</option>
-            </select>
           </div>
         </div>
         <div class="map" id="map">
@@ -50,8 +50,6 @@
         </div>
         <div class="legend">
           <span><i class="theme-symbol"></i>主题</span>
-          <span><i class="work-symbol"></i>已有报告</span>
-          <span><i class="work-symbol planned-symbol"></i>仅有计划</span>
           <div id="type-legend" class="type-legend"></div>
           <button id="clear-filters" class="text-button">清除筛选</button>
         </div>

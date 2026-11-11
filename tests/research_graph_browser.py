@@ -37,7 +37,8 @@ def exercise(page, url, expected):
     require(page.locator("#branch").inner_text() == expected["branch"], "branch should match source data")
     require(page.evaluate("document.documentElement.scrollWidth <= window.innerWidth"), "page must not overflow horizontally")
     require(page.locator("#show-tasks").count() == 0, "there is no extra task-node toggle")
-    require(page.locator("#status-filter").count() == 0, "filters only reflect the agreed elements")
+    report_filters = page.get_by_role("group", name="按报告情况筛选")
+    require(report_filters.get_by_role("button").count() == 3, "report filters are visible controls")
     if not node_count:
         require(page.locator("#empty").is_visible(), "empty repository has an explicit empty state")
         require("暂无调研工作" in page.locator("#detail").inner_text(), "empty details do not show sample works")
@@ -58,21 +59,26 @@ def exercise(page, url, expected):
     for value, label in (("reported", "已有报告"), ("planned", "仅有计划")):
         matches = [n for n in expected["nodes"] if n["kind"] == "object"
                    and bool(n.get("reportIds")) == (value == "reported")]
-        page.locator("#report-filter").select_option(value)
+        button = report_filters.locator(f'button[value="{value}"]')
+        require(button.locator(".report-count").inner_text() == str(len(matches)), "report filter shows work count")
+        button.click()
+        require(button.get_attribute("aria-pressed") == "true", "active report filter is exposed")
         result_ids = page.locator(".result").evaluate_all("items => items.map(item => item.dataset.nodeId)")
         require(set(result_ids) == {n["id"] for n in matches}, "report filter uses linked reports")
         if matches:
             result = page.locator(".result").first
             require(result.locator(".result-kind").inner_text() == label, "work list shows its report label")
-            require(bool(result.locator(".planned-symbol").count()) == (value == "planned"),
+            require(result.locator(f".{value}-symbol").count() == 1,
                     "work list shows the corresponding node symbol")
             result.click()
             require(page.locator("#detail .report-state").inner_text() == label, "details show the report label")
         page.locator("#type-filter").select_option("product")
-        require(page.locator(".result").count() == sum(n["type"] == "product" for n in matches),
-                "report and type filters combine")
+        matching_products = sum(n["type"] == "product" for n in matches)
+        require(page.locator(".result").count() == matching_products, "report and type filters combine")
+        require(button.locator(".report-count").inner_text() == str(matching_products), "counts follow the type filter")
         page.locator("#clear-filters").click()
-        require(page.locator("#report-filter").input_value() == "all", "clear resets the report filter")
+        require(report_filters.locator('button[value="all"]').get_attribute("aria-pressed") == "true",
+                "clear resets the report filter")
     work = next((n for n in expected["nodes"] if n["kind"] == "object"), expected["nodes"][0])
     work_button = page.locator(f'button[data-node-id={json.dumps(work["id"], ensure_ascii=False)}]')
     require(work_button.locator(".result-label").inner_text() == work["displayLabel"],
@@ -154,7 +160,7 @@ def main():
                 first_id = phone.locator(".result").first.get_attribute("data-node-id")
                 phone.locator(".result").first.click()
                 require(phone.locator("#detail h2").inner_text() == next(n for n in expected["nodes"] if n["id"] == first_id)["label"], "mobile node list works")
-                phone.locator("#report-filter").select_option("reported")
+                phone.locator('.report-filters button[value="reported"]').click()
                 require(phone.locator(".result").count() == sum(n["kind"] == "object" and bool(n.get("reportIds")) for n in expected["nodes"]),
                         "mobile report filter works")
                 phone.locator("#clear-filters").click()
