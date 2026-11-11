@@ -1,4 +1,4 @@
-# research 仓库使用、贡献与维护指南
+ # research 仓库使用、贡献与维护指南
 
 ## 从哪里开始
 
@@ -62,7 +62,7 @@
 ### 4. 续查已有报告
 
 ```text
-使用 research，续查 research-reports/organization-agent/plan.md 中 T001 对应的 Claude Tag 报告。
+使用 research，续查 research-reports/team-agent/plan.md 中 T001 对应的 Claude Tag 报告。
 本轮只核对 Claude Tag 是否公开核心源码，以及现有公开资料能确认哪些服务端实现。
 复用仍有效的证据，更新原报告和计划中的成果链接与待查事项。
 ```
@@ -78,7 +78,7 @@
 **交付结果** · 分析计划或独立的分析洞察报告，写明主要发现、依据、适用范围和待核实的判断。详见 [research-analysis 技能文档](../.agents/skills/research-analysis/SKILL.md)。
 
 ```text
-使用 research-analysis，以 research-reports/organization-agent/plan.md 中 T001 链接的 Claude Tag 报告为依据。
+使用 research-analysis，以 research-reports/team-agent/plan.md 中 T001 链接的 Claude Tag 报告为依据。
 分析团队试点时权限范围和验收标准之间的取舍。
 把已有证据、由证据推导的判断和还要实测的事项分开写，交付一份分析洞察报告。
 ```
@@ -143,7 +143,7 @@
 
 - **报告开头**写清调研状态、采用版本、调研人、调研或最近修订的北京时间，以及仍待确认的具体事项。署名用用户指定的名称，或当前 Git 远程平台上已确认的用户账号。没有可确认的署名时请用户提供。详见[调研人署名](../.agents/skills/research-common/references/task-management.md#调研人署名)。
 - **报告目录**保留正文、同名元数据（例如 `report.meta.json`）、实际引用的资料与图片，以及已登记的附加交付。历史修订和证据记录保存在元数据中，源码副本、实验输出和原始结果放在任务临时目录。正文和计划中的本地链接使用相对路径。详见[交付规范](../.agents/skills/research-common/references/delivery-policy.md)。
-- **计划回写**核对两张表，填写实际成果链接、验收结果、调研人和北京时间，写清下一步要查什么。计划任务状态取决于该任务的目标与验收。以 Claude Tag 为例，计划任务 `T001` 已完成其验收目标，报告显示「局部复查完成」，服务端实现仍有待查事项。[组织 Agent 计划](../research-reports/organization-agent/plan.md) · [Claude Tag 报告](../research-reports/organization-agent/product/claude-tag__20261109-154839/report.md)
+- **计划回写**核对两张表，填写实际成果链接、验收结果、调研人和北京时间，写清下一步要查什么。计划任务状态取决于该任务的目标与验收。以 Claude Tag 为例，计划任务 `T001` 已完成其验收目标，报告显示「局部复查完成」，服务端实现仍有待查事项。[Team Agent 计划](../research-reports/team-agent/plan.md) · [Claude Tag 报告](../research-reports/team-agent/product/claude-tag__20261109-154839/report.md)
 
 报告提交时，按实际将要提交的版本校验文件和链接。[报告提交检查](../.agents/skills/research-commit/references/pre-commit-checks.md) · [计划核对规则](../.agents/skills/research-common/references/theme-planning.md#收口与核对)
 
@@ -156,7 +156,7 @@
 **交付结果** · 文件和链接的检查结论。校验通过后给出每篇报告的本地提交哈希。仍有待确认的临时资料或其他阻塞时，说明具体范围和原因。[research-commit 技能文档](../.agents/skills/research-commit/SKILL.md)
 
 ```text
-使用 research-commit，校验并提交 research-reports/organization-agent/plan.md 中 T001 链接的 Claude Tag 报告。
+使用 research-commit，校验并提交 research-reports/team-agent/plan.md 中 T001 链接的 Claude Tag 报告。
 本轮提交范围是报告正文、同名元数据和必要附件。检查通过后只创建该篇报告的一笔本地提交。
 ```
 

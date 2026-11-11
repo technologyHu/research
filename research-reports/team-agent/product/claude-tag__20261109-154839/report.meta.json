@@ -1,7 +1,7 @@
 {
   "classification": {
     "target": "claude-tag",
-    "theme": "organization-agent",
+    "theme": "team-agent",
     "type": "product"
   },
   "completion": "complete",
@@ -324,12 +324,12 @@
     "https://platform.claude.com/docs/en/manage-claude/claude-tag-api",
     "https://www.anthropic.com/news/introducing-claude-tag"
   ],
-  "theme_id": "organization-agent",
-  "theme_name": "组织 Agent",
+  "theme_id": "team-agent",
+  "theme_name": "Team Agent",
   "theme_path": [
-    "organization-agent"
+    "team-agent"
   ],
-  "theme_slug": "organization-agent",
+  "theme_slug": "team-agent",
   "update": {
     "added_sections": [],
     "allow_files": [],

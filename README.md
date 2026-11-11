@@ -14,7 +14,7 @@
 
 [![动态调研图谱](docs/research-graph/preview.gif)](https://technologyhu.github.io/research/)
 
-**1 个调研主题 · 1 种类型 · 1 项调研工作**
+**1 个调研主题 · 1 种类型 · 12 项调研工作**
 
 [打开交互图谱](https://technologyhu.github.io/research/) · [本地页面](docs/research-graph/index.html) · [静态预览](docs/research-graph/preview.png) · [生成与维护说明](docs/research-graph-guide.md)
 
@@ -32,14 +32,14 @@
 
 | 类别 | 主题 | 状态 | 当前计划 | 更新日期 |
 | --- | --- | --- | --- | --- |
-| 调研 | 调研报告 · 组织 Agent | 进行中 | [查看计划](research-reports/organization-agent/plan.md) | 2026-11-09 |
+| 调研 | 调研报告 · Team Agent | 进行中 | [查看计划](research-reports/team-agent/plan.md) | 2026-11-11 |
 | 分析洞察 | 暂无分析洞察计划 | — | — | — |
 
 ## 调研报告总览
 
 | 主题 | 状态 | 计划 | 报告 | 下一步 |
 | --- | --- | --- | --- | --- |
-| 调研报告 · 组织 Agent | 进行中 | [调研计划](research-reports/organization-agent/plan.md) | [Claude Tag 产品调研：共享任务、组织身份与长期协作](research-reports/organization-agent/product/claude-tag__20261109-154839/report.md)（局部复查完成） · 2026-11-09 15:48:39 | 复查 Claude Tag 是否公开核心源码，核对公开资料能确认的服务端实现。 |
+| 调研报告 · Team Agent | 进行中 | [调研计划](research-reports/team-agent/plan.md) | [Claude Tag 产品调研：共享任务、组织身份与长期协作](research-reports/team-agent/product/claude-tag__20261109-154839/report.md)（局部复查完成） · 2026-11-09 15:48:39 | 复查 Claude Tag 是否公开核心源码，核对公开资料能确认的服务端实现。<br>核对企业账号可用的触发事件、云端执行条件及空间、自动任务和连接器的归属。<br>核对专享版项目自动化、所有者权限、连接器授权和任务流转后的更新规则。<br>核对项目群事件是否可触发所选技能，以及应用身份可读写哪些表格。<br>核对可体验的企业版本、项目角色和事件触发文档。<br>核对 Pod 权限、任务认领规则、外部触发和任务历史。<br>核对工作流触发、共享房间权限及原发起人离开后的接续条件。<br>核对 Manager 权限、所有权交接和组织服务账号可用范围。<br>核对付费团队的事件触发、运行日志和连接器权限。<br>核对组织套餐、编辑角色、连接器身份和所有权转移条件。<br>核对 AI Teammates 与 AI Studio 的触发分工，以及哪些来源可成为共享记忆。<br>核对可用套餐、触发范围和私有数据授权对共享输出的影响。 |
 
 ## 分析洞察报告总览
 

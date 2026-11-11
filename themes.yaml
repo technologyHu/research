@@ -56,8 +56,8 @@ themes:
     slug: personal-agent
     name: Personal Agent
     parent: null
-  - id: organization-agent
-    slug: organization-agent
-    name: 组织 Agent
+  - id: team-agent
+    slug: team-agent
+    name: Team Agent
     parent: null
-    aliases: [组织agent]
+    aliases: [组织agent, 组织 Agent]
