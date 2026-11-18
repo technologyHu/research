@@ -7,8 +7,8 @@
 | type | 目标 | 类型技能 |
 | --- | --- | --- |
 | `paper` | 精读或比较论文，包括 survey 论文 | [research-paper](../../research-paper/SKILL.md) |
-| `open-source` | 分析公开项目的架构、源码和工程机制 | [research-open-source](../../research-open-source/SKILL.md) |
-| `product` | 理解产品能力、使用流程、公开机制与约束 | [research-product](../../research-product/SKILL.md) |
+| `open-source` | 以开源项目、库或组件为对象，分析其架构、工程机制和使用条件 | [research-open-source](../../research-open-source/SKILL.md) |
+| `product` | 以产品为对象，分析能力、使用流程、技术机制与约束，包括基于公开源码的调研 | [research-product](../../research-product/SKILL.md) |
 | `benchmark` | 理解评测任务、数据、指标、协议及可比性 | [research-benchmark](../../research-benchmark/SKILL.md) |
 | `analysis` | 基于已有调研输出，对主题或问题综合分析，提炼模式、关联、机制解释或其他洞察；贡献者思考可选 | 按调用方的分析目标与 [分析质量标准](analysis-criteria.md) 执行 |
 
@@ -36,7 +36,7 @@
 ## 决策方法
 
 - survey 是论文的一种，使用 paper；单篇报告目录为 `survey-<专题标识>__<时间>`，专题标识可采用论文简称或体现阅读范围。分析分类体系、检索与选择边界、代表工作覆盖、综合结论和局限，不套用必须有原创算法或实验的结构。
-- 公开项目的源码／工程机制用 open-source；闭源产品能力用 product。产品附带论文或 SDK 不自动改变研究对象。
+- 按研究对象和调研目标选择类型。以产品为对象解释产品行为或技术机制时，沿用 `product`，公开仓库及其 SDK 可作为实现证据。以独立开源项目、库或组件本身为对象时，使用 `open-source`。论文、SDK 和源码的存在用于判断可用证据。
 - 基于已有调研解释主题或问题时，按当前分析目标执行，无需预设观点或选型目标；纯计划任务只维护对应计划。基础对象材料不足时按实际缺口补查，结果返回调用方，不切换顶层工作流。
 - 跨类型来源按前述复用与补查规则处理，不把混合来源对象作为 analysis items 或自动分类兜底。
 - analysis 的 items 表示待分析主题／问题；一个主题的多个维度可放在 fields，采用报告作为来源保留原类型。使用多份报告不自动转为 comparison，单篇 survey 精读仍归 paper。

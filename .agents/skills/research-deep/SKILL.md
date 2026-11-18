@@ -7,7 +7,7 @@ description: 执行已明确范围的论文、开源项目、产品或评测对�
 
 本技能执行 `paper`、`open-source`、`product`、`benchmark` 的对象调研。只执行已说明的问题与接受条件；针对性补查将证据和缺口返回调用方，不开展主题综合或调用顶层入口。需要时按 [执行交接](../research-common/references/routing.md#执行交接与基础补查) 补齐范围。
 
-1. 先核对 [计划纳入条件](../research-common/references/theme-planning.md#计划纳入条件)，再查找对应计划。符合条件的正式对象调研没有计划时自动创建，含 brief 与已有报告补查。用户明确免除计划时沿用该要求。按 [任务管理](../research-common/references/task-management.md) list/show 定位任务，没有任务时依据已明确的目标、类型、版本和字段创建。多个匹配任务按当前范围核对。执行本次授权范围内的工作。
+1. 先核对 [计划纳入条件](../research-common/references/theme-planning.md#计划纳入条件)，沿用调用方已核对的位置，或按 [创建前核对归档路径](../research-common/references/theme-planning.md#创建前核对归档路径) 确定位置，再查找对应计划。符合条件的正式对象调研没有计划时自动创建，含 brief 与已有报告补查。用户明确免除计划时沿用该要求。按 [任务管理](../research-common/references/task-management.md) list/show 定位任务，没有任务时依据已明确的目标、类型、版本和字段创建。多个匹配任务按当前范围核对。执行本次授权范围内的工作。
    先按 [已有成果核对](../research-common/references/routing.md#已有成果核对与复用) 确定本轮仍有效的证据与实际缺口，保留原来源和日期，仅补查未覆盖或已失效部分。
    有关联计划时，核对当前状态、本次任务的问题、依赖与验收，记录 [计划关联](../research-common/references/research-config.md#主题计划关联)，回填开始、实际 run_id、阻碍及阶段进展。暂停／归档主题仅在用户要求继续时按规范恢复，不展开本次授权范围以外的待办；旧成果不充分时回退对应状态并保留历史。
    本轮执行问题写入范围快照或字段。主题核心问题仅在用户确认后填写，暂无对应问题时保留空映射。见 [核心问题的确认](../research-common/references/theme-planning.md#核心问题的确认)。
