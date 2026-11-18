@@ -1,0 +1,355 @@
+{
+  "classification": {
+    "target": "muse-gadget-sdk",
+    "theme": "agent-os",
+    "type": "open-source"
+  },
+  "completion": "partial",
+  "core_gaps": [
+    {
+      "item_id": "muse-gadget-sdk",
+      "question": "正式 Muse App 设备令牌申请的精确顺序与云端工具选择策略",
+      "reason": "公开设备端源码仅确认 BLE 凭证交付、设备 API 与调用收发。正式 Muse App 的令牌申请顺序、VM 内部路由和工具选择仍待核实。"
+    }
+  ],
+  "created_at": "2026-11-18T15:10:18+08:00",
+  "delivery": {
+    "extra_files": [
+      {
+        "path": "assets/muse-gadget-sdk-three-scenarios.svg",
+        "reason": "保留用户指定参考场景图的原始可编辑版本"
+      }
+    ],
+    "report": "report.md"
+  },
+  "derived_from": {
+    "run_id": "20261118t073430z-63dd45bb",
+    "sources": [
+      {
+        "accessed_at": "2026-11-18",
+        "title": "Meta Muse 发布公告",
+        "url": "https://about.fb.com/news/2026/09/introducing-muse-personal-ai-agent/"
+      },
+      {
+        "accessed_at": "2026-11-18",
+        "title": "Meta Muse 安全架构",
+        "url": "https://muse.ai/blog/security-and-safety-for-ai-agents-our-approach-with-muse"
+      },
+      {
+        "accessed_at": "2026-11-18",
+        "title": "Muse Home Link",
+        "url": "https://gadgets.muse.ai/home-link"
+      },
+      {
+        "accessed_at": "2026-11-18",
+        "title": "Muse Gadget SDK 固定仓库",
+        "url": "https://github.com/facebookincubator/muse-gadget-sdk/tree/6a44074014daad1a623f54e62a169f514741836b"
+      },
+      {
+        "accessed_at": "2026-11-18",
+        "title": "Gadget 设备描述协议",
+        "url": "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/protocols/DEVICE.md"
+      },
+      {
+        "accessed_at": "2026-11-18",
+        "title": "Linux SDK 聊天与扩展说明",
+        "url": "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/README.md#hack-and-extend-it"
+      },
+      {
+        "accessed_at": "2026-11-18",
+        "title": "ESP32 Link 能力注册",
+        "url": "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/esp32/main/noise_control.cpp#L1445-L1693"
+      },
+      {
+        "accessed_at": "2026-11-18",
+        "title": "Pebble Linux 桥接",
+        "url": "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/examples/pebble_ring_bridge.py"
+      },
+      {
+        "accessed_at": "2026-11-18",
+        "title": "Pebble Index 01 开发文档",
+        "url": "https://developer.repebble.com/index-01/"
+      },
+      {
+        "accessed_at": "2026-11-18",
+        "title": "Core Devices Muse 插件",
+        "url": "https://github.com/coredevices/pebble-apps/blob/5bc9f0394921692a5d69b2bb4d0ae4d9b7a0ffed/muse/README.md#library-and-host-integration"
+      },
+      {
+        "accessed_at": "2026-11-18",
+        "title": "Linux BLE 配对协议",
+        "url": "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/src/musegadget/pairing.py"
+      },
+      {
+        "accessed_at": "2026-11-18",
+        "title": "Linux BLE 配置处理",
+        "url": "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/src/musegadget/ble_setup.py#L224-L305"
+      },
+      {
+        "accessed_at": "2026-11-18",
+        "title": "Linux 配对入口",
+        "url": "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/src/musegadget/pair.py#L63-L159"
+      },
+      {
+        "accessed_at": "2026-11-18",
+        "title": "Linux 配对记录保存",
+        "url": "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/src/musegadget/config.py#L107-L125"
+      },
+      {
+        "accessed_at": "2026-11-18",
+        "title": "ESP32 凭证处理",
+        "url": "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/esp32/main/app.c#L876-L909"
+      },
+      {
+        "accessed_at": "2026-11-18",
+        "title": "Linux 服务、重连与轮换",
+        "url": "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/src/musegadget/service.py#L114-L274"
+      },
+      {
+        "accessed_at": "2026-11-18",
+        "title": "Linux Link 会话建立",
+        "url": "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/src/musegadget/link_client.py#L323-L376"
+      },
+      {
+        "accessed_at": "2026-11-18",
+        "title": "Linux Noise 传输",
+        "url": "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/src/musegadget/noise/transport.py"
+      },
+      {
+        "accessed_at": "2026-11-18",
+        "title": "Linux Link 注册",
+        "url": "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/src/musegadget/link_client.py#L110-L146"
+      },
+      {
+        "accessed_at": "2026-11-18",
+        "title": "Linux Link 调用",
+        "url": "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/src/musegadget/link_client.py#L804-L881"
+      },
+      {
+        "accessed_at": "2026-11-18",
+        "title": "ESP32 Link 调用",
+        "url": "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/esp32/main/noise_control.cpp#L1842-L1966"
+      },
+      {
+        "accessed_at": "2026-11-18",
+        "title": "ESP32 隧道启动",
+        "url": "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/esp32/main/noise_control.cpp#L2324-L2360"
+      },
+      {
+        "accessed_at": "2026-11-18",
+        "title": "ESP32 隧道网卡",
+        "url": "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/esp32/main/tunnel_netif.c#L298-L350"
+      },
+      {
+        "accessed_at": "2026-11-18",
+        "title": "Linux 消息接口",
+        "url": "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/src/musegadget/link_client.py#L378-L479"
+      },
+      {
+        "accessed_at": "2026-11-18",
+        "title": "Linux 会话订阅",
+        "url": "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/src/musegadget/link_client.py#L591-L635"
+      },
+      {
+        "accessed_at": "2026-11-18",
+        "title": "Linux 等待回复",
+        "url": "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/src/musegadget/service.py#L484-L558"
+      },
+      {
+        "accessed_at": "2026-11-18",
+        "title": "ESP32 实时语音",
+        "url": "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/esp32/AGENTS.md#live-voice-calls-experimental"
+      },
+      {
+        "accessed_at": "2026-11-18",
+        "title": "ESP32 请求 VM 数据",
+        "url": "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/esp32/AGENTS.md#requests-to-muses-vm-from-your-code"
+      },
+      {
+        "accessed_at": "2026-11-18",
+        "title": "Linux 本地文件操作",
+        "url": "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/src/musegadget/fileops.py"
+      },
+      {
+        "accessed_at": "2026-11-18",
+        "title": "本地视频协议",
+        "url": "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/protocols/VIDEO.md"
+      },
+      {
+        "accessed_at": "2026-11-18",
+        "title": "Linux 命令定义",
+        "url": "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/src/musegadget/commands.py"
+      },
+      {
+        "accessed_at": "2026-11-18",
+        "title": "Linux 执行器",
+        "url": "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/src/musegadget/executor.py#L139-L317"
+      },
+      {
+        "accessed_at": "2026-11-18",
+        "title": "ESP32 命令扩展",
+        "url": "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/esp32/AGENTS.md#adding-a-command"
+      },
+      {
+        "accessed_at": "2026-11-18",
+        "title": "WASM 应用权限",
+        "url": "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/esp32/components/muse_apps/sdk/MUSE.md#the-manifest-and-permissions"
+      },
+      {
+        "accessed_at": "2026-11-18",
+        "title": "WASM 生命周期",
+        "url": "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/esp32/components/muse_apps/sdk/MUSE.md#how-an-app-runs"
+      },
+      {
+        "accessed_at": "2026-11-18",
+        "title": "WASM 发消息入口",
+        "url": "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/esp32/components/muse_apps/muse_apps_chat.c#L1303-L1372"
+      },
+      {
+        "accessed_at": "2026-11-18",
+        "title": "Linux Link 客户端",
+        "url": "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/src/musegadget/link_client.py"
+      },
+      {
+        "accessed_at": "2026-11-18",
+        "title": "Command Guard 示例",
+        "url": "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/examples/command_guard/README.md"
+      },
+      {
+        "accessed_at": "2026-11-18",
+        "title": "Muse Gadget SDK Token 条款",
+        "url": "https://gadgets.muse.ai/sdk-terms"
+      },
+      {
+        "accessed_at": "2026-11-18",
+        "title": "Linux 上游 CI",
+        "url": "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/.github/workflows/linux.yml"
+      },
+      {
+        "accessed_at": "2026-11-18",
+        "title": "ESP32 上游 CI",
+        "url": "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/.github/workflows/esp32.yml"
+      },
+      {
+        "accessed_at": "2026-11-18",
+        "title": "Linux 本地消息 socket",
+        "url": "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/src/musegadget/service.py#L277-L329"
+      },
+      {
+        "accessed_at": "2026-11-18",
+        "title": "Linux 消息确认对象",
+        "url": "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/src/musegadget/link_client.py#L917-L928"
+      },
+      {
+        "accessed_at": "2026-11-18",
+        "title": "Linux 消息 ID 提取",
+        "url": "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/src/musegadget/muse_turn.py#L187-L195"
+      },
+      {
+        "accessed_at": "2026-11-18",
+        "title": "Command Guard 请求范围限制",
+        "url": "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/examples/command_guard/README.md#L73-L87"
+      },
+      {
+        "accessed_at": "2026-11-18",
+        "title": "Linux 模拟 VM 注册、调用、结果和解绑测试",
+        "url": "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/tests/test_link_client.py#L128-L170"
+      },
+      {
+        "accessed_at": "2026-11-18",
+        "title": "Linux 模拟 VM 断线重连测试",
+        "url": "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/tests/test_link_client.py#L1262-L1320"
+      }
+    ]
+  },
+  "directory_layout": "dated-flat",
+  "items": [
+    {
+      "completion": "partial",
+      "id": "muse-gadget-sdk",
+      "name": "Muse Gadget SDK",
+      "type": "open-source",
+      "version": "6a44074014daad1a623f54e62a169f514741836b"
+    }
+  ],
+  "opening_version": 3,
+  "report_id": "report-1788e77ed457420498119c01469c249e",
+  "research_digest": "9f9653bfc8f8812ff66818197ba341ff6df8a8732434e51b99264a81750dee4b",
+  "researcher": "technologyHu",
+  "run_id": "20261118t074654z-19edf162",
+  "schema_version": 1,
+  "source_urls": [
+    "https://about.fb.com/news/2026/09/introducing-muse-personal-ai-agent/",
+    "https://developer.repebble.com/index-01/",
+    "https://gadgets.muse.ai/home-link",
+    "https://gadgets.muse.ai/sdk-terms",
+    "https://github.com/coredevices/pebble-apps/blob/5bc9f0394921692a5d69b2bb4d0ae4d9b7a0ffed/muse/README.md#library-and-host-integration",
+    "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/.github/workflows/esp32.yml",
+    "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/.github/workflows/linux.yml",
+    "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/esp32/AGENTS.md#adding-a-command",
+    "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/esp32/AGENTS.md#live-voice-calls-experimental",
+    "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/esp32/AGENTS.md#requests-to-muses-vm-from-your-code",
+    "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/esp32/components/muse_apps/muse_apps_chat.c#L1303-L1372",
+    "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/esp32/components/muse_apps/sdk/MUSE.md#how-an-app-runs",
+    "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/esp32/components/muse_apps/sdk/MUSE.md#the-manifest-and-permissions",
+    "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/esp32/main/app.c#L876-L909",
+    "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/esp32/main/noise_control.cpp#L1445-L1693",
+    "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/esp32/main/noise_control.cpp#L1842-L1966",
+    "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/esp32/main/noise_control.cpp#L2324-L2360",
+    "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/esp32/main/tunnel_netif.c#L298-L350",
+    "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/README.md#hack-and-extend-it",
+    "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/examples/command_guard/README.md",
+    "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/examples/command_guard/README.md#L73-L87",
+    "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/examples/pebble_ring_bridge.py",
+    "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/src/musegadget/ble_setup.py#L224-L305",
+    "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/src/musegadget/commands.py",
+    "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/src/musegadget/config.py#L107-L125",
+    "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/src/musegadget/executor.py#L139-L317",
+    "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/src/musegadget/fileops.py",
+    "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/src/musegadget/link_client.py",
+    "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/src/musegadget/link_client.py#L110-L146",
+    "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/src/musegadget/link_client.py#L323-L376",
+    "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/src/musegadget/link_client.py#L378-L479",
+    "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/src/musegadget/link_client.py#L591-L635",
+    "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/src/musegadget/link_client.py#L804-L881",
+    "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/src/musegadget/link_client.py#L917-L928",
+    "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/src/musegadget/muse_turn.py#L187-L195",
+    "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/src/musegadget/noise/transport.py",
+    "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/src/musegadget/pair.py#L63-L159",
+    "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/src/musegadget/pairing.py",
+    "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/src/musegadget/service.py#L114-L274",
+    "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/src/musegadget/service.py#L277-L329",
+    "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/src/musegadget/service.py#L484-L558",
+    "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/tests/test_link_client.py#L1262-L1320",
+    "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/linux/tests/test_link_client.py#L128-L170",
+    "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/protocols/DEVICE.md",
+    "https://github.com/facebookincubator/muse-gadget-sdk/blob/6a44074014daad1a623f54e62a169f514741836b/protocols/VIDEO.md",
+    "https://github.com/facebookincubator/muse-gadget-sdk/tree/6a44074014daad1a623f54e62a169f514741836b",
+    "https://muse.ai/blog/security-and-safety-for-ai-agents-our-approach-with-muse"
+  ],
+  "theme_id": "agent-os",
+  "theme_name": "Agent OS",
+  "theme_path": [
+    "agent-os"
+  ],
+  "theme_slug": "agent-os",
+  "update": {
+    "added_sections": [],
+    "allow_files": [
+      "references/sources.md"
+    ],
+    "baseline_date": "2026-11-18",
+    "baseline_gaps": "正式 Muse App 设备令牌申请的精确顺序与云端工具选择策略：公开设备端源码仅确认 BLE 凭证交付、设备 API 与调用收发。正式 Muse App 的令牌申请顺序、VM 内部路由和工具选择仍待核实。",
+    "baseline_sha256": "5edc6065d273ea7a91853bf98b19f554da0d69710c323a385d6879573d8645e5",
+    "baseline_version": "6a44074014daad1a623f54e62a169f514741836b",
+    "files_sha256": "35f64e8583cf3a4bc6c246356175c794488bc67e948d3612015007af5af7039c",
+    "sections": [
+      "## 2. 面向的场景",
+      "### 4.1 首次接入与凭证",
+      "### 4.2 建连、注册与调用",
+      "### 4.3 对话与上报"
+    ]
+  },
+  "updated_at": "2026-11-18T15:55:15+08:00",
+  "workflow": "full"
+}

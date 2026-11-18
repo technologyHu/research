@@ -61,3 +61,7 @@ themes:
     name: Team Agent
     parent: null
     aliases: [组织agent, 组织 Agent]
+  - id: agent-os
+    slug: agent-os
+    name: Agent OS
+    parent: null
