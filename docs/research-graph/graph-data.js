@@ -3,7 +3,7 @@ window.RESEARCH_GRAPH = {
   "schemaVersion": 2,
   "repository": "technologyHu/research",
   "branch": "openjiuwen-harness",
-  "fingerprint": "df165d0438fbe99b",
+  "fingerprint": "521e66567f7824a1",
   "types": {
     "paper": "论文",
     "open-source": "开源项目",
@@ -21,13 +21,30 @@ window.RESEARCH_GRAPH = {
     "unknown": "#9aaac6"
   },
   "stats": {
-    "themes": 2,
-    "types": 1,
-    "objects": 29,
-    "reports": 1
+    "themes": 3,
+    "types": 2,
+    "objects": 30,
+    "reports": 2
   },
-  "updatedAt": "2026-11-11",
+  "updatedAt": "2026-11-18",
   "nodes": [
+    {
+      "id": "theme:research-reports/agent-os",
+      "kind": "theme",
+      "type": "theme",
+      "theme": "research-reports/agent-os",
+      "label": "调研报告 · Agent OS",
+      "displayLabel": "Agent OS",
+      "status": "active",
+      "path": "research-reports/agent-os/plan.md",
+      "revision": 5,
+      "updatedAt": "2026-11-18",
+      "color": "#b0a0ff",
+      "statusLabel": "进行中",
+      "url": "https://github.com/technologyHu/research/blob/openjiuwen-harness/research-reports/agent-os/plan.md",
+      "x": 0.5,
+      "y": 0.21
+    },
     {
       "id": "theme:research-reports/personal-agent",
       "kind": "theme",
@@ -42,8 +59,8 @@ window.RESEARCH_GRAPH = {
       "color": "#b0a0ff",
       "statusLabel": "草案",
       "url": "https://github.com/technologyHu/research/blob/openjiuwen-harness/research-reports/personal-agent/plan.md",
-      "x": 0.5,
-      "y": 0.21
+      "x": 0.751147,
+      "y": 0.645
     },
     {
       "id": "theme:research-reports/team-agent",
@@ -59,8 +76,33 @@ window.RESEARCH_GRAPH = {
       "color": "#b0a0ff",
       "statusLabel": "进行中",
       "url": "https://github.com/technologyHu/research/blob/openjiuwen-harness/research-reports/team-agent/plan.md",
-      "x": 0.5,
-      "y": 0.79
+      "x": 0.248853,
+      "y": 0.645
+    },
+    {
+      "id": "work:research-reports/agent-os:T001",
+      "kind": "object",
+      "type": "open-source",
+      "label": "以提交 6a44074 为基线，覆盖指定本地参考报告的产品背景、场景、能力、协议、源码、扩展示例、安全及验证范围。",
+      "displayLabel": "muse-gadget-sdk",
+      "target": "open-source／Muse Gadget SDK",
+      "taskId": "T001",
+      "theme": "research-reports/agent-os",
+      "path": "research-reports/agent-os/plan.md",
+      "status": "partial",
+      "priority": "P0",
+      "runId": "20261118t074654z-19edf162",
+      "updatedAt": "2026-11-18",
+      "color": "#57deca",
+      "statusLabel": "部分完成",
+      "url": "https://github.com/technologyHu/research/blob/openjiuwen-harness/research-reports/agent-os/plan.md",
+      "reportIds": [
+        "report:report-1788e77ed457420498119c01469c249e"
+      ],
+      "pendingReportIds": [],
+      "sourceKind": "plan",
+      "x": 0.324772,
+      "y": 0.235003
     },
     {
       "id": "work:research-reports/personal-agent:T001",
@@ -82,8 +124,8 @@ window.RESEARCH_GRAPH = {
       "reportIds": [],
       "pendingReportIds": [],
       "sourceKind": "plan",
-      "x": 0.595095,
-      "y": 0.12
+      "x": 0.814011,
+      "y": 0.473543
     },
     {
       "id": "work:research-reports/personal-agent:T002",
@@ -105,8 +147,8 @@ window.RESEARCH_GRAPH = {
       "reportIds": [],
       "pendingReportIds": [],
       "sourceKind": "plan",
-      "x": 0.354801,
-      "y": 0.12
+      "x": 0.673038,
+      "y": 0.434486
     },
     {
       "id": "work:research-reports/personal-agent:T003",
@@ -128,8 +170,8 @@ window.RESEARCH_GRAPH = {
       "reportIds": [],
       "pendingReportIds": [],
       "sourceKind": "plan",
-      "x": 0.418152,
-      "y": 0.12
+      "x": 0.742369,
+      "y": 0.463028
     },
     {
       "id": "work:research-reports/personal-agent:T004",
@@ -151,8 +193,8 @@ window.RESEARCH_GRAPH = {
       "reportIds": [],
       "pendingReportIds": [],
       "sourceKind": "plan",
-      "x": 0.289062,
-      "y": 0.12
+      "x": 0.636229,
+      "y": 0.525479
     },
     {
       "id": "work:research-reports/personal-agent:T005",
@@ -174,8 +216,8 @@ window.RESEARCH_GRAPH = {
       "reportIds": [],
       "pendingReportIds": [],
       "sourceKind": "plan",
-      "x": 0.549915,
-      "y": 0.391415
+      "x": 0.758353,
+      "y": 0.88
     },
     {
       "id": "work:research-reports/personal-agent:T006",
@@ -197,8 +239,8 @@ window.RESEARCH_GRAPH = {
       "reportIds": [],
       "pendingReportIds": [],
       "sourceKind": "plan",
-      "x": 0.668333,
-      "y": 0.270638
+      "x": 0.88,
+      "y": 0.721457
     },
     {
       "id": "work:research-reports/personal-agent:T007",
@@ -220,8 +262,8 @@ window.RESEARCH_GRAPH = {
       "reportIds": [],
       "pendingReportIds": [],
       "sourceKind": "plan",
-      "x": 0.616586,
-      "y": 0.344251
+      "x": 0.827393,
+      "y": 0.88
     },
     {
       "id": "work:research-reports/personal-agent:T008",
@@ -243,8 +285,8 @@ window.RESEARCH_GRAPH = {
       "reportIds": [],
       "pendingReportIds": [],
       "sourceKind": "plan",
-      "x": 0.665855,
-      "y": 0.12
+      "x": 0.88,
+      "y": 0.416752
     },
     {
       "id": "work:research-reports/personal-agent:T009",
@@ -266,8 +308,8 @@ window.RESEARCH_GRAPH = {
       "reportIds": [],
       "pendingReportIds": [],
       "sourceKind": "plan",
-      "x": 0.736782,
-      "y": 0.131063
+      "x": 0.88,
+      "y": 0.520118
     },
     {
       "id": "work:research-reports/personal-agent:T010",
@@ -289,8 +331,8 @@ window.RESEARCH_GRAPH = {
       "reportIds": [],
       "pendingReportIds": [],
       "sourceKind": "plan",
-      "x": 0.414354,
-      "y": 0.405438
+      "x": 0.641468,
+      "y": 0.814349
     },
     {
       "id": "work:research-reports/personal-agent:T011",
@@ -312,8 +354,8 @@ window.RESEARCH_GRAPH = {
       "reportIds": [],
       "pendingReportIds": [],
       "sourceKind": "plan",
-      "x": 0.689448,
-      "y": 0.389551
+      "x": 0.88,
+      "y": 0.82138
     },
     {
       "id": "work:research-reports/personal-agent:T012",
@@ -335,8 +377,8 @@ window.RESEARCH_GRAPH = {
       "reportIds": [],
       "pendingReportIds": [],
       "sourceKind": "plan",
-      "x": 0.220292,
-      "y": 0.12
+      "x": 0.564536,
+      "y": 0.535107
     },
     {
       "id": "work:research-reports/personal-agent:T013",
@@ -358,8 +400,8 @@ window.RESEARCH_GRAPH = {
       "reportIds": [],
       "pendingReportIds": [],
       "sourceKind": "plan",
-      "x": 0.483805,
-      "y": 0.433347
+      "x": 0.712136,
+      "y": 0.803023
     },
     {
       "id": "work:research-reports/personal-agent:T014",
@@ -381,8 +423,8 @@ window.RESEARCH_GRAPH = {
       "reportIds": [],
       "pendingReportIds": [],
       "sourceKind": "plan",
-      "x": 0.321524,
-      "y": 0.310169
+      "x": 0.595421,
+      "y": 0.733879
     },
     {
       "id": "work:research-reports/personal-agent:T015",
@@ -404,8 +446,8 @@ window.RESEARCH_GRAPH = {
       "reportIds": [],
       "pendingReportIds": [],
       "sourceKind": "plan",
-      "x": 0.610035,
-      "y": 0.44969
+      "x": 0.814583,
+      "y": 0.780267
     },
     {
       "id": "work:research-reports/personal-agent:T016",
@@ -427,8 +469,8 @@ window.RESEARCH_GRAPH = {
       "reportIds": [],
       "pendingReportIds": [],
       "sourceKind": "plan",
-      "x": 0.74024,
-      "y": 0.275961
+      "x": 0.88,
+      "y": 0.621409
     },
     {
       "id": "work:research-reports/personal-agent:T017",
@@ -450,8 +492,8 @@ window.RESEARCH_GRAPH = {
       "reportIds": [],
       "pendingReportIds": [],
       "sourceKind": "plan",
-      "x": 0.279912,
-      "y": 0.224063
+      "x": 0.561882,
+      "y": 0.640708
     },
     {
       "id": "work:research-reports/team-agent:T001",
@@ -475,8 +517,8 @@ window.RESEARCH_GRAPH = {
       ],
       "pendingReportIds": [],
       "sourceKind": "plan",
-      "x": 0.58615,
-      "y": 0.88
+      "x": 0.247878,
+      "y": 0.823577
     },
     {
       "id": "work:research-reports/team-agent:T002",
@@ -498,8 +540,8 @@ window.RESEARCH_GRAPH = {
       "reportIds": [],
       "pendingReportIds": [],
       "sourceKind": "plan",
-      "x": 0.713359,
-      "y": 0.774287
+      "x": 0.440516,
+      "y": 0.616393
     },
     {
       "id": "work:research-reports/team-agent:T003",
@@ -521,8 +563,8 @@ window.RESEARCH_GRAPH = {
       "reportIds": [],
       "pendingReportIds": [],
       "sourceKind": "plan",
-      "x": 0.395244,
-      "y": 0.613243
+      "x": 0.151492,
+      "y": 0.456905
     },
     {
       "id": "work:research-reports/team-agent:T004",
@@ -544,8 +586,8 @@ window.RESEARCH_GRAPH = {
       "reportIds": [],
       "pendingReportIds": [],
       "sourceKind": "plan",
-      "x": 0.296107,
-      "y": 0.783665
+      "x": 0.12,
+      "y": 0.657924
     },
     {
       "id": "work:research-reports/team-agent:T005",
@@ -567,8 +609,8 @@ window.RESEARCH_GRAPH = {
       "reportIds": [],
       "pendingReportIds": [],
       "sourceKind": "plan",
-      "x": 0.605253,
-      "y": 0.603708
+      "x": 0.364133,
+      "y": 0.488759
     },
     {
       "id": "work:research-reports/team-agent:T006",
@@ -590,8 +632,8 @@ window.RESEARCH_GRAPH = {
       "reportIds": [],
       "pendingReportIds": [],
       "sourceKind": "plan",
-      "x": 0.535133,
-      "y": 0.579728
+      "x": 0.294697,
+      "y": 0.460864
     },
     {
       "id": "work:research-reports/team-agent:T007",
@@ -613,8 +655,8 @@ window.RESEARCH_GRAPH = {
       "reportIds": [],
       "pendingReportIds": [],
       "sourceKind": "plan",
-      "x": 0.651708,
-      "y": 0.88
+      "x": 0.319649,
+      "y": 0.815186
     },
     {
       "id": "work:research-reports/team-agent:T008",
@@ -636,8 +678,8 @@ window.RESEARCH_GRAPH = {
       "reportIds": [],
       "pendingReportIds": [],
       "sourceKind": "plan",
-      "x": 0.328712,
-      "y": 0.653688
+      "x": 0.12,
+      "y": 0.552071
     },
     {
       "id": "work:research-reports/team-agent:T009",
@@ -659,8 +701,8 @@ window.RESEARCH_GRAPH = {
       "reportIds": [],
       "pendingReportIds": [],
       "sourceKind": "plan",
-      "x": 0.463155,
-      "y": 0.57813
+      "x": 0.22323,
+      "y": 0.448387
     },
     {
       "id": "work:research-reports/team-agent:T010",
@@ -682,8 +724,8 @@ window.RESEARCH_GRAPH = {
       "reportIds": [],
       "pendingReportIds": [],
       "sourceKind": "plan",
-      "x": 0.368805,
-      "y": 0.88
+      "x": 0.135015,
+      "y": 0.78054
     },
     {
       "id": "work:research-reports/team-agent:T011",
@@ -705,8 +747,8 @@ window.RESEARCH_GRAPH = {
       "reportIds": [],
       "pendingReportIds": [],
       "sourceKind": "plan",
-      "x": 0.719042,
-      "y": 0.88
+      "x": 0.381183,
+      "y": 0.760226
     },
     {
       "id": "work:research-reports/team-agent:T012",
@@ -728,11 +770,17 @@ window.RESEARCH_GRAPH = {
       "reportIds": [],
       "pendingReportIds": [],
       "sourceKind": "plan",
-      "x": 0.788595,
-      "y": 0.88
+      "x": 0.448235,
+      "y": 0.721664
     }
   ],
   "edges": [
+    {
+      "source": "theme:research-reports/agent-os",
+      "target": "work:research-reports/agent-os:T001",
+      "relation": "includes",
+      "evidence": "research-reports/agent-os/plan.md"
+    },
     {
       "source": "theme:research-reports/personal-agent",
       "target": "work:research-reports/personal-agent:T001",
@@ -1006,6 +1054,26 @@ window.RESEARCH_GRAPH = {
   ],
   "reports": [
     {
+      "id": "report:report-1788e77ed457420498119c01469c249e",
+      "label": "Muse Gadget SDK 调研",
+      "path": "research-reports/agent-os/open-source/muse-gadget-sdk__20261118-155515/report.md",
+      "url": "https://github.com/technologyHu/research/blob/openjiuwen-harness/research-reports/agent-os/open-source/muse-gadget-sdk__20261118-155515/report.md",
+      "status": "review_partial",
+      "statusLabel": "局部复查部分完成",
+      "type": "open-source",
+      "updatedAt": "2026-11-18T15:55:15+08:00",
+      "createdAt": "2026-11-18T15:10:18+08:00",
+      "themeId": "agent-os",
+      "themePath": [
+        "agent-os"
+      ],
+      "researcher": "technologyHu",
+      "associationStatus": "explicit",
+      "workIds": [
+        "work:research-reports/agent-os:T001"
+      ]
+    },
+    {
       "id": "report:report-fd2531e6d5e24ef4817433ef6534fcf1",
       "label": "Claude Tag 产品调研：共享任务、组织身份与长期协作",
       "path": "research-reports/team-agent/product/claude-tag__20261109-154839/report.md",
@@ -1027,6 +1095,19 @@ window.RESEARCH_GRAPH = {
     }
   ],
   "themeOverview": [
+    {
+      "theme": "research-reports/agent-os",
+      "title": "调研报告 · Agent OS",
+      "status": "active",
+      "statusLabel": "进行中",
+      "planPath": "research-reports/agent-os/plan.md",
+      "reportIds": [
+        "report:report-1788e77ed457420498119c01469c249e"
+      ],
+      "nextSteps": [
+        "正式 Muse App 的令牌申请顺序、VM 内部路由和工具选择策略缺直接证据。实机配对、通话和固件联调留待可用设备及服务环境。"
+      ]
+    },
     {
       "theme": "research-reports/personal-agent",
       "title": "调研报告 · Personal Agent",
