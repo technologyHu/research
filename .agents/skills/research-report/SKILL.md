@@ -14,13 +14,13 @@ description: 把已有证据组织成中文调研报告或分析洞察报告，�
 成稿时按 [值得纳入的图与演示类型](../research-common/references/writing-policy.md#值得纳入的图与演示类型) 核对取证阶段发现的素材，将有解释价值的架构、流程、界面、演示、交付物、评测和对比图放入对应章节，不为各类型凑图。形式、来源和实际核验范围准确，图文说明简短且互相补充。
 
 1. 通过 [任务管理](../research-common/references/task-management.md) 定位计划。full 读取 fields 和结果，light 读取 notes 与 assessment；结合所选类型模板与清单成稿。更新已有报告的证据或结论时先读 [局部更新流程](../research-common/references/report-updates.md)，在改动前保存基线；普通文字更正直接编辑。
-   组织章节时按 [图表与代码](../research-common/references/writing-policy.md#图表与代码) 判断哪里需要视觉解释，先检查来源资料和已有成果中的有用图片、产品／软件前端界面及演示 GIF，适用时直接插入。按 [已有图复用](../research-common/references/writing-policy.md#已有图复用) 和 [界面与演示](../research-common/references/writing-policy.md#界面截图与演示素材) 标注来源、演示任务和适用条件，核对 GIF 的关键状态与播放，不为统一风格重绘，不设数量。确需新绘时优先 Markdown 可渲染的代码图，必要时仍可生成静态图片或使用图片生成服务。
+   在提纲中按 [图表与代码](../research-common/references/writing-policy.md#图表与代码) 安排已有素材和新绘图。新绘优先使用目标 Markdown 阅读器支持的内联格式。按 [已有图复用](../research-common/references/writing-policy.md#已有图复用) 和 [界面与演示](../research-common/references/writing-policy.md#界面截图与演示素材) 核对来源、适用条件及演示状态。
 2. 遵循 [写作规范](../research-common/references/writing-policy.md)、[证据规范](../research-common/references/evidence-policy.md) 和 [交付规范](../research-common/references/delivery-policy.md)。先检查本次全部对象，不带 --item；valid 与 completion 分开处理，缺乏证据时不按模板编造结论。
    含源码证据时，按 [源码交接约定](../research-common/references/code-understanding.md) 从现有记录成稿：说明仓库身份／采用依据、研究与代码版本关系、各问题覆盖及运行限制，分别引用各仓库的固定原始源码。访问受阻、待核实和未找到分别披露，不以工具总结、临时 JSON 或示意代码填补证据。补查交回当前 research-deep，只复核受影响问题，不在成稿阶段重新选仓。
    关联主题时，成稿及正式回写前按 [范围快照对照](../research-common/references/theme-planning.md#本次执行范围快照与回写前对照) 核对当前问题和验收；实质变化先同步配置、复核受影响证据，旧范围 verify 不作为新目标完成依据。无关任务／排序变化不要求重查，正式回写保留起始／当前修订及对照结论。
    同时按 [依赖规则](../research-common/references/theme-planning.md#依赖的满足失效与复核) 核对 hard 条件及已接受的成果／版本；前置 done 不替代该检查，前置 partial 的片段仅在满足既定条件时采用。未解决的依赖在部分报告中明确披露，不回写 done；证据与部分报告仍按原完成度规则处理。
 3. 按 outline.delivery.report 起草主 Markdown，默认 report.md；局部更新先把选定章节草稿写到当前任务 scratch/sections.json，暂不 apply-update。partial 明确为部分报告，保留核心缺口及其影响；blocked 继续补查或说明阻碍，不宣称完成。正文真正引用证据，冲突各方保留条件、依据与处理理由。
-   先按 [配图能力条件与选型](../research-common/references/writing-policy.md#图表与代码) 判断能否新绘。满足条件时，简单关系可直接写 Mermaid 等内联代码图，需要静态技术图再调用 [draw-diagram](../draw-diagram/SKILL.md)，其他视觉表达按需使用图片生成；成本偏好不禁止必要出图。能力条件不满足时只复用现有图片。按 [配图规则](../research-common/references/writing-policy.md#自绘技术图) 完成语法、渲染和视觉复核，不以代码可解析代替可读性检查，也不对内联图强制静态导出。局部更新沿用章节范围；已有图片需按局部更新规则明确允许修改，新图按交付规范检查。复用图同时核对受影响章节，不把未复核内容视为已更新。
+   核对 [本地参考资料的覆盖](../research-common/references/routing.md#用户指定的本地参考资料)，按 [链路验证规则](../research-common/references/evidence-policy.md#按链路记录验证) 写清实际验证及边界。新绘图按 [配图能力条件](../research-common/references/writing-policy.md#图表与代码) 和 [配图复核规则](../research-common/references/writing-policy.md#自绘技术图) 执行，确需静态技术图时调用 [draw-diagram](../draw-diagram/SKILL.md)。局部更新沿用获准修改的章节与附件范围。
 4. 按 [报告语言润色](../research-common/references/writing-policy.md#报告语言润色) 用 research_polish.py snapshot 保存润色前副本，读取项目内 [humanizer](../humanizer/SKILL.md) 并以 embedded 模式润色草稿，再用 check 检查受保护内容并人工阅读 diff。保持技术报告的客观语气、事实和引用；发现误改先修复，不覆盖快照来接受差异。只保存最终文本，中间资料留在任务 scratch/。
    按 [图文复核规则](../research-common/references/writing-policy.md#自绘技术图) 对照 diff 复核受影响的图；技术内容改变时返回成稿，不作为纯润色放行。
 5. 局部更新在润色对照通过后才 apply-update；不再对整份报告执行一轮润色，保留未复核章节的原文、版本、日期和缺口。随后完成文章和图片归档、同步报告链接。仅保存允许保留的参考文章与实际引用的本地图片；源码、实验、配置和原始 JSON 默认不随报告交付。用户明确要求的额外交付逐个登记到 delivery.extra_files，写明理由。
@@ -33,4 +33,4 @@ description: 把已有证据组织成中文调研报告或分析洞察报告，�
    回写主题核心问题时只更新已确认问题的覆盖情况。本轮新增发现与证据缺口记入任务成果和范围。拟新增或实质改写主题问题须先 [取得用户确认](../research-common/references/theme-planning.md#核心问题的确认)。
    本次报告修订了已被其他任务采用的结论时，回写计划同时标出相关依赖与实际下游，按规则复核影响并保留旧接受记录；不自动执行所有后续研究，清理前将相关成果、接受版本及待复核事项写入长期计划。
 
-独立 validate_report.py 不带 outline 只做文件检查，不能替代最终任务 verify。本技能在报告交付与计划回写后完成，不执行 Git 提交、推送或发布，也不回调顶层入口。
+独立 validate_report.py 不带 outline 只做文件检查，最终使用任务 verify。交付时按 [完成度口径](../research-common/references/research-config.md#结构有效性与调研完成度) 说明资料覆盖、证据缺口与实际验证，并按 [Git 跟踪与图谱同步](../research-common/references/delivery-policy.md#git-跟踪与图谱同步) 报告索引状态。

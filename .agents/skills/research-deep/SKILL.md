@@ -14,7 +14,7 @@ description: 执行已明确范围的论文、开源项目、产品或评测对�
    首次执行保存 [本次范围快照](../research-common/references/theme-planning.md#本次执行范围快照与回写前对照)，恢复时与当前计划对照；只复核本次问题、对象／版本／时间及验收实质改变涉及的范围，不因无关计划修订全部重查，不覆盖旧快照接受变化。
    按 [依赖规则](../research-common/references/theme-planning.md#依赖的满足失效与复核) 核对所需成果及接受条件，记录实际采用版本／片段；hard 未满足的部分暂停，已授权的独立工作可继续。前置变化后定位实际使用的主张，必要时逐层复核下游，不能只看前置任务状态。
 2. 读取所选类型的模板与清单，以及 [证据规范](../research-common/references/evidence-policy.md)、[执行规范](../research-common/references/execution-policy.md) 和 [交付规范](../research-common/references/delivery-policy.md)。
-   指定参考文章必须按 [文章获取流程](../research-common/references/article-acquisition.md) 获取；按需调用 [web-article-fetcher](../web-article-fetcher/SKILL.md)。全部先存当前任务，人工阅读并接受正文，保留获取失败与未核对缺口；不得只看搜索摘要。新发现的补充文章按需登记 optional。
+   用户指定的文件和目录按 [本地参考资料](../research-common/references/routing.md#用户指定的本地参考资料) 盘点和复核。指定的网页文章按 [文章获取流程](../research-common/references/article-acquisition.md) 获取，按需调用 [web-article-fetcher](../web-article-fetcher/SKILL.md)。网页正文先存当前任务，人工核对后接受，保留获取失败与未核对缺口。新发现的补充文章按需登记 optional。
    optional 不免除实际引用时的正文核对与归档。按文章 id 重查正文，补图使用独立图片命令；刷新失败可沿用旧有效版本并说明缺口，不把旧快照宣称为最新内容。
    取证阶段按 [图与演示类型](../research-common/references/writing-policy.md#值得纳入的图与演示类型) 检查来源中的架构、流程、界面、动态演示、关键产物、评测与对比图，记录有用候选的来源、对应问题及可见状态；交回成稿时一并提供，不到最后才为配图泛搜素材。
    正文变化后按检查器的 stale_article_fields／stale_articles 复核相关结论，复核后才更新实际依赖的 article_fingerprints；接受正文和归档原文不解除结论过期。
