@@ -1,0 +1,73 @@
+{
+  "classification": {
+    "target": "hachimodock",
+    "theme": "agent-os",
+    "type": "open-source"
+  },
+  "completion": "complete",
+  "core_gaps": [],
+  "created_at": "2026-11-19T11:35:26+08:00",
+  "delivery": {
+    "extra_files": [
+      {
+        "path": "assets/LICENSE.txt",
+        "reason": "随原报告动画提供许可"
+      }
+    ],
+    "report": "report.md"
+  },
+  "directory_layout": "dated-flat",
+  "items": [
+    {
+      "completion": "complete",
+      "id": "hachimodock",
+      "name": "HachimoDock",
+      "type": "open-source",
+      "version": "786e03940510b05cab25fa996b799ce3a5e90751"
+    }
+  ],
+  "non_core_gaps": [
+    {
+      "item_id": "hachimodock",
+      "question": "补充问题",
+      "reason": "本轮按固定版本源码核对接口，未联调运行中的桥接服务或实体设备。"
+    }
+  ],
+  "opening_version": 3,
+  "report_id": "report-c9579138f6094b519dc5247fd63e155f",
+  "research_digest": "985cacdb1c667a2d6248b5b582f970d77667ccff2877438ea126207d407a6908",
+  "researcher": "technologyHu",
+  "run_id": "20261119t122848z-0be04ea6",
+  "schema_version": 1,
+  "source_urls": [
+    "https://github.com/ai-maker-lab/HachimoDock/blob/786e03940510b05cab25fa996b799ce3a5e90751/LICENSE",
+    "https://github.com/ai-maker-lab/HachimoDock/blob/786e03940510b05cab25fa996b799ce3a5e90751/README.md",
+    "https://github.com/ai-maker-lab/HachimoDock/blob/786e03940510b05cab25fa996b799ce3a5e90751/firmware/protocol.md",
+    "https://github.com/ai-maker-lab/HachimoDock/blob/786e03940510b05cab25fa996b799ce3a5e90751/pc/builtin-clawpkgs/tomato-clock/runtime/widget.json",
+    "https://github.com/ai-maker-lab/HachimoDock/blob/786e03940510b05cab25fa996b799ce3a5e90751/pc/skills/petui/SKILL.md",
+    "https://github.com/ai-maker-lab/HachimoDock/blob/786e03940510b05cab25fa996b799ce3a5e90751/pc/src-tauri/bridge/hooks/workbuddy-pet-manager-hook.js",
+    "https://github.com/ai-maker-lab/HachimoDock/blob/786e03940510b05cab25fa996b799ce3a5e90751/pc/src-tauri/bridge/packages/agent-session-bus/README.md",
+    "https://github.com/ai-maker-lab/HachimoDock/blob/786e03940510b05cab25fa996b799ce3a5e90751/pc/src-tauri/bridge/packages/agent-session-bus/src/server.js",
+    "https://github.com/ai-maker-lab/HachimoDock/blob/786e03940510b05cab25fa996b799ce3a5e90751/pc/src-tauri/bridge/packages/clawd-backend-service/src/headless-mqtt.js"
+  ],
+  "theme_id": "agent-os",
+  "theme_name": "Agent OS",
+  "theme_path": [
+    "agent-os"
+  ],
+  "theme_slug": "agent-os",
+  "update": {
+    "added_sections": [],
+    "allow_files": [],
+    "baseline_date": "原报告未单独标注；原文日期说明保留",
+    "baseline_gaps": "补充问题：本次未在运行中的 PC Pet Manager、实机或在线服务上执行示例。；更早记录：补充问题：本次未做设备和在线模型联调。",
+    "baseline_sha256": "1dd0e06e2723fc59e3faaeab90038c813970ba7377cda7c26a79cb6060432752",
+    "baseline_version": "HachimoDock（786e03940510b05cab25fa996b799ce3a5e90751）",
+    "files_sha256": "25acd2fbb807ff4d25ee586a2cf733a261454b25db614ace066ed6c491c8f475",
+    "sections": [
+      "## 4. 扩展开发与复用许可"
+    ]
+  },
+  "updated_at": "2026-11-19T20:39:34+08:00",
+  "workflow": "light"
+}
