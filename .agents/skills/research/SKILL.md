@@ -11,6 +11,8 @@ description: 统筹论文、开源项目、产品和评测的对象调研与计�
 
 ## 确定任务与复用成果
 
+用户要求“参考某篇报告调研另一个对象”时，默认借鉴参考报告的问题、证据深度和呈现方式，按本次对象的资料重新取证。只有任务明确要求比较时，才把参考对象纳入对照并撰写异同。
+
 用户只要求登记主题或子主题时，按 [主题注册表](../research-common/references/theme-registry.md) 更新 `themes.yaml`，校验后即可交付。需要调研或维护计划时，再核对 [计划纳入条件](../research-common/references/theme-planning.md#计划纳入条件)。只有主题名称或宽泛方向时，先明确具体目标或要维护的已有报告，暂不写计划或任务条目。
 
 先读取项目根的 themes.yaml，按 [主题注册表](../research-common/references/theme-registry.md) 复用规范主题 ID；新主题先登记。主题层次压成一个名称，具体报告目录由工具追加北京时间戳，不手工拼接子主题目录。target 表示本篇报告的研究专题，多个片段用双下划线分隔，片段内单词用单连字符连接，如 codex__context-engineering__context-compaction；片段数量不固定，旧单连字符和双连字符名称原样维护。items 中的 codex 仍表示研究对象，两者不必相同。完整规则见 [交付规范](../research-common/references/delivery-policy.md#目录命名)。
