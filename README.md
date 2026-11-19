@@ -13,6 +13,7 @@
 
 | 主题 | 调研报告 | 贡献者 |
 | --- | --- | --- |
+| Agent OS | [HachimoDock 调研：从桌面 Agent 状态跟随到宠物语音控制](research-reports/agent-os/open-source/hachimodock__20261119-203934/report.md) | technologyHu |
 | Agent OS | [Muse Gadget SDK 调研](research-reports/agent-os/open-source/muse-gadget-sdk__20261118-155515/report.md) | technologyHu |
 | Team Agent | [Claude Tag 产品调研：共享任务、组织身份与长期协作](research-reports/team-agent/product/claude-tag__20261109-154839/report.md) | technologyHu |
 
@@ -20,7 +21,7 @@
 
 | 排名 | 贡献者 | 报告数 |
 | --- | --- | --- |
-| 1 | technologyHu | 2 |
+| 1 | technologyHu | 3 |
 
 ## 分析洞察报告总览
 

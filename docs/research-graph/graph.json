@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "repository": "technologyHu/research",
   "branch": "openjiuwen-harness",
-  "fingerprint": "521e66567f7824a1",
+  "fingerprint": "d31a9d157d29aede",
   "types": {
     "paper": "论文",
     "open-source": "开源项目",
@@ -22,10 +22,10 @@
   "stats": {
     "themes": 3,
     "types": 2,
-    "objects": 30,
-    "reports": 2
+    "objects": 31,
+    "reports": 3
   },
-  "updatedAt": "2026-11-18",
+  "updatedAt": "2026-11-19",
   "nodes": [
     {
       "id": "theme:research-reports/agent-os",
@@ -36,8 +36,8 @@
       "displayLabel": "Agent OS",
       "status": "active",
       "path": "research-reports/agent-os/plan.md",
-      "revision": 5,
-      "updatedAt": "2026-11-18",
+      "revision": 31,
+      "updatedAt": "2026-11-19",
       "color": "#b0a0ff",
       "statusLabel": "进行中",
       "url": "https://github.com/technologyHu/research/blob/openjiuwen-harness/research-reports/agent-os/plan.md",
@@ -91,7 +91,7 @@
       "status": "partial",
       "priority": "P0",
       "runId": "20261118t074654z-19edf162",
-      "updatedAt": "2026-11-18",
+      "updatedAt": "2026-11-19",
       "color": "#57deca",
       "statusLabel": "部分完成",
       "url": "https://github.com/technologyHu/research/blob/openjiuwen-harness/research-reports/agent-os/plan.md",
@@ -100,8 +100,33 @@
       ],
       "pendingReportIds": [],
       "sourceKind": "plan",
-      "x": 0.324772,
-      "y": 0.235003
+      "x": 0.308486,
+      "y": 0.190028
+    },
+    {
+      "id": "work:research-reports/agent-os:T002",
+      "kind": "object",
+      "type": "open-source",
+      "label": "研究设备分工、会话、语音、协议及组件扩展。",
+      "displayLabel": "hachimodock",
+      "target": "open-source／HachimoDock",
+      "taskId": "T002",
+      "theme": "research-reports/agent-os",
+      "path": "research-reports/agent-os/plan.md",
+      "status": "complete",
+      "priority": "P0",
+      "runId": "20261119t122848z-0be04ea6",
+      "updatedAt": "2026-11-19",
+      "color": "#57deca",
+      "statusLabel": "完整",
+      "url": "https://github.com/technologyHu/research/blob/openjiuwen-harness/research-reports/agent-os/plan.md",
+      "reportIds": [
+        "report:report-c9579138f6094b519dc5247fd63e155f"
+      ],
+      "pendingReportIds": [],
+      "sourceKind": "plan",
+      "x": 0.341676,
+      "y": 0.283986
     },
     {
       "id": "work:research-reports/personal-agent:T001",
@@ -781,6 +806,12 @@
       "evidence": "research-reports/agent-os/plan.md"
     },
     {
+      "source": "theme:research-reports/agent-os",
+      "target": "work:research-reports/agent-os:T002",
+      "relation": "includes",
+      "evidence": "research-reports/agent-os/plan.md"
+    },
+    {
       "source": "theme:research-reports/personal-agent",
       "target": "work:research-reports/personal-agent:T001",
       "relation": "includes",
@@ -1073,6 +1104,26 @@
       ]
     },
     {
+      "id": "report:report-c9579138f6094b519dc5247fd63e155f",
+      "label": "HachimoDock 调研：从桌面 Agent 状态跟随到宠物语音控制",
+      "path": "research-reports/agent-os/open-source/hachimodock__20261119-203934/report.md",
+      "url": "https://github.com/technologyHu/research/blob/openjiuwen-harness/research-reports/agent-os/open-source/hachimodock__20261119-203934/report.md",
+      "status": "review_complete",
+      "statusLabel": "局部复查完成",
+      "type": "open-source",
+      "updatedAt": "2026-11-19T20:39:34+08:00",
+      "createdAt": "2026-11-19T11:35:26+08:00",
+      "themeId": "agent-os",
+      "themePath": [
+        "agent-os"
+      ],
+      "researcher": "technologyHu",
+      "associationStatus": "explicit",
+      "workIds": [
+        "work:research-reports/agent-os:T002"
+      ]
+    },
+    {
       "id": "report:report-fd2531e6d5e24ef4817433ef6534fcf1",
       "label": "Claude Tag 产品调研：共享任务、组织身份与长期协作",
       "path": "research-reports/team-agent/product/claude-tag__20261109-154839/report.md",
@@ -1101,10 +1152,12 @@
       "statusLabel": "进行中",
       "planPath": "research-reports/agent-os/plan.md",
       "reportIds": [
+        "report:report-c9579138f6094b519dc5247fd63e155f",
         "report:report-1788e77ed457420498119c01469c249e"
       ],
       "nextSteps": [
-        "正式 Muse App 的令牌申请顺序、VM 内部路由和工具选择策略缺直接证据。实机配对、通话和固件联调留待可用设备及服务环境。"
+        "正式 Muse App 的令牌申请顺序、VM 内部路由和工具选择策略缺直接证据。实机配对、通话和固件联调留待可用设备及服务环境。",
+        "真实米家账号和灯具联调、实机、在线服务、MiMo Desktop 平台差异与发行二进制复现待验证。"
       ]
     },
     {
